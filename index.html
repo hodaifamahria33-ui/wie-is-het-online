@@ -1314,89 +1314,215 @@
       color: #6b4ed4;
     }
 
-    /* Beginscherm met promo-foto */
+    /* Beginscherm — promo-stijl (kosmos + zwevende kaarten) */
     .screen-start {
-      background: #1a0f2e;
-    }
-
-    .start-bg {
-      position: absolute;
-      left: 0;
-      width: 100%;
-      height: 112%;
-      top: -10vh;
-      object-fit: cover;
-      object-position: center 22%;
-      pointer-events: none;
-    }
-
-    .start-shade {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(
-        180deg,
-        rgba(26, 15, 46, 0.1) 0%,
-        rgba(26, 15, 46, 0) 30%,
-        rgba(26, 15, 46, 0) 55%,
-        rgba(18, 12, 35, 0.5) 78%,
-        rgba(12, 8, 28, 0.92) 100%
-      );
-      pointer-events: none;
+      font-family: "Outfit", "Segoe UI", system-ui, sans-serif;
+      background:
+        radial-gradient(ellipse 130% 90% at 50% -10%, rgba(139, 92, 246, 0.55) 0%, transparent 55%),
+        radial-gradient(ellipse 80% 50% at 15% 85%, rgba(59, 130, 246, 0.35) 0%, transparent 50%),
+        radial-gradient(ellipse 70% 45% at 88% 75%, rgba(236, 72, 153, 0.2) 0%, transparent 45%),
+        linear-gradient(180deg, #0c0618 0%, #1a0b35 38%, #12082a 100%);
+      overflow: hidden;
     }
 
     .screen-start .cards,
     .screen-start .glow { display: none; }
 
-    /* Knop + tagline vast onderaan — titel op foto blijft vrij */
+    .start-cosmos {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .start-star {
+      position: absolute;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 0 8px rgba(255, 255, 255, 0.9);
+      animation: startStarTwinkle 3s ease-in-out infinite;
+    }
+
+    @keyframes startStarTwinkle {
+      0%, 100% { opacity: 0.25; transform: scale(0.7); }
+      50% { opacity: 1; transform: scale(1.2); }
+    }
+
+    .start-cards {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .start-card {
+      position: absolute;
+      width: clamp(52px, 14vw, 88px);
+      aspect-ratio: 4 / 5;
+      border-radius: 12px;
+      padding: 4px;
+      background: linear-gradient(145deg, rgba(167, 139, 250, 0.95) 0%, rgba(109, 40, 217, 0.9) 100%);
+      box-shadow:
+        0 10px 28px rgba(0, 0, 0, 0.45),
+        0 0 20px rgba(139, 92, 246, 0.45);
+      transform: translate(-50%, -50%) rotate(var(--rot, 0deg));
+      animation: startCardFloat 6s ease-in-out infinite;
+      animation-delay: var(--delay, 0s);
+    }
+
+    .start-card--small {
+      width: clamp(44px, 11vw, 68px);
+      opacity: 0.85;
+    }
+
+    .start-card--blur {
+      filter: blur(2px) brightness(0.55);
+      opacity: 0.65;
+      background: linear-gradient(145deg, rgba(88, 60, 140, 0.8) 0%, rgba(49, 25, 90, 0.85) 100%);
+    }
+
+    .start-card-inner {
+      width: 100%;
+      height: 100%;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #1e1035;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .start-card-inner img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center top;
+    }
+
+    .start-card-mystery {
+      font-size: clamp(1.4rem, 5vw, 2.2rem);
+      font-weight: 900;
+      color: rgba(255, 255, 255, 0.35);
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    }
+
+    @keyframes startCardFloat {
+      0%, 100% { transform: translate(-50%, -50%) rotate(var(--rot, 0deg)) translateY(0); }
+      50% { transform: translate(-50%, -50%) rotate(calc(var(--rot, 0deg) + 4deg)) translateY(-10px); }
+    }
+
+    .start-hero {
+      position: absolute;
+      left: 50%;
+      top: 42%;
+      transform: translate(-50%, -50%);
+      z-index: 5;
+      text-align: center;
+      width: min(96vw, 520px);
+      pointer-events: none;
+    }
+
+    .start-title {
+      margin: 0;
+      font-size: clamp(2.6rem, 11vw, 4.6rem);
+      font-weight: 900;
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      color: #fff;
+      text-shadow:
+        0 4px 0 #312e81,
+        0 8px 24px rgba(0, 0, 0, 0.55),
+        0 0 40px rgba(139, 92, 246, 0.35);
+    }
+
+    .start-title-accent {
+      color: #ffeb29;
+      text-shadow:
+        0 3px 0 #b45309,
+        0 6px 18px rgba(250, 204, 21, 0.5);
+    }
+
+    .start-online-badge {
+      display: inline-block;
+      margin: 0.65rem 0 0;
+      padding: 0.35rem 1.35rem;
+      border-radius: 999px;
+      font-size: clamp(0.95rem, 3.2vw, 1.25rem);
+      font-weight: 800;
+      letter-spacing: 0.28em;
+      color: #fff;
+      background: rgba(15, 10, 35, 0.65);
+      border: 2px solid rgba(56, 189, 248, 0.85);
+      box-shadow:
+        0 0 24px rgba(56, 189, 248, 0.45),
+        inset 0 0 12px rgba(56, 189, 248, 0.15);
+    }
+
     .screen-start .content {
       inset: auto 0 0 0;
       top: auto;
       height: auto;
       justify-content: flex-end;
       flex-direction: column;
-      gap: 0.75rem;
-      padding: 0 24px clamp(52px, 8vh, 88px);
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0 20px clamp(40px, 7vh, 72px);
       pointer-events: none;
+      z-index: 6;
     }
 
-    .screen-start .content .btn,
-    .screen-start .content .start-tagline {
+    .screen-start .content .btn-begin {
       pointer-events: auto;
     }
 
-    .screen-start .seo-brand {
-      position: absolute;
-      left: 0;
-      right: 0;
-      bottom: max(12px, env(safe-area-inset-bottom));
-      z-index: 12;
-      margin: 0;
-      padding: 0 1rem;
-      font-size: clamp(0.7rem, 2.8vw, 0.85rem);
-      font-weight: 600;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      text-align: center;
-      color: rgba(255, 255, 255, 0.55);
-      text-shadow: 0 1px 8px rgba(0, 0, 0, 0.8);
-      pointer-events: none;
+    .screen-start .btn-begin {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      min-width: min(88vw, 340px);
+      padding: 1rem 2rem;
+      border: none;
+      border-radius: 999px;
+      font-family: inherit;
+      font-size: clamp(1.05rem, 4vw, 1.45rem);
+      font-weight: 900;
+      letter-spacing: 0.14em;
+      color: #1a1028;
+      background: linear-gradient(180deg, #fff59d 0%, #ffeb29 42%, #f59e0b 100%);
+      box-shadow:
+        0 6px 0 #ca8a04,
+        0 14px 40px rgba(250, 204, 21, 0.45),
+        0 0 32px rgba(255, 235, 59, 0.25);
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
     }
 
-    .screen-start .btn {
-      font-size: clamp(1.15rem, 2.5vw, 1.65rem);
-      padding: 1rem 3.5rem;
-      box-shadow: 0 12px 48px rgba(0, 0, 0, 0.45);
+    .screen-start .btn-begin:hover {
+      transform: scale(1.04) translateY(-2px);
+      box-shadow:
+        0 8px 0 #ca8a04,
+        0 18px 48px rgba(250, 204, 21, 0.55),
+        0 0 40px rgba(255, 235, 59, 0.35);
+    }
+
+    .btn-begin-deco {
+      display: block;
+      width: clamp(22px, 6vw, 32px);
+      height: 10px;
+      background:
+        linear-gradient(#1a1028, #1a1028) 0 0 / 100% 2px no-repeat,
+        linear-gradient(#1a1028, #1a1028) 0 50% / 70% 2px no-repeat,
+        linear-gradient(#1a1028, #1a1028) 100% 100% / 100% 2px no-repeat;
+      opacity: 0.85;
     }
 
     .screen-start .start-tagline {
-      position: relative;
-      bottom: auto;
-      left: auto;
-      right: auto;
-      font-size: clamp(0.85rem, 1.6vw, 1.05rem);
-      color: rgba(126, 200, 232, 0.9);
-      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
-      z-index: 12;
+      pointer-events: none;
+      margin: 0;
+      font-size: clamp(0.75rem, 2.5vw, 0.9rem);
+      color: rgba(186, 230, 253, 0.75);
+      text-shadow: 0 1px 6px rgba(0, 0, 0, 0.6);
     }
 
   </style>
@@ -1410,13 +1536,20 @@
     </div>
   </div>
 
-  <!-- Scherm 1: beginscherm (promo-foto) -->
+  <!-- Scherm 1: beginscherm promo -->
   <main id="screen-start" class="screen screen-start">
-    <img class="start-bg" src="og-image.png" alt="wiehasit.com — online Wie-is-het spel" />
-    <span class="start-shade" aria-hidden="true"></span>
-    <h1 class="seo-brand">wiehasit.com</h1>
+    <div class="start-cosmos" id="start-cosmos" aria-hidden="true"></div>
+    <div class="start-cards" id="start-cards" aria-hidden="true"></div>
+    <div class="start-hero">
+      <h1 class="start-title" data-i18n-html="startTitleHtml">Wie <span class="start-title-accent">Is</span> Het?</h1>
+      <p class="start-online-badge" data-i18n="startOnlineBadge">ONLINE</p>
+    </div>
     <section class="content">
-      <button id="btn-begin" class="btn" type="button" data-i18n="btnBegin">LET'S BEGIN</button>
+      <button id="btn-begin" class="btn btn-begin" type="button">
+        <span class="btn-begin-deco" aria-hidden="true"></span>
+        <span data-i18n="btnBegin">LET'S BEGIN</span>
+        <span class="btn-begin-deco" aria-hidden="true"></span>
+      </button>
       <p class="start-tagline" data-i18n="startTagline">Raad het personage · Speel met vrienden online</p>
     </section>
   </main>
@@ -1673,6 +1806,8 @@
   <script>
     const I18N = {
       nl: {
+        startTitleHtml: 'Wie <span class="start-title-accent">Is</span> Het?',
+        startOnlineBadge: "ONLINE",
         startTagline: "wiehasit.com · Raad het personage online",
         btnBegin: "LATEN WE BEGINNEN",
         modeTitle: 'Kies je<span class="accent">spelmodus</span>',
@@ -1748,6 +1883,8 @@
         langAria: "Taal kiezen"
       },
       en: {
+        startTitleHtml: 'Who <span class="start-title-accent">Is</span> It?',
+        startOnlineBadge: "ONLINE",
         startTagline: "wiehasit.com · Guess the character online",
         btnBegin: "LET'S BEGIN",
         modeTitle: 'Choose your<span class="accent">game mode</span>',
@@ -1882,6 +2019,7 @@
     langMenu.addEventListener("click", (e) => e.stopPropagation());
 
     applyLanguage();
+    buildStartScreenDecor();
 
     const screenStart = document.getElementById("screen-start");
     const screenMode = document.getElementById("screen-mode");
@@ -1937,6 +2075,70 @@
         encodeURIComponent(name) +
         "&size=128&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf"
       );
+    }
+
+    const START_FLOAT_CARDS = [
+      { name: "Anne", x: 14, y: 18, rot: -14, delay: 0 },
+      { name: "Max", x: 86, y: 16, rot: 12, delay: 0.4 },
+      { name: "Lucas", x: 8, y: 42, rot: -10, delay: 0.9 },
+      { name: "Mila", x: 90, y: 40, rot: 14, delay: 1.2 },
+      { name: "Noah", x: 82, y: 68, rot: 8, delay: 1.6 },
+      { name: "Emma", x: 16, y: 70, rot: -8, delay: 0.6, small: true },
+      { mystery: true, x: 22, y: 10, rot: 18, delay: 2 },
+      { mystery: true, x: 74, y: 78, rot: -12, delay: 2.4 }
+    ];
+
+    function buildStartScreenDecor() {
+      const cosmos = document.getElementById("start-cosmos");
+      const cardsRoot = document.getElementById("start-cards");
+      if (!cosmos || !cardsRoot) return;
+
+      if (!cosmos.dataset.built) {
+        cosmos.dataset.built = "1";
+        const starCount = 28;
+        for (let i = 0; i < starCount; i++) {
+          const s = document.createElement("span");
+          s.className = "start-star";
+          s.style.left = 4 + Math.random() * 92 + "%";
+          s.style.top = 4 + Math.random() * 92 + "%";
+          const size = 2 + Math.random() * 3;
+          s.style.width = size + "px";
+          s.style.height = size + "px";
+          s.style.animationDelay = Math.random() * 3 + "s";
+          cosmos.appendChild(s);
+        }
+      }
+
+      if (!cardsRoot.dataset.built) {
+        cardsRoot.dataset.built = "1";
+        START_FLOAT_CARDS.forEach((slot) => {
+          const card = document.createElement("div");
+          card.className = "start-card";
+          if (slot.small) card.classList.add("start-card--small");
+          if (slot.mystery) card.classList.add("start-card--blur");
+          card.style.left = slot.x + "%";
+          card.style.top = slot.y + "%";
+          card.style.setProperty("--rot", slot.rot + "deg");
+          card.style.setProperty("--delay", (slot.delay || 0) + "s");
+
+          const inner = document.createElement("div");
+          inner.className = "start-card-inner";
+          if (slot.mystery) {
+            const q = document.createElement("span");
+            q.className = "start-card-mystery";
+            q.textContent = "?";
+            inner.appendChild(q);
+          } else {
+            const img = document.createElement("img");
+            img.src = cardAvatarUrl(slot.name);
+            img.alt = slot.name;
+            img.loading = "eager";
+            inner.appendChild(img);
+          }
+          card.appendChild(inner);
+          cardsRoot.appendChild(card);
+        });
+      }
     }
 
     function buildGameBoards() {
