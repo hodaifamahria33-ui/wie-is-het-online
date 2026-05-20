@@ -47,9 +47,10 @@
   let opponentZone = null;
   let opponentChest = null;
   let opponentAnswerEl = null;
-  let questionPanel = null;
-  let questionInput = null;
-  let btnSendQuestion = null;
+  let gameQuickActions = null;
+  let gameActionsAnswer = null;
+  let gameActionsPost = null;
+  let gameActionsQuestionText = null;
   let btnSwitchTurn = null;
   let btnEndFlipPhase = null;
   let postAnswerTimerEl = null;
@@ -389,57 +390,30 @@
     }
   }
 
-  function setQuestionInputEnabled(enabled) {
-    if (questionInput) questionInput.disabled = !enabled;
-    if (btnSendQuestion) btnSendQuestion.disabled = !enabled;
-  }
-
-  function triggerQuestionPop() {
-    if (!questionPanel) return;
-    questionPanel.classList.remove("is-popping");
-    void questionPanel.offsetWidth;
-    questionPanel.classList.add("is-popping");
-    setTimeout(() => questionPanel.classList.remove("is-popping"), 520);
+  function hideGameActions() {
+    if (gameQuickActions) gameQuickActions.classList.add("hidden");
+    if (gameActionsAnswer) gameActionsAnswer.classList.add("hidden");
+    if (gameActionsPost) gameActionsPost.classList.add("hidden");
+    if (gameActionsQuestionText) gameActionsQuestionText.classList.add("hidden");
+    hidePostAnswerPanel();
   }
 
   function showQuestionPanel(mode) {
-    if (!questionPanel) return;
-    if (screenGame) screenGame.classList.add("phase-question");
-    questionPanel.classList.remove("hidden", "mode-ask", "mode-answer", "mode-post");
-    questionPanel.classList.add(mode === "answer" ? "mode-answer" : "mode-ask");
-    const hintEl = document.getElementById("question-bar-hint");
     if (mode === "ask") {
-      hideBanner();
-      if (hintEl) {
-        hintEl.textContent = tFn("turnPlayer");
-        hintEl.classList.remove("hidden");
-      }
-      const canAsk = state.phase === PHASE.MY_TURN && !state.askedThisTurn;
-      setQuestionInputEnabled(canAsk);
-      triggerQuestionPop();
-      if (questionInput && canAsk) {
-        questionInput.value = "";
-        setTimeout(() => questionInput.focus(), 120);
-      }
-    } else if (mode === "answer") {
-      if (hintEl) {
-        hintEl.textContent = tFn("answerOpponentQuestion");
-        hintEl.classList.remove("hidden");
-      }
-      triggerQuestionPop();
+      hideGameActions();
+      setBanner(tFn("turnPlayer"));
+      return;
+    }
+    if (mode === "answer") {
+      setBanner(tFn("answerOpponentQuestion"));
+      if (gameQuickActions) gameQuickActions.classList.remove("hidden");
+      if (gameActionsPost) gameActionsPost.classList.add("hidden");
+      if (gameActionsAnswer) gameActionsAnswer.classList.remove("hidden");
     }
   }
 
   function hideQuestionPanel() {
-    if (questionPanel) {
-      questionPanel.classList.add("hidden");
-      questionPanel.classList.remove("mode-post", "mode-answer", "mode-ask", "is-popping");
-    }
-    if (screenGame) screenGame.classList.remove("phase-question");
-    const hintEl = document.getElementById("question-bar-hint");
-    if (hintEl) hintEl.classList.add("hidden");
-    setQuestionInputEnabled(false);
-    hidePostAnswerPanel();
+    hideGameActions();
   }
 
   function normalizeQuestion(text) {
@@ -499,29 +473,15 @@
   }
 
   function hidePostAnswerPanel() {
-    if (!questionPanel) return;
-    const post = questionPanel.querySelector(".question-bar-post");
-    if (post) {
-      post.classList.add("hidden");
-      post.classList.remove("mode-switch", "mode-flip", "mode-free");
-    }
-    questionPanel.classList.remove("mode-post");
+    if (gameActionsPost) gameActionsPost.classList.add("hidden");
   }
 
   function showPostAnswerPanel(mode) {
-    if (!questionPanel) return;
-    const post = questionPanel.querySelector(".question-bar-post");
-    if (!post) return;
-    if (screenGame) screenGame.classList.add("phase-question");
-    questionPanel.classList.remove("hidden", "mode-ask", "mode-answer");
-    questionPanel.classList.add("mode-post");
-    triggerQuestionPop();
-    const hintEl = document.getElementById("question-bar-hint");
-    if (hintEl) hintEl.classList.add("hidden");
-    post.classList.remove("hidden", "mode-switch", "mode-flip", "mode-free");
-    post.classList.add(
-      mode === "switch" ? "mode-switch" : mode === "flip" ? "mode-flip" : "mode-free"
-    );
+    if (!gameQuickActions || !gameActionsPost) return;
+    gameQuickActions.classList.remove("hidden");
+    if (gameActionsAnswer) gameActionsAnswer.classList.add("hidden");
+    if (gameActionsQuestionText) gameActionsQuestionText.classList.add("hidden");
+    gameActionsPost.classList.remove("hidden");
     if (btnSwitchTurn) btnSwitchTurn.classList.toggle("hidden", mode !== "switch");
     if (btnEndFlipPhase) btnEndFlipPhase.classList.toggle("hidden", mode !== "free");
     if (postAnswerTimerEl) {
@@ -622,9 +582,11 @@
     setScreenTurn("question");
     enableCardFlips();
     setBanner(questionText);
+    if (gameActionsQuestionText) {
+      gameActionsQuestionText.textContent = questionText;
+      gameActionsQuestionText.classList.remove("hidden");
+    }
     showQuestionPanel("answer");
-    const qDisplay = questionPanel?.querySelector(".opponent-question-text");
-    if (qDisplay) qDisplay.textContent = questionText;
   }
 
   function finishQuestionAsAsker(yes, questionText) {
@@ -640,33 +602,7 @@
   }
 
   function submitPlayerQuestion() {
-    if (state.phase !== PHASE.MY_TURN || !questionInput || state.askedThisTurn) return;
-    const questionText = questionInput.value.trim();
-    if (!questionText) {
-      questionInput.focus();
-      return;
-    }
-    if (isDuplicateQuestion(questionText)) {
-      setBanner(tFn("duplicateQuestion"));
-      questionInput.focus();
-      return;
-    }
-    recordQuestion(questionText);
-    state.askedThisTurn = true;
-    hideQuestionPanel();
-    clearInteractivity();
-    if (state.online && window.WieIsHetOnline) {
-      state.phase = PHASE.WAIT_ANSWER;
-      state.pendingQuestionText = questionText;
-      window.WieIsHetOnline.send({ type: "question", questionId: "custom", questionText });
-      setBanner('"' + questionText + '" — ' + tFn("waitAnswer"));
-      questionInput.value = "";
-      return;
-    }
-    const secretName = getSecretName(state.opponentSecretIndex);
-    const yes = evaluateCustomQuestion(questionText, secretName);
-    questionInput.value = "";
-    finishQuestionAsAsker(yes, questionText);
+    /* Vraag-popup verwijderd — alleen bot stelt vragen, speler antwoordt met JA/NEE */
   }
 
   function onAnswerChipClick(btn) {
@@ -1084,23 +1020,12 @@
     bindWellClickHandlers();
   }
 
-  function wireQuestionPanel() {
-    if (!questionPanel || questionPanel.dataset.wired === "1") return;
-    questionPanel.dataset.wired = "1";
-    questionPanel.querySelectorAll(".answer-chip").forEach((btn) => {
+  function wireGameQuickActions() {
+    if (!gameQuickActions || gameQuickActions.dataset.wired === "1") return;
+    gameQuickActions.dataset.wired = "1";
+    gameQuickActions.querySelectorAll(".answer-chip").forEach((btn) => {
       btn.addEventListener("click", () => onAnswerChipClick(btn));
     });
-    if (btnSendQuestion) {
-      btnSendQuestion.addEventListener("click", submitPlayerQuestion);
-    }
-    if (questionInput) {
-      questionInput.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") {
-          e.preventDefault();
-          submitPlayerQuestion();
-        }
-      });
-    }
     btnSwitchTurn = document.getElementById("btn-switch-turn");
     btnEndFlipPhase = document.getElementById("btn-end-flip-phase");
     postAnswerTimerEl = document.getElementById("post-answer-timer");
@@ -1162,9 +1087,10 @@
       opponentZone = opts.opponentZone;
       opponentChest = opts.opponentChest;
       opponentAnswerEl = opts.opponentAnswerEl;
-      questionPanel = opts.questionPanel;
-      questionInput = document.getElementById("question-input");
-      btnSendQuestion = document.getElementById("btn-send-question");
+      gameQuickActions = document.getElementById("game-quick-actions");
+      gameActionsAnswer = document.getElementById("game-actions-answer");
+      gameActionsPost = document.getElementById("game-actions-post");
+      gameActionsQuestionText = document.getElementById("game-actions-question-text");
       winOverlay = opts.winOverlay;
       state.online = Boolean(opts.online);
       state.isHost = opts.isHost !== false;
@@ -1174,7 +1100,7 @@
         state.localSecretReady = false;
       }
       wireBoards();
-      wireQuestionPanel();
+      wireGameQuickActions();
       wireChest();
       saveChestDefault();
       if (unsubOnline) unsubOnline();

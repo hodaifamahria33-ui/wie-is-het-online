@@ -1,23 +1,9 @@
 /**
  * Bord groot en breed in beeld (klassieke layout).
  */
-.screen-game-view {
-  --wie-ui-top: calc(env(safe-area-inset-top, 0px) + 52px);
-  --wie-question-reserve: 210px;
-  --wie-board-gap: 40px;
-  --wie-secret-rail: clamp(158px, 18vw, 210px);
-  --wie-chest-rail: clamp(120px, 14vw, 160px);
-}
-
 #game-table {
-  --game-board-width: min(
-    calc(100vw - var(--wie-secret-rail) - var(--wie-chest-rail) - 24px),
-    min(calc(88vh * 2.05), 900px)
-  );
-  --game-strip-width: min(
-    calc(100vw - var(--wie-secret-rail) - 16px),
-    calc(var(--game-board-width) + var(--wie-chest-rail) + 32px)
-  );
+  --game-board-width: min(99vw, min(calc(96vh * 2.1), 960px));
+  --game-strip-width: min(99vw, calc(var(--game-board-width) + 220px));
   --board-tilt: 8deg;
 }
 
@@ -38,22 +24,16 @@
   overflow: hidden;
 }
 
-/* Ruimte voor banner / vraag-popup — bord blijft volledig zichtbaar */
+/* Ruimte voor banner / vraag-popup — bord blijft groot */
 .screen-game-view.phase-pick-secret #game-table .game-scene {
-  padding-top: calc(env(safe-area-inset-top, 0px) + 118px);
+  padding-top: calc(env(safe-area-inset-top, 0px) + 96px);
   padding-bottom: max(20px, env(safe-area-inset-bottom, 16px));
 }
 
 .screen-game-view.turn-player #game-table .game-scene,
 .screen-game-view.phase-question #game-table .game-scene,
 .screen-game-view.phase-post-switch #game-table .game-scene {
-  display: grid;
-  place-items: start center;
-  align-content: start;
-  justify-items: center;
-  padding-top: calc(
-    var(--wie-ui-top) + var(--wie-question-reserve) + var(--wie-board-gap)
-  );
+  padding-top: calc(env(safe-area-inset-top, 0px) + 112px);
   padding-bottom: max(22px, env(safe-area-inset-bottom, 16px));
 }
 
@@ -68,7 +48,7 @@
   align-items: center;
   justify-content: center;
   width: 100%;
-  max-width: min(var(--game-strip-width), calc(100vw - var(--wie-secret-rail, 150px)));
+  max-width: none;
   flex: none;
   z-index: 5;
   margin: 0;
@@ -84,12 +64,7 @@
 }
 
 #game-table .game-turn-banner {
-  top: var(--wie-ui-top, calc(env(safe-area-inset-top, 0px) + 54px));
-}
-
-.screen-game-view.phase-question .game-turn-banner,
-.screen-game-view.turn-player .game-turn-banner {
-  display: none;
+  top: calc(env(safe-area-inset-top, 0px) + 52px);
 }
 
 #game-table .opponent-figure,
@@ -106,8 +81,8 @@
 #game-table .board-stack {
   position: relative;
   width: var(--game-strip-width);
-  max-width: min(99vw, calc(100vw - var(--wie-secret-rail, 150px)));
-  min-width: min(var(--game-board-width), calc(100vw - var(--wie-secret-rail, 150px)));
+  max-width: 99vw;
+  min-width: var(--game-board-width);
   transform-style: preserve-3d;
   margin: 0 auto;
   transform: none !important;
@@ -188,68 +163,25 @@
   box-sizing: border-box;
 }
 
-/* Geheime kaart schuift vanaf de zijkant naar buiten — “uit het bord” */
+/* Geheime kaart helemaal rechts op scherm + houder eronder */
 #game-table .secret-card-slot {
   position: fixed !important;
   left: auto !important;
-  right: max(8px, env(safe-area-inset-right, 8px)) !important;
-  top: 50% !important;
+  right: max(10px, env(safe-area-inset-right, 8px)) !important;
+  top: 52% !important;
   margin: 0;
-  width: clamp(96px, 10vw, 128px);
+  width: clamp(102px, 11.5vw, 142px);
   padding-bottom: 20px;
   box-sizing: content-box;
   z-index: 28;
-  transform: translateY(-50%) translateX(72px) scale(0.9);
+  transform: translateY(-54%) scale(0.94);
   opacity: 0;
   pointer-events: none;
-  filter: drop-shadow(0 0 0 transparent);
-  transition:
-    opacity 0.45s ease,
-    transform 0.55s cubic-bezier(0.22, 1, 0.36, 1),
-    filter 0.45s ease;
 }
 
 #game-table .secret-card-slot.visible {
   opacity: 1;
-  transform: translateY(-50%) translateX(0) scale(1);
-  filter: drop-shadow(0 14px 36px rgba(67, 56, 202, 0.45));
-  pointer-events: none;
-}
-
-#game-table .secret-card-slot.is-reveal {
-  animation: secretSlideIn 0.72s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-}
-
-@keyframes secretSlideIn {
-  0% {
-    opacity: 0;
-    transform: translateY(-50%) translateX(88px) scale(0.86);
-    filter: drop-shadow(0 0 0 transparent);
-  }
-  65% {
-    opacity: 1;
-    transform: translateY(-50%) translateX(4px) scale(1.03);
-    filter: drop-shadow(0 18px 42px rgba(99, 102, 241, 0.55));
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(-50%) translateX(0) scale(1);
-    filter: drop-shadow(0 14px 36px rgba(67, 56, 202, 0.45));
-  }
-}
-
-#game-table .secret-card-slot.visible::after {
-  content: "";
-  position: absolute;
-  inset: -10px -14px 8px -14px;
-  border-radius: 22px;
-  background: radial-gradient(
-    ellipse 80% 70% at 50% 35%,
-    rgba(129, 140, 248, 0.35) 0%,
-    rgba(96, 165, 250, 0.12) 45%,
-    transparent 72%
-  );
-  z-index: 0;
+  transform: translateY(-54%) scale(1);
   pointer-events: none;
 }
 
@@ -283,11 +215,6 @@
 #game-table .secret-card-slot .card-face {
   position: relative;
   z-index: 2;
-  box-shadow:
-    0 18px 42px rgba(0, 0, 0, 0.5),
-    0 0 0 3px rgba(255, 255, 255, 0.92),
-    0 0 28px rgba(96, 165, 250, 0.5),
-    0 0 44px rgba(167, 139, 250, 0.35) !important;
 }
 
 #game-table .board-tray--player {
@@ -322,43 +249,16 @@
 }
 
 @media (max-width: 720px) {
-  .screen-game-view {
-    --wie-secret-rail: 0px;
-    --wie-question-reserve: 172px;
-  }
-
-  #game-table .opponent-zone,
-  #game-table .board-stack {
-    max-width: 99vw !important;
-    min-width: 0;
-  }
-
   #game-table .secret-card-slot {
     position: fixed !important;
-    right: max(6px, env(safe-area-inset-right)) !important;
+    right: max(8px, env(safe-area-inset-right)) !important;
     left: auto !important;
     top: auto !important;
     bottom: max(14px, env(safe-area-inset-bottom)) !important;
-    transform: translateX(48px) scale(0.9) !important;
+    transform: scale(0.92) !important;
   }
 
   #game-table .secret-card-slot.visible {
-    transform: translateX(6px) scale(1) !important;
-    filter: drop-shadow(0 12px 28px rgba(67, 56, 202, 0.4)) !important;
-  }
-
-  #game-table .secret-card-slot.is-reveal {
-    animation: secretSlideInMobile 0.72s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-  }
-
-  @keyframes secretSlideInMobile {
-    0% {
-      opacity: 0;
-      transform: translateX(64px) scale(0.86) !important;
-    }
-    100% {
-      opacity: 1;
-      transform: translateX(6px) scale(1) !important;
-    }
+    transform: scale(1) !important;
   }
 }

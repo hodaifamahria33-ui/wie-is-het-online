@@ -17,11 +17,11 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/game/premium-game.css?v=32" />
-  <link rel="stylesheet" href="assets/game/game-play.css?v=32" />
-  <link rel="stylesheet" href="assets/game/game-extras.css?v=32" />
-  <link rel="stylesheet" href="assets/game/game-layout.css?v=32" />
-  <link rel="stylesheet" href="assets/game/character-variety.css?v=32" />
+  <link rel="stylesheet" href="assets/game/premium-game.css?v=33" />
+  <link rel="stylesheet" href="assets/game/game-play.css?v=33" />
+  <link rel="stylesheet" href="assets/game/game-extras.css?v=33" />
+  <link rel="stylesheet" href="assets/game/game-layout.css?v=33" />
+  <link rel="stylesheet" href="assets/game/character-variety.css?v=33" />
   <meta name="description" content="wiehasit.com — gratis online Wie-is-het spel. Maak een potje, deel de code, raad het personage met vrienden of tegen de bot." />
   <meta name="keywords" content="wiehasit.com, wie has it, wie is het online, raadspel, gratis spel" />
   <meta property="og:type" content="website" />
@@ -2159,35 +2159,6 @@
         <div class="table-surface table-surface--hidden" aria-hidden="true"></div>
       </div>
 
-      <div id="question-panel" class="question-bar hidden" aria-live="polite">
-        <div class="question-bar-card">
-          <p class="question-bar-hint hidden" id="question-bar-hint" aria-live="polite"></p>
-          <div class="question-bar-ask">
-            <p class="question-bar-label" data-i18n="askQuestionShort">Stel je vraag (tegenstander antwoordt):</p>
-            <div class="question-input-row">
-              <input type="text" id="question-input" class="question-input" maxlength="100"
-                placeholder="Bijv. Is het een jongen?" autocomplete="off" />
-              <button type="button" id="btn-send-question" class="btn-send-question" data-i18n="btnAsk">Vraag</button>
-            </div>
-          </div>
-          <div class="question-bar-answer">
-            <p class="opponent-question-text"></p>
-            <div class="answer-row">
-              <button type="button" class="answer-chip" data-answer="yes">JA</button>
-              <button type="button" class="answer-chip" data-answer="no">NEE</button>
-            </div>
-          </div>
-          <div class="question-bar-post hidden">
-            <p id="post-answer-label" class="post-answer-label"></p>
-            <p id="post-answer-timer" class="post-answer-timer" aria-live="polite">10</p>
-            <div class="post-answer-actions">
-              <button type="button" id="btn-switch-turn" class="btn-switch-turn" data-i18n="btnSwitch">SWITCH</button>
-              <button type="button" id="btn-end-flip-phase" class="btn-end-flip-phase hidden" data-i18n="btnEndTurn">Volgende beurt</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <div id="win-overlay" class="win-overlay hidden" role="dialog" aria-modal="true">
         <div class="win-confetti" aria-hidden="true"></div>
         <div class="win-card">
@@ -2207,6 +2178,20 @@
 
         <p id="game-turn-banner" class="game-turn-banner hidden" aria-live="polite"></p>
 
+        <div id="game-quick-actions" class="game-quick-actions hidden" aria-live="polite">
+          <p id="game-actions-question-text" class="game-actions-question hidden"></p>
+          <div id="game-actions-answer" class="game-actions-row hidden">
+            <button type="button" class="answer-chip" data-answer="yes">JA</button>
+            <button type="button" class="answer-chip" data-answer="no">NEE</button>
+          </div>
+          <div id="game-actions-post" class="game-actions-row hidden">
+            <p id="post-answer-label" class="post-answer-label"></p>
+            <p id="post-answer-timer" class="post-answer-timer" aria-live="polite">10</p>
+            <button type="button" id="btn-switch-turn" class="btn-switch-turn" data-i18n="btnSwitch">SWITCH</button>
+            <button type="button" id="btn-end-flip-phase" class="btn-end-flip-phase hidden" data-i18n="btnEndTurn">Volgende beurt</button>
+          </div>
+        </div>
+
         <div class="player-zone">
           <div class="player-figure" aria-hidden="true">
             <div class="player-character-wrap">
@@ -2220,10 +2205,10 @@
   </main>
 
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
-  <script src="assets/game/online-room.js?v=32"></script>
-  <script src="assets/game/lobby-room.js?v=32"></script>
-  <script src="assets/game/character-traits.js?v=32"></script>
-  <script src="assets/game/game-play.js?v=32"></script>
+  <script src="assets/game/online-room.js?v=33"></script>
+  <script src="assets/game/lobby-room.js?v=33"></script>
+  <script src="assets/game/character-traits.js?v=33"></script>
+  <script src="assets/game/game-play.js?v=33"></script>
 
   <script>
     const I18N = {
@@ -2280,7 +2265,7 @@
         phasePickSecret: "Kies jouw geheime personage",
         phaseOpponentPick: "Tegenstander kiest…",
         phaseWaitOpponent: "Wachten op tegenstander…",
-        turnPlayer: "Jouw beurt — vraag stellen, kaart omlaag/omhoog (tik nogmaals), of raden",
+        turnPlayer: "Jouw beurt — kaarten omlaag/omhoog (tik nogmaals), of tik tegenstander om te raden",
         cardTapToFlip: "Tik om kaart omlaag te doen",
         cardTapToRestore: "Tik om kaart weer omhoog te zetten",
         duplicateQuestion: "Die vraag heb je al gesteld — probeer iets anders",
@@ -2368,7 +2353,7 @@
         phasePickSecret: "Pick your secret character",
         phaseOpponentPick: "Opponent is choosing…",
         phaseWaitOpponent: "Waiting for opponent…",
-        turnPlayer: "Your turn — ask, flip cards down/up (tap again), or guess",
+        turnPlayer: "Your turn — flip cards down/up (tap again), or tap opponent to guess",
         cardTapToFlip: "Tap to flip card down",
         cardTapToRestore: "Tap to flip card back up",
         duplicateQuestion: "You already asked that — try something else",
@@ -2694,7 +2679,6 @@
         opponentZone: document.querySelector(".opponent-zone"),
         opponentChest: document.getElementById("opponent-chest"),
         opponentAnswerEl: document.getElementById("opponent-answer"),
-        questionPanel: document.getElementById("question-panel"),
         winOverlay: document.getElementById("win-overlay"),
         online: onlineMatch,
         isHost: sessionMode === "host",

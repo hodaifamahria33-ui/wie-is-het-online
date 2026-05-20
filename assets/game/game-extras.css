@@ -34,30 +34,22 @@
   order: 3;
   position: fixed !important;
   left: auto !important;
-  right: max(8px, env(safe-area-inset-right, 8px)) !important;
-  top: 50% !important;
+  right: max(10px, env(safe-area-inset-right, 8px)) !important;
+  top: 52% !important;
   flex-shrink: 0;
   z-index: 28;
   padding-bottom: 20px;
-  transform: translateY(-50%) translateX(72px) scale(0.9);
-  opacity: 0;
-  transition:
-    opacity 0.45s ease,
-    transform 0.55s cubic-bezier(0.22, 1, 0.36, 1),
-    filter 0.45s ease;
 }
 
 #game-table .secret-card-slot.visible {
-  opacity: 1;
-  transform: translateY(-50%) translateX(0) scale(1) !important;
-  filter: drop-shadow(0 14px 36px rgba(67, 56, 202, 0.45));
+  transform: translateY(-54%) scale(1) !important;
 }
 
 #game-table .board-stack {
   flex: 0 0 auto;
   width: var(--game-strip-width, var(--game-board-width)) !important;
-  max-width: min(99vw, calc(100vw - var(--wie-secret-rail, 180px))) !important;
-  min-width: 0 !important;
+  max-width: 99vw !important;
+  min-width: var(--game-board-width) !important;
   transform: none !important;
 }
 
@@ -199,8 +191,12 @@
   40% { transform: scale(1.06); }
 }
 
-/* Vraag-popup — vast bovenaan, bord eronder met ruimte */
+/* Vraag-popup verwijderd */
 .question-bar {
+  display: none !important;
+}
+
+.question-bar--legacy {
   position: fixed;
   left: 50%;
   top: var(--wie-ui-top, calc(env(safe-area-inset-top, 0px) + 52px));
@@ -821,28 +817,51 @@
   }
 }
 
-/* --- Definitieve UI-layout (laatste regels) --- */
-.screen-game-view.turn-player #game-table .game-scene,
-.screen-game-view.phase-question #game-table .game-scene,
-.screen-game-view.phase-post-switch #game-table .game-scene {
-  place-items: start center !important;
-  align-content: start !important;
-  justify-items: center !important;
-  padding-top: calc(
-    var(--wie-ui-top) + var(--wie-question-reserve) + var(--wie-board-gap)
-  ) !important;
+/* Kleine actiebalk (JA/NEE, SWITCH) — geen vraag-popup */
+.game-quick-actions {
+  position: fixed;
+  left: 50%;
+  top: max(96px, calc(env(safe-area-inset-top, 0px) + 88px));
+  transform: translateX(-50%);
+  z-index: 48;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  width: min(92vw, 420px);
+  pointer-events: none;
 }
 
-.screen-game-view.turn-player #game-table .board-stack,
-.screen-game-view.phase-question #game-table .board-stack,
-.screen-game-view.phase-post-switch #game-table .board-stack,
-.screen-game-view.turn-player #game-table .opponent-zone,
-.screen-game-view.phase-question #game-table .opponent-zone {
-  max-width: min(var(--game-strip-width), calc(100vw - var(--wie-secret-rail, 180px))) !important;
+.game-quick-actions:not(.hidden) {
+  pointer-events: auto;
 }
 
-#game-table .secret-card-slot.visible {
-  opacity: 1 !important;
-  transform: translateY(-50%) translateX(0) scale(1) !important;
-  filter: drop-shadow(0 14px 36px rgba(67, 56, 202, 0.45)) !important;
+.game-quick-actions.hidden {
+  display: none;
+}
+
+.game-actions-question {
+  margin: 0;
+  text-align: center;
+  font-weight: 700;
+  font-size: clamp(0.8rem, 2.4vw, 0.95rem);
+  color: #f8fafc;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+}
+
+.game-actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.82);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.4);
+}
+
+.game-actions-row.hidden {
+  display: none;
 }
