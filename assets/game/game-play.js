@@ -386,25 +386,50 @@
     if (btnSendQuestion) btnSendQuestion.disabled = !enabled;
   }
 
+  function triggerQuestionPop() {
+    if (!questionPanel) return;
+    questionPanel.classList.remove("is-popping");
+    void questionPanel.offsetWidth;
+    questionPanel.classList.add("is-popping");
+    setTimeout(() => questionPanel.classList.remove("is-popping"), 520);
+  }
+
   function showQuestionPanel(mode) {
     if (!questionPanel) return;
-    questionPanel.classList.remove("hidden", "mode-ask", "mode-answer");
+    if (screenGame) screenGame.classList.add("phase-question");
+    questionPanel.classList.remove("hidden", "mode-ask", "mode-answer", "mode-post");
     questionPanel.classList.add(mode === "answer" ? "mode-answer" : "mode-ask");
+    const hintEl = document.getElementById("question-bar-hint");
     if (mode === "ask") {
+      hideBanner();
+      if (hintEl) {
+        hintEl.textContent = tFn("turnPlayer");
+        hintEl.classList.remove("hidden");
+      }
       const canAsk = state.phase === PHASE.MY_TURN && !state.askedThisTurn;
       setQuestionInputEnabled(canAsk);
+      triggerQuestionPop();
       if (questionInput && canAsk) {
         questionInput.value = "";
-        setTimeout(() => questionInput.focus(), 80);
+        setTimeout(() => questionInput.focus(), 120);
       }
+    } else if (mode === "answer") {
+      if (hintEl) {
+        hintEl.textContent = tFn("answerOpponentQuestion");
+        hintEl.classList.remove("hidden");
+      }
+      triggerQuestionPop();
     }
   }
 
   function hideQuestionPanel() {
     if (questionPanel) {
       questionPanel.classList.add("hidden");
-      questionPanel.classList.remove("mode-post", "mode-answer", "mode-ask");
+      questionPanel.classList.remove("mode-post", "mode-answer", "mode-ask", "is-popping");
     }
+    if (screenGame) screenGame.classList.remove("phase-question");
+    const hintEl = document.getElementById("question-bar-hint");
+    if (hintEl) hintEl.classList.add("hidden");
     setQuestionInputEnabled(false);
     hidePostAnswerPanel();
   }
@@ -479,8 +504,12 @@
     if (!questionPanel) return;
     const post = questionPanel.querySelector(".question-bar-post");
     if (!post) return;
+    if (screenGame) screenGame.classList.add("phase-question");
     questionPanel.classList.remove("hidden", "mode-ask", "mode-answer");
     questionPanel.classList.add("mode-post");
+    triggerQuestionPop();
+    const hintEl = document.getElementById("question-bar-hint");
+    if (hintEl) hintEl.classList.add("hidden");
     post.classList.remove("hidden", "mode-switch", "mode-flip", "mode-free");
     post.classList.add(
       mode === "switch" ? "mode-switch" : mode === "flip" ? "mode-flip" : "mode-free"
@@ -754,7 +783,6 @@
     state.flippedThisTurn = false;
     state.askedThisTurn = false;
     setScreenTurn("my");
-    setBanner(tFn("turnPlayer"));
     enableMyFlips();
     showQuestionPanel("ask");
   }

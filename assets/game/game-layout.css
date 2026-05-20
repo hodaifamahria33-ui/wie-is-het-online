@@ -12,14 +12,21 @@
   display: grid;
   place-items: center;
   padding:
-    calc(env(safe-area-inset-top, 0px) + 54px)
+    calc(env(safe-area-inset-top, 0px) + 88px)
     6px
-    6px;
+    10px;
   box-sizing: border-box;
   perspective: 1100px;
   perspective-origin: 50% 50%;
   transform: none !important;
   overflow: hidden;
+}
+
+/* Ruimte bovenin voor vraag-popup tijdens jouw beurt */
+.screen-game-view.turn-player #game-table .game-scene,
+.screen-game-view.phase-question #game-table .game-scene,
+.screen-game-view.phase-post-switch #game-table .game-scene {
+  padding-top: calc(env(safe-area-inset-top, 0px) + 172px);
 }
 
 #game-table .opponent-zone {
@@ -49,7 +56,12 @@
 }
 
 #game-table .game-turn-banner {
-  top: calc(env(safe-area-inset-top, 0px) + 48px);
+  top: calc(env(safe-area-inset-top, 0px) + 52px);
+}
+
+.screen-game-view.phase-question .game-turn-banner,
+.screen-game-view.turn-player .game-turn-banner {
+  display: none;
 }
 
 #game-table .opponent-figure,

@@ -17,11 +17,11 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/game/premium-game.css?v=27" />
-  <link rel="stylesheet" href="assets/game/game-play.css?v=27" />
-  <link rel="stylesheet" href="assets/game/game-layout.css?v=27" />
-  <link rel="stylesheet" href="assets/game/game-extras.css?v=27" />
-  <link rel="stylesheet" href="assets/game/character-variety.css?v=27" />
+  <link rel="stylesheet" href="assets/game/premium-game.css?v=28" />
+  <link rel="stylesheet" href="assets/game/game-play.css?v=28" />
+  <link rel="stylesheet" href="assets/game/game-layout.css?v=28" />
+  <link rel="stylesheet" href="assets/game/game-extras.css?v=28" />
+  <link rel="stylesheet" href="assets/game/character-variety.css?v=28" />
   <meta name="description" content="wiehasit.com — gratis online Wie-is-het spel. Maak een potje, deel de code, raad het personage met vrienden of tegen de bot." />
   <meta name="keywords" content="wiehasit.com, wie has it, wie is het online, raadspel, gratis spel" />
   <meta property="og:type" content="website" />
@@ -2158,27 +2158,30 @@
 
 
             <div id="question-panel" class="question-bar hidden" aria-live="polite">
-        <div class="question-bar-ask">
-          <p class="question-bar-label" data-i18n="askQuestionShort">Stel je vraag (tegenstander antwoordt):</p>
-          <div class="question-input-row">
-            <input type="text" id="question-input" class="question-input" maxlength="100"
-              placeholder="Bijv. Is het een jongen?" autocomplete="off" />
-            <button type="button" id="btn-send-question" class="btn-send-question" data-i18n="btnAsk">Vraag</button>
+        <div class="question-bar-card">
+          <p class="question-bar-hint hidden" id="question-bar-hint" aria-live="polite"></p>
+          <div class="question-bar-ask">
+            <p class="question-bar-label" data-i18n="askQuestionShort">Stel je vraag (tegenstander antwoordt):</p>
+            <div class="question-input-row">
+              <input type="text" id="question-input" class="question-input" maxlength="100"
+                placeholder="Bijv. Is het een jongen?" autocomplete="off" />
+              <button type="button" id="btn-send-question" class="btn-send-question" data-i18n="btnAsk">Vraag</button>
+            </div>
           </div>
-        </div>
-        <div class="question-bar-answer">
-          <p class="opponent-question-text"></p>
-          <div class="answer-row">
-            <button type="button" class="answer-chip" data-answer="yes">JA</button>
-            <button type="button" class="answer-chip" data-answer="no">NEE</button>
+          <div class="question-bar-answer">
+            <p class="opponent-question-text"></p>
+            <div class="answer-row">
+              <button type="button" class="answer-chip" data-answer="yes">JA</button>
+              <button type="button" class="answer-chip" data-answer="no">NEE</button>
+            </div>
           </div>
-        </div>
-              <div class="question-bar-post hidden">
-          <p id="post-answer-label" class="post-answer-label"></p>
-          <p id="post-answer-timer" class="post-answer-timer" aria-live="polite">10</p>
-          <div class="post-answer-actions">
-            <button type="button" id="btn-switch-turn" class="btn-switch-turn" data-i18n="btnSwitch">SWITCH</button>
-            <button type="button" id="btn-end-flip-phase" class="btn-end-flip-phase hidden" data-i18n="btnEndTurn">Volgende beurt</button>
+          <div class="question-bar-post hidden">
+            <p id="post-answer-label" class="post-answer-label"></p>
+            <p id="post-answer-timer" class="post-answer-timer" aria-live="polite">10</p>
+            <div class="post-answer-actions">
+              <button type="button" id="btn-switch-turn" class="btn-switch-turn" data-i18n="btnSwitch">SWITCH</button>
+              <button type="button" id="btn-end-flip-phase" class="btn-end-flip-phase hidden" data-i18n="btnEndTurn">Volgende beurt</button>
+            </div>
           </div>
         </div>
       </div>
@@ -2215,10 +2218,10 @@
   </main>
 
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
-  <script src="assets/game/online-room.js?v=27"></script>
-  <script src="assets/game/lobby-room.js?v=27"></script>
-  <script src="assets/game/character-traits.js?v=27"></script>
-  <script src="assets/game/game-play.js?v=27"></script>
+  <script src="assets/game/online-room.js?v=28"></script>
+  <script src="assets/game/lobby-room.js?v=28"></script>
+  <script src="assets/game/character-traits.js?v=28"></script>
+  <script src="assets/game/game-play.js?v=28"></script>
 
   <script>
     const I18N = {

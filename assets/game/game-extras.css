@@ -185,16 +185,81 @@
   40% { transform: scale(1.06); }
 }
 
-/* Compacte vraagbalk — blokkeert nooit het bord (alleen knoppen/velden klikbaar) */
+/* Vraag-popup — animatie, boven het bord */
 .question-bar {
   position: fixed;
   left: 50%;
-  top: calc(env(safe-area-inset-top, 0px) + 96px);
-  transform: translateX(-50%);
-  z-index: 45;
-  width: min(92vw, 480px);
+  top: calc(env(safe-area-inset-top, 0px) + 58px);
+  z-index: 55;
+  width: min(94vw, 520px);
   box-sizing: border-box;
   pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(-50%) translateY(-18px) scale(0.9);
+  transition:
+    opacity 0.32s ease,
+    transform 0.42s cubic-bezier(0.34, 1.35, 0.64, 1),
+    visibility 0.32s;
+}
+
+.question-bar:not(.hidden) {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0) scale(1);
+}
+
+.question-bar.is-popping:not(.hidden) {
+  animation: questionPopIn 0.48s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+
+@keyframes questionPopIn {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-22px) scale(0.86);
+  }
+  55% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(4px) scale(1.03);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+}
+
+.question-bar-card {
+  background: linear-gradient(
+    165deg,
+    rgba(15, 23, 42, 0.94) 0%,
+    rgba(30, 41, 59, 0.9) 55%,
+    rgba(15, 23, 42, 0.92) 100%
+  );
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 2px solid rgba(255, 255, 255, 0.22);
+  border-radius: 20px;
+  padding: 0.95rem 1.1rem 1.05rem;
+  box-shadow:
+    0 22px 55px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.06),
+    0 0 48px rgba(96, 165, 250, 0.2);
+}
+
+.question-bar-hint {
+  display: block;
+  text-align: center;
+  font-size: clamp(0.72rem, 2.2vw, 0.88rem);
+  font-weight: 700;
+  line-height: 1.35;
+  color: rgba(226, 232, 240, 0.92);
+  margin: 0 0 0.65rem;
+  padding-bottom: 0.55rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.question-bar-hint.hidden {
+  display: none;
 }
 
 .question-bar input,
@@ -264,7 +329,10 @@
 }
 
 .question-bar.hidden {
-  display: none;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateX(-50%) translateY(-14px) scale(0.92);
 }
 
 .question-bar-ask {
@@ -361,11 +429,12 @@
 }
 
 .question-bar-label {
-  font-weight: 700;
-  font-size: 0.82rem;
-  color: rgba(255, 255, 255, 0.85);
-  margin-bottom: 0.4rem;
+  font-weight: 800;
+  font-size: clamp(0.82rem, 2.4vw, 0.95rem);
+  color: rgba(255, 255, 255, 0.95);
+  margin-bottom: 0.55rem;
   text-align: center;
+  letter-spacing: 0.02em;
 }
 
 .question-input-row {
