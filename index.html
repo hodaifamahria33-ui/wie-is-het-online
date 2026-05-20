@@ -17,11 +17,11 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/game/premium-game.css?v=25" />
-  <link rel="stylesheet" href="assets/game/game-play.css?v=25" />
-  <link rel="stylesheet" href="assets/game/game-layout.css?v=25" />
-  <link rel="stylesheet" href="assets/game/game-extras.css?v=25" />
-  <link rel="stylesheet" href="assets/game/character-variety.css?v=25" />
+  <link rel="stylesheet" href="assets/game/premium-game.css?v=26" />
+  <link rel="stylesheet" href="assets/game/game-play.css?v=26" />
+  <link rel="stylesheet" href="assets/game/game-layout.css?v=26" />
+  <link rel="stylesheet" href="assets/game/game-extras.css?v=26" />
+  <link rel="stylesheet" href="assets/game/character-variety.css?v=26" />
   <meta name="description" content="wiehasit.com — gratis online Wie-is-het spel. Maak een potje, deel de code, raad het personage met vrienden of tegen de bot." />
   <meta name="keywords" content="wiehasit.com, wie has it, wie is het online, raadspel, gratis spel" />
   <meta property="og:type" content="website" />
@@ -1366,8 +1366,8 @@
     .game-table {
       position: absolute;
       inset: 0;
-      overflow: visible;
-      --game-board-width: min(96vw, calc((100vh - 100px) / 2.35), 680px);
+      overflow: hidden;
+      --game-board-width: min(99vw, min(calc(96vh * 2.1), 960px));
     }
 
     .game-countdown:not(.hidden) {
@@ -2215,10 +2215,10 @@
   </main>
 
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
-  <script src="assets/game/online-room.js?v=25"></script>
-  <script src="assets/game/lobby-room.js?v=25"></script>
-  <script src="assets/game/character-traits.js?v=25"></script>
-  <script src="assets/game/game-play.js?v=25"></script>
+  <script src="assets/game/online-room.js?v=26"></script>
+  <script src="assets/game/lobby-room.js?v=26"></script>
+  <script src="assets/game/character-traits.js?v=26"></script>
+  <script src="assets/game/game-play.js?v=26"></script>
 
   <script>
     const I18N = {
@@ -2614,21 +2614,6 @@
       });
     }
 
-    function fitGameBoardToViewport() {
-      const stack = document.querySelector("#game-table .board-stack");
-      const scene = document.querySelector("#game-table .game-scene");
-      if (!stack || !scene || !gameTable || gameTable.classList.contains("hidden")) return;
-      stack.style.transform = "";
-      const pad = 76;
-      const maxH = Math.max(160, scene.clientHeight - pad);
-      const maxW = Math.max(160, scene.clientWidth - pad);
-      const h = stack.offsetHeight || stack.scrollHeight;
-      const w = stack.offsetWidth || stack.scrollWidth;
-      if (!h || !w) return;
-      const scale = Math.min(1, maxW / w, maxH / h);
-      if (scale < 0.99) stack.style.transform = "scale(" + scale + ")";
-    }
-
     function finishCountdownStartPlay() {
       countdownTimeout = null;
       if (gameCountdown) {
@@ -2656,8 +2641,8 @@
           if (screenGame) screenGame.classList.add("phase-pick-secret", "turn-player");
         }
       }
-      requestAnimationFrame(fitGameBoardToViewport);
-      setTimeout(fitGameBoardToViewport, 150);
+      const stack = document.querySelector("#game-table .board-stack");
+      if (stack) stack.style.transform = "";
       applyLanguage();
     }
 
@@ -2833,10 +2818,6 @@
 
     window.wieRunCountdown = runCountdownThenTable;
     window.wieBuildBoards = buildGameBoards;
-
-    window.addEventListener("resize", () => {
-      fitGameBoardToViewport();
-    });
 
     function resetGameScreen() {
       clearCountdown();

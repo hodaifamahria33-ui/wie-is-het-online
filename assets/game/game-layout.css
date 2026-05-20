@@ -1,32 +1,25 @@
 /**
- * Bord gecentreerd in beeld, zo groot mogelijk.
+ * Bord groot en breed in beeld (klassieke layout).
  */
 #game-table {
-  --game-board-width: min(96vw, calc((100vh - 100px) / 2.35), 680px);
+  --game-board-width: min(99vw, min(calc(96vh * 2.1), 960px));
   --board-tilt: 8deg;
 }
 
 #game-table .game-scene {
   position: absolute;
   inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  place-items: center;
   padding:
     calc(env(safe-area-inset-top, 0px) + 54px)
-    8px
-    12px;
+    6px
+    6px;
   box-sizing: border-box;
   perspective: 1100px;
   perspective-origin: 50% 50%;
   transform: none !important;
-  overflow: visible;
-}
-
-.screen-game-view.game-session-active #game-table:not(.hidden) .board-stack,
-.screen-game-view.game-session-active #game-table:not(.hidden) .board-stand--front {
-  opacity: 1 !important;
-  visibility: visible !important;
+  overflow: hidden;
 }
 
 #game-table .opponent-zone {
@@ -76,8 +69,7 @@
   max-width: var(--game-board-width);
   transform-style: preserve-3d;
   margin: 0 auto;
-  flex-shrink: 0;
-  transform-origin: center center;
+  transform: none !important;
 }
 
 #game-table .board-stand--rear {
@@ -143,8 +135,8 @@
 #game-table .player-play-area {
   position: relative;
   z-index: 5;
-  width: var(--game-board-width);
-  max-width: var(--game-board-width);
+  width: auto;
+  max-width: min(99vw, calc(var(--game-board-width) + 280px));
   margin: 0 auto;
   display: block;
   pointer-events: auto;
@@ -152,11 +144,11 @@
 
 #game-table .secret-card-slot {
   position: absolute;
-  left: calc(100% + clamp(10px, 2vw, 20px));
+  left: calc(100% + clamp(12px, 2vw, 22px));
   top: 50%;
   margin: 0;
-  width: clamp(88px, 13vw, 130px);
-  transform: translateY(-50%) translateX(12px) scale(0.9);
+  width: clamp(96px, 14vw, 140px);
+  transform: translateY(-50%) translateX(8px) scale(0.92);
 }
 
 #game-table .secret-card-slot.visible {
@@ -194,20 +186,15 @@
   }
 }
 
-@media (max-width: 900px) {
+@media (max-width: 720px) {
   #game-table .secret-card-slot {
+    right: auto;
     left: 50%;
-    top: calc(100% + 12px);
-    transform: translateX(-50%) translateY(0) scale(0.9);
+    top: calc(100% + 10px);
+    transform: translateX(-50%) scale(0.92);
   }
 
   #game-table .secret-card-slot.visible {
-    transform: translateX(-50%) translateY(0) scale(1);
-  }
-}
-
-@media (max-width: 480px) {
-  #game-table {
-    --game-board-width: min(99vw, 100%);
+    transform: translateX(-50%) scale(1);
   }
 }

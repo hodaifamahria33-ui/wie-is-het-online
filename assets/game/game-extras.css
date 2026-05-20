@@ -1,35 +1,47 @@
 /* Schatkist, vragen, win-overlay */
 
+/* Rij: schatkist (raden) links — groot bord midden — geheim kaartje links van bord */
 #game-table .player-play-area {
   display: flex !important;
-  align-items: center;
-  justify-content: center;
-  gap: clamp(10px, 2.5vw, 22px);
-  width: var(--game-board-width) !important;
-  max-width: 96vw !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: flex-end !important;
+  justify-content: center !important;
+  gap: clamp(12px, 2.2vw, 28px) !important;
+  width: auto !important;
+  max-width: min(99vw, calc(var(--game-board-width) + 300px)) !important;
   margin: 0 auto;
-  flex-wrap: wrap;
 }
 
-@media (max-width: 900px) {
-  #game-table .player-play-area {
-    flex-direction: column !important;
-    align-items: center !important;
-  }
+#game-table .opponent-chest {
+  order: 1;
+  flex-shrink: 0;
+  align-self: center;
 }
 
-#game-table .board-stack {
+#game-table .board-stand--front {
+  order: 2;
   flex: 0 0 auto;
+  width: var(--game-board-width) !important;
+  max-width: var(--game-board-width) !important;
 }
 
 #game-table .secret-card-slot {
-  position: static !important;
-  transform: none !important;
+  order: 3;
+  position: absolute !important;
+  left: calc(100% + clamp(10px, 2vw, 20px)) !important;
+  right: auto !important;
+  top: 50% !important;
   flex-shrink: 0;
 }
 
 #game-table .secret-card-slot.visible {
-  transform: scale(1) !important;
+  transform: translateY(-50%) translateX(0) scale(1) !important;
+}
+
+#game-table .board-stack {
+  flex: 0 0 auto;
+  transform: none !important;
 }
 
 .opponent-chest {
