@@ -192,6 +192,10 @@
       sendChat(text);
     },
 
+    refresh() {
+      refreshAllPlayers();
+    },
+
     reset() {
       guestName = null;
       guestOnline = false;

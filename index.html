@@ -76,13 +76,116 @@
       var l = localStorage.getItem("wieIsHetLang");
       return l === "en" ? "en" : "nl";
     };
+    window.WIE_HEAD_I18N = {
+      nl: {
+        errHostEmpty: "Kies een code (max 5 tekens)",
+        errJoinEmpty: "Vul een potcode in",
+        lobbyChatHint: "Praat even — daarna start de host het spel.",
+        lobbyYou: "jij",
+        lobbyFriend: "Vriend",
+        lobbyJoined: "Joined",
+        lobbyWaitingFriend: "Wacht op vriend…",
+        lobbyChatPlaceholder: "Typ een bericht…",
+        btnCopyCode: "KOPIEER LINK",
+        btnCopyDone: "✓ Link gekopieerd!",
+        btnShareWa: "DEEL VIA WHATSAPP",
+        btnStartGame: "START GAME",
+        btnBack: "TERUG"
+      },
+      en: {
+        errHostEmpty: "Pick a code (max 5 characters)",
+        errJoinEmpty: "Enter a game code",
+        lobbyChatHint: "Chat briefly — then the host starts the game.",
+        lobbyYou: "you",
+        lobbyFriend: "Friend",
+        lobbyJoined: "Joined",
+        lobbyWaitingFriend: "Waiting for friend…",
+        lobbyChatPlaceholder: "Type a message…",
+        btnCopyCode: "COPY LINK",
+        btnCopyDone: "✓ Link copied!",
+        btnShareWa: "SHARE ON WHATSAPP",
+        btnStartGame: "START GAME",
+        btnBack: "BACK"
+      }
+    };
     window.wieMsg = function (key) {
-      var t = {
-        nl: { errHostEmpty: "Kies een code (max 5 tekens)", errJoinEmpty: "Vul een potcode in" },
-        en: { errHostEmpty: "Pick a code (max 5 characters)", errJoinEmpty: "Enter a game code" }
-      };
+      if (window.wieT) return window.wieT(key);
       var lang = window.wieLang();
-      return (t[lang] && t[lang][key]) || t.nl[key] || key;
+      var pack = window.WIE_HEAD_I18N[lang] || window.WIE_HEAD_I18N.nl;
+      return (pack && pack[key]) || window.WIE_HEAD_I18N.nl[key] || key;
+    };
+    window.wieBuildJoinUrl = function (code) {
+      var c = String(code || "")
+        .toUpperCase()
+        .replace(/[^A-Z0-9]/g, "")
+        .slice(0, 5);
+      if (!c) return "";
+      var base = window.location.href.split("?")[0].split("#")[0];
+      return base + "?join=" + encodeURIComponent(c);
+    };
+    window.wieCopyLink = function () {
+      if (window.wieApp && window.wieApp.copyLink) return window.wieApp.copyLink();
+      var el = document.getElementById("lobby-code");
+      var btn = document.getElementById("btn-copy-code");
+      var c = el ? el.textContent.replace(/\s/g, "").trim() : "";
+      if (!c || c === "-----") return;
+      var url = window.wieBuildJoinUrl(c);
+      if (!url) return;
+      var done = window.wieMsg("btnCopyDone");
+      function showOk() {
+        if (btn) {
+          btn.classList.add("copied");
+          btn.textContent = done;
+          setTimeout(function () {
+            btn.classList.remove("copied");
+            btn.textContent = window.wieMsg("btnCopyCode");
+          }, 2200);
+        }
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url).then(showOk).catch(function () {
+          var ta = document.createElement("textarea");
+          ta.value = url;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand("copy");
+          document.body.removeChild(ta);
+          showOk();
+        });
+      } else {
+        var ta = document.createElement("textarea");
+        ta.value = url;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        showOk();
+      }
+    };
+    window.wieShareWa = function () {
+      if (window.wieApp && window.wieApp.shareWa) return window.wieApp.shareWa();
+      var el = document.getElementById("lobby-code");
+      var c = el ? el.textContent.replace(/\s/g, "").trim() : "";
+      var url = window.wieBuildJoinUrl(c);
+      if (!url) return;
+      var text =
+        window.wieLang() === "en"
+          ? "Play Who Is It with me! Tap to join:\n" + url
+          : "Speel Wie Is Het met me! Tik om mee te doen:\n" + url;
+      window.open("https://wa.me/?text=" + encodeURIComponent(text), "_blank", "noopener");
+    };
+    window.wieStartGame = function () {
+      if (window.wieApp && window.wieApp.startGame) return window.wieApp.startGame();
+      var el = document.getElementById("lobby-code");
+      var c = el ? el.textContent.replace(/\s/g, "").trim() : "";
+      if (!c || c === "-----") return;
+      if (window.WieIsHetOnline && window.WieIsHetOnline.broadcastGameStart) {
+        window.WieIsHetOnline.broadcastGameStart();
+      }
+      window.wieShowOnly("screen-game");
+      setTimeout(function () {
+        if (window.wieApp && window.wieApp.startGameSession) window.wieApp.startGameSession();
+      }, 350);
     };
     window.wieGoHost = function () {
       if (window.wieApp && window.wieApp.goHost) return window.wieApp.goHost();
@@ -146,7 +249,7 @@
     window.wieInitLobby = function (role) {
       if (!window.WieLobby) return;
       window.WieLobby.init({
-        t: window.wieMsg,
+        t: window.wieT || window.wieMsg,
         role: role || "host",
         playersHost: document.getElementById("lobby-players"),
         playersGuest: document.getElementById("joined-players"),
@@ -832,8 +935,9 @@
       font-size: clamp(2.5rem, 8vw, 4rem);
       font-weight: 800;
       color: #8b5cf6;
-      letter-spacing: 0.25em;
+      letter-spacing: 0.08em;
       margin: 0.5rem 0 1rem;
+      font-variant-numeric: tabular-nums;
     }
 
     .screen-loading-photos {
@@ -1982,9 +2086,9 @@
           <h2 data-i18n-html="lobbyTitle">Je potje is<span class="accent">klaar!</span></h2>
           <p id="lobby-code" class="pot-code">-----</p>
           <p class="hint" data-i18n="lobbyHint">Stuur deze link naar je vrienden — zij joinen automatisch</p>
-          <button id="btn-copy-code" class="btn btn-copy-code" type="button" data-i18n="btnCopyCode">KOPIEER LINK</button>
-          <button id="btn-share-wa" class="btn secondary" type="button" data-i18n="btnShareWa">DEEL VIA WHATSAPP</button>
-          <button id="btn-start-game" class="btn btn-start-game" type="button" data-i18n="btnStartGame">START GAME</button>
+          <button id="btn-copy-code" class="btn btn-copy-code" type="button" data-i18n="btnCopyCode" onclick="window.wieCopyLink()">KOPIEER LINK</button>
+          <button id="btn-share-wa" class="btn secondary" type="button" data-i18n="btnShareWa" onclick="window.wieShareWa()">DEEL VIA WHATSAPP</button>
+          <button id="btn-start-game" class="btn btn-start-game" type="button" data-i18n="btnStartGame" onclick="window.wieStartGame()">START GAME</button>
           <button id="btn-lobby-back" class="btn back" type="button" data-i18n="btnBack" onclick="window.wieShowScreen('screen-lobby','screen-menu')">TERUG</button>
         </section>
       </div>
@@ -2110,7 +2214,7 @@
 
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
   <script src="assets/game/online-room.js?v=20"></script>
-  <script src="assets/game/lobby-room.js?v=20"></script>
+  <script src="assets/game/lobby-room.js?v=21"></script>
   <script src="assets/game/character-traits.js?v=19"></script>
   <script src="assets/game/game-play.js?v=19"></script>
 
@@ -2301,6 +2405,9 @@
       return (I18N[lang] && I18N[lang][key]) || I18N.nl[key] || key;
     }
 
+    window.wieT = t;
+    window.wieMainT = t;
+
     function applyLanguage() {
       document.documentElement.lang = lang === "en" ? "en" : "nl";
       const copyBtn = document.getElementById("btn-copy-code");
@@ -2324,11 +2431,15 @@
       document.querySelectorAll("[data-i18n-aria]").forEach((el) => {
         el.setAttribute("aria-label", t(el.dataset.i18nAria));
       });
+      if (window.WieLobby && typeof window.WieLobby.refresh === "function") {
+        window.WieLobby.refresh();
+      }
     }
 
     function setLanguage(next) {
       lang = next;
       localStorage.setItem("wieIsHetLang", next);
+      window.wieT = t;
       applyLanguage();
       document.getElementById("lang-menu").classList.add("hidden");
       document.getElementById("btn-lang").setAttribute("aria-expanded", "false");
@@ -2583,7 +2694,7 @@
       if (!window.WieLobby) return;
       window.wieInitLobby = initLobbySocial;
       WieLobby.init({
-        t,
+        t: window.wieT || t,
         role,
         playersHost: document.getElementById("lobby-players"),
         playersGuest: document.getElementById("joined-players"),
@@ -2600,6 +2711,7 @@
       if (onlineGameUnsub) onlineGameUnsub();
       initLobbySocial("host");
       WieLobby.onOpenAsHost();
+      applyLanguage();
       if (!window.WieIsHetOnline) return;
       onlineGameUnsub = WieIsHetOnline.onMessage((msg) => {
         if (window.WieLobby && WieLobby.handleMessage(msg)) return;
@@ -2619,6 +2731,7 @@
       if (onlineGameUnsub) onlineGameUnsub();
       initLobbySocial("guest");
       WieLobby.onOpenAsGuest();
+      applyLanguage();
       if (!window.WieIsHetOnline) return;
       onlineGameUnsub = WieIsHetOnline.onMessage((msg) => {
         if (window.WieLobby && WieLobby.handleMessage(msg)) return;
@@ -2883,7 +2996,10 @@
     }
 
     function transition(from, to, enterClass) {
-      if (busy) return;
+      if (!from || !to) return;
+      if (busy) {
+        busy = false;
+      }
       busy = true;
 
       to.classList.remove("hidden");
@@ -2951,29 +3067,9 @@
       transition(screenLobby, screenMenu, "transition-in-from-left");
     });
 
-    onClick("btn-copy-code", () => {
-      copyJoinLink(lobbyCode.textContent.trim(), document.getElementById("btn-copy-code"));
-    });
-
-    onClick("btn-share-wa", () => {
-      const url = buildJoinUrl(lobbyCode.textContent.trim());
-      if (!url) return;
-      const text =
-        lang === "en"
-          ? "Play Who Is It with me! Tap to join:\n" + url
-          : "Speel Wie Is Het met me! Tik om mee te doen:\n" + url;
-      window.open("https://wa.me/?text=" + encodeURIComponent(text), "_blank", "noopener");
-    });
-
-    onClick("btn-start-game", () => {
-      const c = lobbyCode.textContent.trim();
-      if (!c || c === "-----") return;
-      if (window.WieIsHetOnline && sessionMode === "host") {
-        WieIsHetOnline.broadcastGameStart();
-      }
-      transition(screenLobby, screenGame, "transition-in-from-right");
-      setTimeout(startGameSession, TRANSITION_MS + 50);
-    });
+    onClick("btn-copy-code", doCopyLink);
+    onClick("btn-share-wa", doShareWa);
+    onClick("btn-start-game", doStartGame);
 
     onClick("btn-give-up", () => {
       resetGameScreen();
@@ -3029,9 +3125,12 @@
         screenPhotoLoad.classList.remove("active");
         setTimeout(() => {
           screenPhotoLoad.classList.add("hidden");
-          lobbyCode.textContent = code.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 5);
+          const pot = code.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 5);
+          lobbyCode.textContent = pot;
           sessionMode = "host";
-          sessionCode = lobbyCode.textContent;
+          sessionCode = pot;
+          busy = false;
+          applyLanguage();
           if (window.WieIsHetOnline) {
             WieIsHetOnline.setupHost(sessionCode)
               .then(() => wireHostLobby())
@@ -3072,13 +3171,42 @@
 
     onClick("btn-join-game", doJoinWithCode);
 
+    function doStartGame() {
+      const c = (lobbyCode ? lobbyCode.textContent : "").replace(/\s/g, "").trim();
+      if (!c || c === "-----") return;
+      busy = false;
+      if (window.WieIsHetOnline && sessionMode === "host") {
+        WieIsHetOnline.broadcastGameStart();
+      }
+      transition(screenLobby, screenGame, "transition-in-from-right");
+      setTimeout(startGameSession, TRANSITION_MS + 50);
+    }
+
+    function doCopyLink() {
+      const c = (lobbyCode ? lobbyCode.textContent : "").replace(/\s/g, "").trim();
+      copyJoinLink(c, document.getElementById("btn-copy-code"));
+    }
+
+    function doShareWa() {
+      const c = (lobbyCode ? lobbyCode.textContent : "").replace(/\s/g, "").trim();
+      const url = buildJoinUrl(c);
+      if (!url) return;
+      const text =
+        lang === "en"
+          ? "Play Who Is It with me! Tap to join:\n" + url
+          : "Speel Wie Is Het met me! Tik om mee te doen:\n" + url;
+      window.open("https://wa.me/?text=" + encodeURIComponent(text), "_blank", "noopener");
+    }
+
     window.wieApp = {
       goHost() {
         if (hostError) hostError.textContent = "";
+        busy = false;
         transition(screenMenu, screenHost, "transition-in-from-right");
       },
       goJoin() {
         if (joinError) joinError.textContent = "";
+        busy = false;
         transition(screenMenu, screenJoin, "transition-in-from-right");
       },
       makePot: doMakePot,
@@ -3086,6 +3214,9 @@
       startBotGame,
       startSoloGame,
       startGameSession,
+      startGame: doStartGame,
+      copyLink: doCopyLink,
+      shareWa: doShareWa,
     };
   </script>
 </body>
