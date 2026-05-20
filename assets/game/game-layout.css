@@ -2,11 +2,8 @@
  * Bord groot en breed in beeld (klassieke layout).
  */
 #game-table {
-  --game-board-width: min(
-    99vw,
-    min(calc((100vh - 128px) / 2.15), 920px),
-    960px
-  );
+  --game-board-width: min(99vw, min(calc(96vh * 2.1), 960px));
+  --game-strip-width: min(99vw, calc(var(--game-board-width) + 220px));
   --board-tilt: 8deg;
 }
 
@@ -27,12 +24,17 @@
   overflow: hidden;
 }
 
-/* Vraag-popup boven — bord iets hoger, onderkant vrij voor alle kaarten */
+/* Ruimte voor banner / vraag-popup — bord blijft groot */
+.screen-game-view.phase-pick-secret #game-table .game-scene {
+  padding-top: calc(env(safe-area-inset-top, 0px) + 96px);
+  padding-bottom: max(20px, env(safe-area-inset-bottom, 16px));
+}
+
 .screen-game-view.turn-player #game-table .game-scene,
 .screen-game-view.phase-question #game-table .game-scene,
 .screen-game-view.phase-post-switch #game-table .game-scene {
-  padding-top: calc(env(safe-area-inset-top, 0px) + 118px);
-  padding-bottom: max(24px, env(safe-area-inset-bottom, 18px));
+  padding-top: calc(env(safe-area-inset-top, 0px) + 112px);
+  padding-bottom: max(22px, env(safe-area-inset-bottom, 16px));
 }
 
 #game-table .opponent-zone {
@@ -83,8 +85,9 @@
 
 #game-table .board-stack {
   position: relative;
-  width: var(--game-board-width);
-  max-width: var(--game-board-width);
+  width: var(--game-strip-width);
+  max-width: 99vw;
+  min-width: var(--game-board-width);
   transform-style: preserve-3d;
   margin: 0 auto;
   transform: none !important;
@@ -106,7 +109,10 @@
 #game-table .board-stand--front {
   position: relative;
   z-index: 4;
-  width: 100%;
+  width: var(--game-board-width);
+  max-width: var(--game-board-width);
+  min-width: var(--game-board-width);
+  flex: 0 0 auto;
   pointer-events: auto;
   transform: perspective(900px) rotateX(calc(var(--board-tilt) * -1));
   transform-origin: center center;
@@ -153,8 +159,8 @@
 #game-table .player-play-area {
   position: relative;
   z-index: 5;
-  width: auto;
-  max-width: min(99vw, calc(var(--game-board-width) + 200px));
+  width: 100%;
+  max-width: 100%;
   margin: 0 auto;
   display: block;
   pointer-events: auto;

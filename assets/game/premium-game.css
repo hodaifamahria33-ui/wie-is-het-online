@@ -51,7 +51,7 @@
 
 .game-table {
   z-index: 3;
-  --game-board-width: min(96vw, 560px);
+  --game-board-width: min(99vw, min(calc(96vh * 2.1), 960px));
 }
 
 .game-scene {
