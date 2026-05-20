@@ -8,7 +8,6 @@
   align-items: flex-end !important;
   justify-content: center !important;
   gap: clamp(12px, 2.2vw, 28px) !important;
-  width: auto !important;
   width: 100% !important;
   max-width: 100% !important;
   padding-right: 0 !important;
