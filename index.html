@@ -17,11 +17,11 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/game/premium-game.css?v=24" />
-  <link rel="stylesheet" href="assets/game/game-play.css?v=24" />
-  <link rel="stylesheet" href="assets/game/game-layout.css?v=24" />
-  <link rel="stylesheet" href="assets/game/game-extras.css?v=24" />
-  <link rel="stylesheet" href="assets/game/character-variety.css?v=24" />
+  <link rel="stylesheet" href="assets/game/premium-game.css?v=25" />
+  <link rel="stylesheet" href="assets/game/game-play.css?v=25" />
+  <link rel="stylesheet" href="assets/game/game-layout.css?v=25" />
+  <link rel="stylesheet" href="assets/game/game-extras.css?v=25" />
+  <link rel="stylesheet" href="assets/game/character-variety.css?v=25" />
   <meta name="description" content="wiehasit.com — gratis online Wie-is-het spel. Maak een potje, deel de code, raad het personage met vrienden of tegen de bot." />
   <meta name="keywords" content="wiehasit.com, wie has it, wie is het online, raadspel, gratis spel" />
   <meta property="og:type" content="website" />
@@ -2215,10 +2215,10 @@
   </main>
 
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
-  <script src="assets/game/online-room.js?v=24"></script>
-  <script src="assets/game/lobby-room.js?v=24"></script>
-  <script src="assets/game/character-traits.js?v=24"></script>
-  <script src="assets/game/game-play.js?v=24"></script>
+  <script src="assets/game/online-room.js?v=25"></script>
+  <script src="assets/game/lobby-room.js?v=25"></script>
+  <script src="assets/game/character-traits.js?v=25"></script>
+  <script src="assets/game/game-play.js?v=25"></script>
 
   <script>
     const I18N = {
@@ -2315,10 +2315,10 @@
         startOnlineBadge: "ONLINE",
         startTagline: "Guess the character · Play online",
         btnBegin: "LET'S BEGIN",
-        modeTitle: 'Choose your<span class="accent">game mode</span>',
+        modeTitle: 'Choose your <span class="accent">game mode</span>',
         btnPlayOnline: "Play online",
         btnPlayBot: "Play against bot",
-        botDiffTitle: 'Choose<span class="accent">difficulty</span>',
+        botDiffTitle: 'Choose <span class="accent">difficulty</span>',
         btnEasy: "Easy",
         btnMedium: "Medium",
         btnHard: "Hard",
@@ -2413,12 +2413,14 @@
     function applyLanguage() {
       document.documentElement.lang = lang === "en" ? "en" : "nl";
       const copyBtn = document.getElementById("btn-copy-code");
+      document.querySelectorAll("[data-i18n-html]").forEach((el) => {
+        const key = el.dataset.i18nHtml;
+        if (key) el.innerHTML = t(key);
+      });
       document.querySelectorAll("[data-i18n]").forEach((el) => {
+        if (el.dataset.i18nHtml) return;
         if (copyBtn && el === copyBtn && copyBtn.classList.contains("copied")) return;
         el.textContent = t(el.dataset.i18n);
-      });
-      document.querySelectorAll("[data-i18n-html]").forEach((el) => {
-        el.innerHTML = t(el.dataset.i18nHtml);
       });
       const qInput = document.getElementById("question-input");
       if (qInput) qInput.placeholder = t("questionPlaceholder");
@@ -2504,8 +2506,6 @@
     const joinError = document.getElementById("join-error");
     const lobbyCode = document.getElementById("lobby-code");
     const joinedCode = document.getElementById("joined-code");
-
-    ensureStartScreenVisible();
 
     const TRANSITION_MS = 300;
     const PHOTO_LOAD_MS = 1200;
@@ -2768,7 +2768,7 @@
     function wireHostLobby() {
       if (onlineGameUnsub) onlineGameUnsub();
       initLobbySocial("host");
-      WieLobby.onOpenAsHost();
+      if (window.WieLobby && WieLobby.onOpenAsHost) WieLobby.onOpenAsHost();
       applyLanguage();
       if (!window.WieIsHetOnline) return;
       onlineGameUnsub = WieIsHetOnline.onMessage((msg) => {
@@ -2785,7 +2785,7 @@
     function wireGuestOnline() {
       if (onlineGameUnsub) onlineGameUnsub();
       initLobbySocial("guest");
-      WieLobby.onOpenAsGuest();
+      if (window.WieLobby && WieLobby.onOpenAsGuest) WieLobby.onOpenAsGuest();
       applyLanguage();
       if (!window.WieIsHetOnline) return;
       onlineGameUnsub = WieIsHetOnline.onMessage((msg) => {
