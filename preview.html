@@ -2435,20 +2435,21 @@
       });
     });
 
+    const publicPlayUrl = buildSharePlayUrl();
+    const startPublicUrlEl = document.getElementById("start-public-url");
+    if (startPublicUrlEl) startPublicUrlEl.textContent = publicPlayUrl;
+
     const urlParams = new URLSearchParams(window.location.search);
     const linkCode = urlParams.get("join");
-    const autoSolo = urlParams.get("speel") === "1" || urlParams.get("play") === "1";
 
     if (linkCode) {
       joinViaLink(linkCode);
-    } else if (autoSolo) {
-      startSoloGame("medium");
     }
 
     const btnSharePlay = document.getElementById("btn-share-play");
     if (btnSharePlay) {
       btnSharePlay.addEventListener("click", () => {
-        copyText(buildSharePlayUrl(), btnSharePlay);
+        copyText(publicPlayUrl, btnSharePlay);
       });
     }
 

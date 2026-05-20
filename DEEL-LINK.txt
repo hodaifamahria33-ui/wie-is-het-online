@@ -6,9 +6,10 @@ DEZE LINK DEELEN MET IEDEREEN:
   https://hodaifamahria33-ui.github.io/wie-is-het-online/
 
 Wat gebeurt er?
-  • Vriend opent de link → spel start meteen (tegen de bot)
+  • Vriend opent de link → ziet het beginscherm
+  • Tik op LATEN WE BEGINNEN → kiest spelmodus → speelt
   • Werkt 24/7, ook als jij uit bent of slaapt
-  • Geen host, geen potcode, geen wachten op jou
+  • Geen host nodig om mee te doen
 
 Op je telefoon (beginscherm in het spel):
   • KOPIEER PUBLIEKE LINK → plak in WhatsApp / Snapchat / etc.

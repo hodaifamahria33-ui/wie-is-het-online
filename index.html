@@ -2503,12 +2503,9 @@
 
     const urlParams = new URLSearchParams(window.location.search);
     const linkCode = urlParams.get("join");
-    const showMenu = urlParams.get("menu") === "1";
 
     if (linkCode) {
       joinViaLink(linkCode);
-    } else if (!showMenu) {
-      startSoloGame("medium");
     }
 
     const btnSharePlay = document.getElementById("btn-share-play");
