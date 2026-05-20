@@ -5,7 +5,6 @@
   --game-board-width: min(99vw, min(calc(96vh * 2.1), 960px));
   --game-strip-width: min(99vw, calc(var(--game-board-width) + 220px));
   --board-tilt: 8deg;
-  --secret-card-offset-x: 88px;
 }
 
 #game-table .game-scene {
@@ -164,25 +163,25 @@
   box-sizing: border-box;
 }
 
-/* Geheime kaart helemaal rechts op scherm + houder eronder */
+/* Geheime kaart los van 3D-bord — vast tegen rechter schermrand */
 #game-table .secret-card-slot {
   position: fixed !important;
   left: auto !important;
-  right: max(0px, env(safe-area-inset-right, 0px)) !important;
-  top: 52% !important;
+  right: clamp(6px, 1.2vw, 18px) !important;
+  top: 50% !important;
   margin: 0;
-  width: clamp(102px, 11.5vw, 142px);
+  width: clamp(96px, 10vw, 132px);
   padding-bottom: 20px;
   box-sizing: content-box;
-  z-index: 28;
-  transform: translateY(-54%) translateX(var(--secret-card-offset-x, 88px)) scale(0.94);
+  z-index: 32;
+  transform: translateY(-50%) scale(0.94);
   opacity: 0;
   pointer-events: none;
 }
 
 #game-table .secret-card-slot.visible {
   opacity: 1;
-  transform: translateY(-54%) translateX(var(--secret-card-offset-x, 88px)) scale(1);
+  transform: translateY(-50%) scale(1);
   pointer-events: none;
 }
 
