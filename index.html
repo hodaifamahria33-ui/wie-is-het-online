@@ -17,12 +17,13 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/game/premium-game.css?v=39" />
-  <link rel="stylesheet" href="assets/game/game-play.css?v=39" />
-  <link rel="stylesheet" href="assets/game/game-extras.css?v=39" />
-  <link rel="stylesheet" href="assets/game/game-drawers.css?v=39" />
-  <link rel="stylesheet" href="assets/game/game-layout.css?v=39" />
-  <link rel="stylesheet" href="assets/game/character-variety.css?v=39" />
+  <link rel="stylesheet" href="assets/game/premium-game.css?v=40" />
+  <link rel="stylesheet" href="assets/game/game-play.css?v=40" />
+  <link rel="stylesheet" href="assets/game/game-extras.css?v=40" />
+  <link rel="stylesheet" href="assets/game/game-drawers.css?v=40" />
+  <link rel="stylesheet" href="assets/game/game-hud.css?v=40" />
+  <link rel="stylesheet" href="assets/game/game-layout.css?v=40" />
+  <link rel="stylesheet" href="assets/game/character-variety.css?v=40" />
   <meta name="description" content="wiehasit.com — gratis online Wie-is-het spel. Maak een potje, deel de code, raad het personage met vrienden of tegen de bot." />
   <meta name="keywords" content="wiehasit.com, wie has it, wie is het online, raadspel, gratis spel" />
   <meta property="og:type" content="website" />
@@ -2183,9 +2184,16 @@
 
     <p id="game-turn-banner" class="game-turn-banner hidden" aria-live="polite"></p>
 
+    <div id="game-turn-badge" class="game-turn-badge hidden" aria-live="polite">
+      <span class="game-turn-badge-dot" aria-hidden="true"></span>
+      <span id="game-turn-badge-text"></span>
+    </div>
+
     <div id="question-drawer" class="question-drawer hidden" aria-live="polite">
       <div class="question-drawer-sheet">
+        <p class="question-drawer-title" data-i18n="turnBadgeYou">Jouw beurt — stel een vraag</p>
         <p class="question-drawer-label" data-i18n="askQuestionShort">Stel je vraag (tegenstander antwoordt):</p>
+        <div id="quick-questions" class="quick-questions" aria-label="Snelle vragen"></div>
         <div class="question-input-row">
           <input type="text" id="question-input" class="question-input" maxlength="100"
             placeholder="Bijv. Is het een jongen?" autocomplete="off" data-i18n-placeholder="questionPlaceholder" />
@@ -2232,10 +2240,10 @@
   </main>
 
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
-  <script src="assets/game/online-room.js?v=39"></script>
-  <script src="assets/game/lobby-room.js?v=39"></script>
-  <script src="assets/game/character-traits.js?v=39"></script>
-  <script src="assets/game/game-play.js?v=39"></script>
+  <script src="assets/game/online-room.js?v=40"></script>
+  <script src="assets/game/lobby-room.js?v=40"></script>
+  <script src="assets/game/character-traits.js?v=40"></script>
+  <script src="assets/game/game-play.js?v=40"></script>
 
   <script>
     const I18N = {
@@ -2292,6 +2300,9 @@
         phasePickSecret: "Kies jouw geheime personage",
         phaseOpponentPick: "Tegenstander kiest…",
         phaseWaitOpponent: "Wachten op tegenstander…",
+        turnBadgeYou: "Jouw beurt",
+        turnBadgeOpponent: "Tegenstander",
+        turnBadgeFlip: "Draai kaarten (10 sec)",
         turnPlayer: "Jouw beurt — kaarten omlaag/omhoog (tik nogmaals), of tik tegenstander om te raden",
         cardTapToFlip: "Tik om kaart omlaag te doen",
         cardTapToRestore: "Tik om kaart weer omhoog te zetten",
@@ -2380,6 +2391,9 @@
         phasePickSecret: "Pick your secret character",
         phaseOpponentPick: "Opponent is choosing…",
         phaseWaitOpponent: "Waiting for opponent…",
+        turnBadgeYou: "Your turn",
+        turnBadgeOpponent: "Opponent",
+        turnBadgeFlip: "Flip cards (10 sec)",
         turnPlayer: "Your turn — flip cards down/up (tap again), or tap opponent to guess",
         cardTapToFlip: "Tap to flip card down",
         cardTapToRestore: "Tap to flip card back up",

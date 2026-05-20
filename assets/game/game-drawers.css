@@ -13,7 +13,6 @@
   bottom: 0;
   z-index: 200;
   display: flex;
-  display: flex;
   justify-content: center;
   padding: 0 12px max(14px, env(safe-area-inset-bottom, 12px));
   pointer-events: none;
@@ -68,6 +67,15 @@
     0 0 40px rgba(96, 165, 250, 0.18);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
+}
+
+.question-drawer-title {
+  margin: 0 0 0.35rem;
+  text-align: center;
+  font-weight: 900;
+  font-size: clamp(0.95rem, 2.8vw, 1.08rem);
+  color: #86efac;
+  letter-spacing: 0.03em;
 }
 
 .question-drawer-label {
@@ -155,7 +163,6 @@
   position: fixed;
   inset: 0;
   z-index: 220;
-  display: flex;
   display: flex;
   align-items: center;
   justify-content: center;

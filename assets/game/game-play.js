@@ -61,6 +61,9 @@
   let questionInput = null;
   let btnSendQuestion = null;
   let answerRevealTimeoutId = null;
+  let turnBadge = null;
+  let turnBadgeText = null;
+  let quickQuestionsEl = null;
   let btnSwitchTurn = null;
   let btnEndFlipPhase = null;
   let postAnswerTimerEl = null;
@@ -90,6 +93,33 @@
     if (turnBanner) turnBanner.classList.add("hidden");
   }
 
+  function setTurnBadge(mode) {
+    if (!turnBadge || !turnBadgeText) {
+      turnBadge = document.getElementById("game-turn-badge");
+      turnBadgeText = document.getElementById("game-turn-badge-text");
+    }
+    if (!turnBadge || !turnBadgeText) return;
+    turnBadge.classList.remove("is-you", "is-opponent", "is-pick", "is-flip");
+    if (!mode || mode === "hidden") {
+      turnBadge.classList.add("hidden");
+      return;
+    }
+    turnBadge.classList.remove("hidden");
+    if (mode === "my") {
+      turnBadge.classList.add("is-you");
+      turnBadgeText.textContent = tFn("turnBadgeYou");
+    } else if (mode === "their") {
+      turnBadge.classList.add("is-opponent");
+      turnBadgeText.textContent = tFn("turnBadgeOpponent");
+    } else if (mode === "pick") {
+      turnBadge.classList.add("is-pick");
+      turnBadgeText.textContent = tFn("phasePickSecret");
+    } else if (mode === "flip") {
+      turnBadge.classList.add("is-flip");
+      turnBadgeText.textContent = tFn("turnBadgeFlip");
+    }
+  }
+
   function setScreenTurn(mode) {
     if (!screenGame) return;
     screenGame.classList.remove(
@@ -99,11 +129,24 @@
       "phase-question",
       "phase-guess"
     );
-    if (mode === "pick") screenGame.classList.add("phase-pick-secret");
-    if (mode === "my") screenGame.classList.add("turn-player");
-    if (mode === "their") screenGame.classList.add("turn-opponent");
-    if (mode === "question") screenGame.classList.add("phase-question");
-    if (mode === "guess") screenGame.classList.add("phase-guess");
+    if (mode === "pick") {
+      screenGame.classList.add("phase-pick-secret");
+      setTurnBadge("pick");
+    } else if (mode === "my") {
+      screenGame.classList.add("turn-player");
+      setTurnBadge("my");
+    } else if (mode === "their") {
+      screenGame.classList.add("turn-opponent");
+      setTurnBadge("their");
+    } else if (mode === "question") {
+      screenGame.classList.add("phase-question");
+      setTurnBadge("their");
+    } else if (mode === "guess") {
+      screenGame.classList.add("phase-guess");
+      setTurnBadge("my");
+    } else {
+      setTurnBadge("hidden");
+    }
   }
 
   function clearInteractivity() {
@@ -436,6 +479,27 @@
     if (!answerDrawerQuestion) answerDrawerQuestion = document.getElementById("answer-drawer-question");
     if (!questionInput) questionInput = document.getElementById("question-input");
     if (!btnSendQuestion) btnSendQuestion = document.getElementById("btn-send-question");
+    if (!quickQuestionsEl) quickQuestionsEl = document.getElementById("quick-questions");
+    if (!turnBadge) turnBadge = document.getElementById("game-turn-badge");
+    if (!turnBadgeText) turnBadgeText = document.getElementById("game-turn-badge-text");
+  }
+
+  function renderQuickQuestions() {
+    if (!quickQuestionsEl) return;
+    quickQuestionsEl.innerHTML = "";
+    AI_QUESTIONS.forEach((q) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "quick-q-btn";
+      btn.textContent = q.text.replace(/^Is het een? /i, "").replace(/^Heeft de naam /i, "").replace(/^Begint de naam met /i, "Letter ");
+      if (btn.textContent.length > 22) btn.textContent = q.text.slice(0, 20) + "…";
+      btn.addEventListener("click", () => {
+        if (state.phase !== PHASE.MY_TURN || state.askedThisTurn) return;
+        if (questionInput) questionInput.value = q.text;
+        submitPlayerQuestion();
+      });
+      quickQuestionsEl.appendChild(btn);
+    });
   }
 
   function showQuestionDrawer() {
@@ -447,6 +511,8 @@
     hideGameActions();
     hideBanner();
     if (screenGame) screenGame.classList.add("show-question-drawer");
+    setTurnBadge("my");
+    renderQuickQuestions();
     questionDrawer.classList.remove("hidden");
     questionDrawer.style.display = "flex";
     triggerDrawerPop(questionDrawer);
@@ -602,9 +668,10 @@
     hideAnswerDrawer();
     hideAnswerReveal();
     hideGameActions();
+    setTurnBadge("flip");
     showFlipPhaseBar();
     enableMyFlips();
-    setBanner(tFn("flipRushPrompt"));
+    hideBanner();
     runCountdownTimer(
       POST_ANSWER_FLIP_SEC,
       () => {},
@@ -732,6 +799,7 @@
     setScreenTurn("question");
     clearInteractivity();
     hideBanner();
+    setTurnBadge("their");
     showQuestionPanel("answer");
   }
 
@@ -900,7 +968,8 @@
     state.flippedThisTurn = false;
     state.askedThisTurn = false;
     setScreenTurn("my");
-    showQuestionPanel("ask");
+    wireQuestionDrawer();
+    window.setTimeout(() => showQuestionPanel("ask"), 80);
   }
 
   function beginTheirTurn() {
@@ -911,7 +980,7 @@
     state.phase = PHASE.THEIR_TURN;
     state.askedThisTurn = false;
     setScreenTurn("their");
-    setBanner(tFn("turnOpponent"));
+    hideBanner();
     if (opponentZone) opponentZone.classList.add("turn-active");
     if (!state.online) {
       const cfg = getBotConfig();
@@ -1218,8 +1287,7 @@
   }
 
   function wireQuestionDrawer() {
-    questionInput = document.getElementById("question-input");
-    btnSendQuestion = document.getElementById("btn-send-question");
+    resolveDrawerNodes();
     if (btnSendQuestion && btnSendQuestion.dataset.wired !== "1") {
       btnSendQuestion.dataset.wired = "1";
       btnSendQuestion.addEventListener("click", submitPlayerQuestion);
@@ -1251,6 +1319,7 @@
 
   function reset() {
     setPostAnswerBoardMode(false);
+    setTurnBadge("hidden");
     state.phase = PHASE.IDLE;
     state.secretIndex = null;
     state.opponentSecretIndex = null;
