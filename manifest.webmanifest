@@ -1,7 +1,7 @@
 {
-  "name": "Wie Is Het Potje",
-  "short_name": "Potje",
-  "description": "Wie Is Het Potje — gratis online raadspel. Speel met vrienden of tegen de bot.",
+  "name": "wiehasit.com",
+  "short_name": "wiehasit",
+  "description": "wiehasit.com — gratis online Wie-is-het spel. Speel met vrienden of tegen de bot.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

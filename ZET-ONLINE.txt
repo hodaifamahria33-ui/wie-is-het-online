@@ -1,22 +1,15 @@
-═══ Wie Is Het? Online — live link ═══
+═══ wiehasit.com — je spel online ═══
 
-SPEEL OP JE TELEFOON:
+OFFICIËLE NAAM:  wiehasit.com
+
+SPEELLINK (GitHub, werkt nu):
   https://hodaifamahria33-ui.github.io/wie-is-het-online/
 
-Zo vind je het op Google (na indexering, ±1 week):
-  Zoek op: Wie Is Het Potje
+EIGEN DOMEIN (na kopen + DNS):
+  https://wiehasit.com
 
-Of meteen:
-  1. Open Chrome of Safari op je telefoon
-  2. Plak de link hierboven
-  3. Delen → «Zet op beginscherm» → heet: Potje
+Google zoeken:  wiehasit.com
 
-Google sneller? Zie GOOGLE-ZOEKEN.txt
+Op je telefoon: Delen → Zet op beginscherm → heet: wiehasit
 
-Delen met vrienden (WhatsApp):
-  → Host game → DEEL VIA WHATSAPP
-  → Alleen de link + foto gaat mee ✅
-
-Lokaal op je pc:
-  → Dubbelklik: start-online.bat
-  → http://localhost:8765
+Domein instellen: zie WIEHASIT-DOMEIN.txt

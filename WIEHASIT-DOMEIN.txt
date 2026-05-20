@@ -1,0 +1,31 @@
+═══ wiehasit.com koppelen aan je spel ═══
+
+Je site heet nu: wiehasit.com
+GitHub-link werkt nog steeds tot het domein live is.
+
+STAP 1 — Domein kopen (als je het nog niet hebt)
+  → Ga naar: https://www.namecheap.com of https://www.cloudflare.com/products/registrar/
+  → Zoek: wiehasit.com
+  → Koop het domein (±€10–15 per jaar)
+
+STAP 2 — DNS instellen bij je domein-provider
+
+  Optie A — alleen www (makkelijkst):
+    Type: CNAME
+    Name: www
+    Value: hodaifamahria33-ui.github.io
+
+  Optie B — wiehasit.com zonder www (apex):
+    Type: A     Name: @    Value: 185.199.108.153
+    Type: A     Name: @    Value: 185.199.109.153
+    Type: A     Name: @    Value: 185.199.110.153
+    Type: A     Name: @    Value: 185.199.111.153
+    Type: CNAME Name: www  Value: hodaifamahria33-ui.github.io
+
+STAP 3 — Wachten (5 min – 48 uur)
+  → Daarna werkt: https://wiehasit.com
+
+STAP 4 — Google
+  → Zoek op: wiehasit.com
+  → Search Console: https://search.google.com/search-console
+    Property: https://wiehasit.com
