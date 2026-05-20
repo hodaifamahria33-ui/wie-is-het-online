@@ -1,7 +1,17 @@
-/* Beginscherm — Wie Ben Ik? stijl */
-.screen-start {
-  background: linear-gradient(180deg, #b8e8ff 0%, #9fd4ff 42%, #8ec5f7 100%);
+/* Beginscherm — Wie Ben Ik? licht & vrolijk */
+.screen.screen-start,
+#screen-start.screen-start {
+  background:
+    radial-gradient(ellipse 120% 80% at 50% -10%, #ffffff 0%, transparent 55%),
+    radial-gradient(circle at 12% 88%, rgba(167, 243, 208, 0.45) 0%, transparent 35%),
+    radial-gradient(circle at 88% 78%, rgba(253, 224, 71, 0.35) 0%, transparent 32%),
+    linear-gradient(180deg, #e8f7ff 0%, #cceeff 38%, #b8e4ff 72%, #a8d8f5 100%) !important;
   overflow: hidden;
+}
+
+html.start-screen-active,
+html.start-screen-active body {
+  background: #d4f1ff !important;
 }
 
 .screen-start .start-scene {
@@ -52,9 +62,10 @@
 }
 
 .screen-start .start-deco--plus {
-  color: rgba(255, 255, 255, 0.85);
+  color: #7c8cf8;
   font-size: 1.25rem;
   font-weight: 700;
+  opacity: 0.75;
   animation: startDrift 4s ease-in-out infinite reverse;
 }
 
@@ -112,48 +123,68 @@
 .screen-start .start-card {
   position: absolute;
   z-index: 4;
-  width: clamp(72px, 22vw, 108px);
-  aspect-ratio: 0.78;
-  border-radius: 14px;
-  box-shadow: 0 10px 28px rgba(30, 58, 95, 0.22);
+  width: clamp(80px, 24vw, 118px);
+  aspect-ratio: 0.82;
+  border-radius: 16px;
+  border: 3px solid rgba(255, 255, 255, 0.85);
+  box-shadow:
+    0 12px 32px rgba(59, 130, 200, 0.28),
+    inset 0 2px 0 rgba(255, 255, 255, 0.65);
   overflow: hidden;
   animation: startCardFloat 5s ease-in-out infinite;
+}
+
+.screen-start .start-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.45) 0%, transparent 48%);
+  pointer-events: none;
+  z-index: 3;
 }
 
 .screen-start .start-card--tl {
   top: 14%;
   left: 4%;
-  background: linear-gradient(160deg, #ddd6fe, #a78bfa);
+  background: linear-gradient(165deg, #ede9fe 0%, #c4b5fd 45%, #a78bfa 100%);
   animation-delay: 0s;
 }
 
 .screen-start .start-card--tr {
   top: 12%;
   right: 4%;
-  background: linear-gradient(160deg, #bae6fd, #38bdf8);
+  background: linear-gradient(165deg, #e0f2fe 0%, #7dd3fc 50%, #38bdf8 100%);
   animation-delay: 0.8s;
 }
 
 .screen-start .start-card--bl {
   bottom: 22%;
   left: 3%;
-  background: linear-gradient(160deg, #fbcfe8, #f472b6);
+  background: linear-gradient(165deg, #fce7f3 0%, #f9a8d4 50%, #ec4899 100%);
   animation-delay: 1.2s;
 }
 
 .screen-start .start-card--br {
   bottom: 20%;
   right: 3%;
-  background: linear-gradient(160deg, #fef08a, #facc15);
+  background: linear-gradient(165deg, #fef9c3 0%, #fde047 50%, #facc15 100%);
   animation-delay: 0.4s;
 }
 
-.screen-start .start-card-face {
+.screen-start .start-card-art {
   position: absolute;
-  inset: 12% 10% 28%;
+  inset: 6% 8% 10%;
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: center;
+  z-index: 1;
+}
+
+.screen-start .start-card-art svg {
+  width: 100%;
+  height: auto;
+  max-height: 100%;
+  filter: drop-shadow(0 4px 8px rgba(30, 58, 95, 0.15));
 }
 
 .screen-start .start-card-q {
@@ -163,11 +194,14 @@
   align-items: center;
   justify-content: center;
   font-family: "Fredoka", "Outfit", sans-serif;
-  font-size: clamp(2.2rem, 8vw, 3.2rem);
+  font-size: clamp(2.4rem, 9vw, 3.5rem);
   font-weight: 700;
-  color: rgba(255, 255, 255, 0.95);
-  text-shadow: 0 4px 12px rgba(30, 41, 90, 0.35);
+  color: #fff;
+  text-shadow:
+    0 2px 0 rgba(30, 58, 95, 0.25),
+    0 6px 16px rgba(30, 58, 95, 0.35);
   z-index: 2;
+  pointer-events: none;
 }
 
 .screen-start .start-hero {
