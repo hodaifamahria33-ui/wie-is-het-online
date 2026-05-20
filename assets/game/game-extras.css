@@ -778,10 +778,10 @@
   }
 }
 
-@media (max-width: 900px) {
+@media (max-width: 900px) and (min-width: 721px) {
   #game-table .player-play-area {
     flex-wrap: wrap;
-    max-width: 99vw !important;
+    max-width: 96vw !important;
   }
 
   .opponent-chest {
@@ -792,10 +792,6 @@
   #game-table .board-stack {
     order: 2;
     width: 100%;
-  }
-
-  #game-table .secret-card-slot {
-    order: 3;
   }
 
   .opponent-answer {

@@ -2,8 +2,8 @@
  * Bord groot en breed in beeld (klassieke layout).
  */
 #game-table {
-  --game-board-width: min(99vw, min(calc(96vh * 2.1), 960px));
-  --game-strip-width: min(99vw, calc(var(--game-board-width) + 220px));
+  --game-board-width: min(96vw, min(calc(96vh * 2.1), 960px));
+  --game-strip-width: min(96vw, calc(var(--game-board-width) + 220px));
   --board-tilt: 8deg;
 }
 
@@ -249,17 +249,4 @@
   }
 }
 
-@media (max-width: 720px) {
-  #game-table .secret-card-slot {
-    position: fixed !important;
-    right: max(8px, env(safe-area-inset-right)) !important;
-    left: auto !important;
-    top: auto !important;
-    bottom: max(14px, env(safe-area-inset-bottom)) !important;
-    transform: scale(0.92) !important;
-  }
-
-  #game-table .secret-card-slot.visible {
-    transform: scale(1) !important;
-  }
-}
+/* Mobiel: zie game-mobile.css (laatst geladen) */
