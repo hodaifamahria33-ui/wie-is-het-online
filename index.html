@@ -174,8 +174,41 @@
           : "Speel Wie Is Het met me! Tik om mee te doen:\n" + url;
       window.open("https://wa.me/?text=" + encodeURIComponent(text), "_blank", "noopener");
     };
+    window.wieHeadCountdown = function () {
+      var screen = document.getElementById("screen-game");
+      var cd = document.getElementById("game-countdown");
+      var table = document.getElementById("game-table");
+      var num = document.getElementById("countdown-num");
+      if (!screen || !cd || !num) return;
+      document.querySelectorAll("main.screen").forEach(function (el) {
+        if (el.id === "screen-game") el.classList.remove("hidden");
+        else el.classList.add("hidden");
+      });
+      if (table) table.classList.add("hidden");
+      cd.classList.remove("hidden");
+      cd.style.display = "flex";
+      var n = 3;
+      var go = window.wieLang && window.wieLang() === "en" ? "GO!" : "START!";
+      function tick() {
+        num.textContent = n > 0 ? String(n) : go;
+        if (n > 0) {
+          n--;
+          setTimeout(tick, 1000);
+        } else {
+          setTimeout(function () {
+            cd.classList.add("hidden");
+            if (table) table.classList.remove("hidden");
+            if (window.wieApp && window.wieApp.finishCountdownPlay) {
+              window.wieApp.finishCountdownPlay();
+            }
+          }, 700);
+        }
+      }
+      tick();
+    };
     window.wieStartGame = function () {
       if (window.wieApp && window.wieApp.startGame) return window.wieApp.startGame();
+      if (window.wieLaunchGame) return window.wieLaunchGame();
       var el = document.getElementById("lobby-code");
       var c = el ? el.textContent.replace(/\s/g, "").trim() : "";
       if (!c || c === "-----") return;
@@ -185,8 +218,8 @@
       window.wieShowOnly("screen-game");
       if (window.wieApp && window.wieApp.startGameSession) {
         window.wieApp.startGameSession();
-      } else if (window.wieRunCountdown) {
-        window.wieRunCountdown();
+      } else {
+        window.wieHeadCountdown();
       }
     };
     window.wieGoHost = function () {
@@ -227,7 +260,13 @@
         window.wieShowOnly("screen-lobby");
         window.wieInitLobby("host");
         if (window.WieIsHetOnline && window.WieIsHetOnline.setupHost) {
-          window.WieIsHetOnline.setupHost(code).catch(function () {});
+          window.WieIsHetOnline.setupHost(code)
+            .then(function () {
+              if (window.wieWireHostLobby) window.wieWireHostLobby();
+            })
+            .catch(function () {
+              if (window.wieWireHostLobby) window.wieWireHostLobby();
+            });
         }
       }
       if (load) {
@@ -1259,6 +1298,7 @@
 
     /* —— Spelscherm: countdown + tafel —— */
     .screen-game-view {
+      position: relative;
       background: linear-gradient(180deg, #1a1035 0%, #2d1f5c 40%, #1e2a4a 100%);
     }
 
@@ -1269,7 +1309,7 @@
     .game-countdown {
       position: absolute;
       inset: 0;
-      z-index: 20;
+      z-index: 100;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -2209,10 +2249,10 @@
   </main>
 
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
-  <script src="assets/game/online-room.js?v=20"></script>
-  <script src="assets/game/lobby-room.js?v=21"></script>
-  <script src="assets/game/character-traits.js?v=21"></script>
-  <script src="assets/game/game-play.js?v=21"></script>
+  <script src="assets/game/online-room.js?v=22"></script>
+  <script src="assets/game/lobby-room.js?v=22"></script>
+  <script src="assets/game/character-traits.js?v=22"></script>
+  <script src="assets/game/game-play.js?v=22"></script>
 
   <script>
     const I18N = {
@@ -2629,8 +2669,8 @@
       buildCountdownPhotos();
       if (screenGame) screenGame.classList.remove("hidden");
       gameCountdown.classList.remove("hidden");
-      gameCountdown.style.display = "";
-      gameTable.classList.add("hidden");
+      gameCountdown.style.display = "flex";
+      if (gameTable) gameTable.classList.add("hidden");
       countdownNum.textContent = String(COUNTDOWN_SEC);
       let n = COUNTDOWN_SEC;
       function tick() {
@@ -2770,21 +2810,40 @@
     }
 
     function startGameSession() {
-      clearCountdown();
-      if (gameCountdown) gameCountdown.classList.add("hidden");
-      if (gameTable) gameTable.classList.add("hidden");
-      if (window.WieIsHetPlay) WieIsHetPlay.reset();
-      buildGameBoards();
-      runCountdownThenTable();
+      try {
+        clearCountdown();
+        if (gameTable) gameTable.classList.add("hidden");
+        if (window.WieIsHetPlay) {
+          try {
+            WieIsHetPlay.reset();
+          } catch (err) {
+            console.warn("play reset", err);
+          }
+        }
+        buildGameBoards();
+        runCountdownThenTable();
+      } catch (err) {
+        console.error("startGameSession", err);
+        runCountdownThenTable();
+      }
     }
 
     window.wieRunCountdown = runCountdownThenTable;
 
     function resetGameScreen() {
       clearCountdown();
-      gameCountdown.classList.add("hidden");
-      gameTable.classList.add("hidden");
-      if (window.WieIsHetPlay) WieIsHetPlay.reset();
+      if (gameCountdown) {
+        gameCountdown.classList.add("hidden");
+        gameCountdown.style.display = "";
+      }
+      if (gameTable) gameTable.classList.add("hidden");
+      if (window.WieIsHetPlay) {
+        try {
+          WieIsHetPlay.reset();
+        } catch (err) {
+          console.warn("play reset", err);
+        }
+      }
     }
 
     function ensureStartScreenVisible() {
@@ -3096,8 +3155,6 @@
 
     onClick("btn-copy-code", doCopyLink);
     onClick("btn-share-wa", doShareWa);
-    onClick("btn-start-game", doStartGame);
-
     onClick("btn-give-up", () => {
       resetGameScreen();
       leaveOnlineSession();
@@ -3198,17 +3255,33 @@
 
     onClick("btn-join-game", doJoinWithCode);
 
+    let startingGame = false;
+
     function doStartGame() {
+      if (startingGame) return;
       const c = (lobbyCode ? lobbyCode.textContent : "").replace(/\s/g, "").trim();
       if (!c || c === "-----") return;
-      if (window.WieIsHetPlay) WieIsHetPlay.hideEndOverlay();
-      resetGameScreen();
-      if (window.WieIsHetOnline && sessionMode === "host") {
-        WieIsHetOnline.broadcastGameStart();
+      startingGame = true;
+      try {
+        if (window.WieIsHetPlay) WieIsHetPlay.hideEndOverlay();
+        resetGameScreen();
+        if (window.WieIsHetOnline && sessionMode === "host") {
+          WieIsHetOnline.broadcastGameStart();
+        }
+        showGameScreen();
+        startGameSession();
+      } catch (err) {
+        console.error("doStartGame", err);
+        showGameScreen();
+        runCountdownThenTable();
+      } finally {
+        setTimeout(() => {
+          startingGame = false;
+        }, 4000);
       }
-      showGameScreen();
-      startGameSession();
     }
+
+    window.wieLaunchGame = doStartGame;
 
     function doCopyLink() {
       const c = (lobbyCode ? lobbyCode.textContent : "").replace(/\s/g, "").trim();
@@ -3226,6 +3299,9 @@
       window.open("https://wa.me/?text=" + encodeURIComponent(text), "_blank", "noopener");
     }
 
+    window.wieWireHostLobby = wireHostLobby;
+    window.wieWireGuestOnline = wireGuestOnline;
+
     window.wieApp = {
       goHost() {
         if (hostError) hostError.textContent = "";
@@ -3242,6 +3318,7 @@
       startBotGame,
       startSoloGame,
       startGameSession,
+      finishCountdownPlay: finishCountdownStartPlay,
       startGame: doStartGame,
       copyLink: doCopyLink,
       shareWa: doShareWa,
