@@ -63,8 +63,9 @@
   display: none !important;
 }
 
-#game-table .game-turn-banner {
-  top: calc(env(safe-area-inset-top, 0px) + 52px);
+.screen-game-view.has-secret-visible.phase-pick-secret .game-turn-banner,
+.screen-game-view.has-secret-visible.turn-opponent .game-turn-banner {
+  display: none !important;
 }
 
 #game-table .opponent-figure,

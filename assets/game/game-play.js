@@ -189,6 +189,8 @@
     void secretSlot.offsetWidth;
     secretSlot.classList.add("is-reveal");
     window.setTimeout(() => secretSlot.classList.remove("is-reveal"), 750);
+    if (screenGame) screenGame.classList.add("has-secret-visible");
+    hideBanner();
   }
 
   function showOpponentAnswer(text, isYes) {
@@ -870,7 +872,6 @@
       well.classList.add("picked-secret");
       cloneCardToSecret(well);
       setScreenTurn("their");
-      setBanner(tFn("phaseOpponentPick"));
       if (state.online && window.WieIsHetOnline) {
         WieIsHetOnline.sendSecretReady();
       }
@@ -956,6 +957,7 @@
       });
       secretSlot.classList.remove("visible");
     }
+    if (screenGame) screenGame.classList.remove("has-secret-visible");
     if (winOverlay) {
       winOverlay.classList.add("hidden");
       winOverlay.classList.remove("active", "lose");
@@ -1071,6 +1073,7 @@
       });
       secretSlot.classList.remove("visible");
     }
+    if (screenGame) screenGame.classList.remove("has-secret-visible");
     hideEndOverlay();
   }
 

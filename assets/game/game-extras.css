@@ -820,7 +820,7 @@
 /* Kleine actiebalk (JA/NEE, SWITCH) — geen vraag-popup */
 .game-quick-actions {
   position: fixed;
-  left: 50%;
+  left: clamp(200px, 42vw, 46%);
   top: max(96px, calc(env(safe-area-inset-top, 0px) + 88px));
   transform: translateX(-50%);
   z-index: 48;
