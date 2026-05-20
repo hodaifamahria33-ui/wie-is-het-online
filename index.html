@@ -1067,8 +1067,14 @@
 
     .btn-start-game:hover { transform: scale(1.03); }
 
-    .screen-lobby .content,
+    .screen-lobby .lobby-main .content,
     .screen-joined .lobby-content-main .content {
+      position: relative !important;
+      inset: auto !important;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
       gap: 0.65rem;
     }
 
@@ -1291,24 +1297,25 @@
     .screen-joined h2 {
       color: #3d2d5c;
       text-shadow: none;
-      font-size: clamp(1.35rem, 5vw, 2rem);
-      margin: 0 0 0.35rem;
+      font-size: clamp(1.5rem, 4vw, 2.25rem);
+      margin: 0 0 0.5rem;
       line-height: 1.15;
-    }
-
-    .screen-lobby .lobby-main,
-    .screen-joined .lobby-content-main {
-      flex: 0 0 auto;
-      justify-content: flex-start;
-      align-items: stretch;
-      width: 100%;
     }
 
     .screen-lobby .pot-code,
     .screen-joined .pot-code {
-      font-size: clamp(1.6rem, 9vw, 2.25rem);
-      margin: 0.15rem 0 0.5rem;
-      line-height: 1.1;
+      display: block;
+      width: 100%;
+      font-size: clamp(2.25rem, 5vw, 3.5rem);
+      font-weight: 800;
+      color: #5b21b6;
+      letter-spacing: 0.22em;
+      white-space: nowrap;
+      overflow: visible;
+      text-align: center;
+      margin: 0.25rem 0 0.75rem;
+      line-height: 1.2;
+      font-variant-numeric: tabular-nums;
     }
 
     .screen-lobby .btn,
@@ -1324,15 +1331,32 @@
 
     .screen-lobby .hint,
     .screen-joined .hint {
-      font-size: 0.85rem;
-      line-height: 1.35;
-      margin: 0.15rem 0;
+      font-size: 0.9rem;
+      line-height: 1.4;
+      margin: 0.2rem 0 0.5rem;
     }
 
     .joined-status.error {
       color: #dc2626;
       font-weight: 700;
       font-size: 0.95rem;
+    }
+
+    @media (min-width: 721px) {
+      .screen-lobby .lobby-main,
+      .screen-joined .lobby-content-main {
+        flex: 1;
+        align-items: center;
+        justify-content: center;
+        padding: 1.25rem 2rem;
+      }
+
+      .screen-lobby .lobby-main .content,
+      .screen-joined .lobby-content-main .content {
+        max-width: 400px;
+        width: 100%;
+        margin: 0 auto;
+      }
     }
 
     @media (max-width: 720px) {
@@ -1355,6 +1379,9 @@
       .lobby-content-main {
         order: 1;
         flex: 0 0 auto;
+        width: 100%;
+        justify-content: flex-start;
+        align-items: stretch;
       }
 
       .lobby-sidebar {
