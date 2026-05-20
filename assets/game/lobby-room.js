@@ -1,0 +1,222 @@
+/**
+ * Lobby: spelerslijst + chat vóór START GAME (host & gast).
+ */
+(function () {
+  let tFn = (k) => k;
+  let role = null;
+  let myName = "Speler";
+  let guestName = null;
+  let guestOnline = false;
+  let hostName = "Host";
+
+  const ui = {
+    playersHost: null,
+    playersGuest: null,
+    chatHost: null,
+    chatGuest: null,
+    inputHost: null,
+    inputGuest: null,
+    formHost: null,
+    formGuest: null,
+  };
+
+  function escapeHtml(s) {
+    return String(s)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function getPlayerName() {
+    const saved = localStorage.getItem("wiePlayerName");
+    if (saved && saved.trim()) return saved.trim().slice(0, 16);
+    const generated = "Speler" + Math.floor(100 + Math.random() * 900);
+    localStorage.setItem("wiePlayerName", generated);
+    return generated;
+  }
+
+  function renderPlayers(listEl, isHostView) {
+    if (!listEl) return;
+    listEl.innerHTML = "";
+    const hostItem = document.createElement("li");
+    hostItem.className = "lobby-player lobby-player--host" + (guestOnline || !isHostView ? " lobby-player--online" : "");
+    hostItem.innerHTML =
+      '<span class="lobby-player-dot" aria-hidden="true"></span>' +
+      "<span class=\"lobby-player-name\">" +
+      escapeHtml(isHostView ? myName + " (" + tFn("lobbyYou") + ")" : hostName) +
+      "</span>";
+    listEl.appendChild(hostItem);
+
+    if (isHostView) {
+      const guestItem = document.createElement("li");
+      guestItem.className =
+        "lobby-player lobby-player--guest" + (guestOnline ? " lobby-player--online" : " lobby-player--waiting");
+      const label = guestOnline
+        ? escapeHtml(guestName || tFn("lobbyFriend"))
+        : tFn("lobbyWaitingFriend");
+      guestItem.innerHTML =
+        '<span class="lobby-player-dot" aria-hidden="true"></span>' +
+        '<span class="lobby-player-name">' +
+        label +
+        "</span>" +
+        (guestOnline ? '<span class="lobby-player-badge">' + tFn("lobbyJoined") + "</span>" : "");
+      listEl.appendChild(guestItem);
+    } else {
+      const meItem = document.createElement("li");
+      meItem.className = "lobby-player lobby-player--guest lobby-player--online";
+      meItem.innerHTML =
+        '<span class="lobby-player-dot" aria-hidden="true"></span>' +
+        '<span class="lobby-player-name">' +
+        escapeHtml(myName + " (" + tFn("lobbyYou") + ")") +
+        "</span>" +
+        '<span class="lobby-player-badge">' +
+        tFn("lobbyJoined") +
+        "</span>";
+      listEl.appendChild(meItem);
+    }
+  }
+
+  function appendChatLine(container, text, who, isMine) {
+    if (!container || !text) return;
+    const line = document.createElement("div");
+    line.className = "lobby-chat-line" + (isMine ? " lobby-chat-line--mine" : "");
+    const whoEl = document.createElement("span");
+    whoEl.className = "lobby-chat-who";
+    whoEl.textContent = who ? who + ": " : "";
+    const msgEl = document.createElement("span");
+    msgEl.className = "lobby-chat-text";
+    msgEl.textContent = text;
+    line.append(whoEl, msgEl);
+    container.appendChild(line);
+    container.scrollTop = container.scrollHeight;
+  }
+
+  function refreshAllPlayers() {
+    renderPlayers(ui.playersHost, true);
+    renderPlayers(ui.playersGuest, false);
+  }
+
+  function sendChat(text) {
+    const trimmed = String(text || "").trim().slice(0, 200);
+    if (!trimmed || !window.WieIsHetOnline) return;
+    window.WieIsHetOnline.sendLobbyChat(trimmed, myName);
+    const box = role === "host" ? ui.chatHost : ui.chatGuest;
+    appendChatLine(box, trimmed, myName, true);
+  }
+
+  function bindChatForm(form, input) {
+    if (!form || !input) return;
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      sendChat(input.value);
+      input.value = "";
+      input.focus();
+    });
+  }
+
+  function addSystemLine(text) {
+    const hostBox = ui.chatHost;
+    const guestBox = ui.chatGuest;
+    if (hostBox) {
+      const line = document.createElement("div");
+      line.className = "lobby-chat-line lobby-chat-line--system";
+      line.textContent = text;
+      hostBox.appendChild(line);
+      hostBox.scrollTop = hostBox.scrollHeight;
+    }
+    if (guestBox) {
+      const line = document.createElement("div");
+      line.className = "lobby-chat-line lobby-chat-line--system";
+      line.textContent = text;
+      guestBox.appendChild(line);
+      guestBox.scrollTop = guestBox.scrollHeight;
+    }
+  }
+
+  window.WieLobby = {
+    init(opts) {
+      tFn = opts.t || tFn;
+      role = opts.role || null;
+      myName = getPlayerName();
+      ui.playersHost = opts.playersHost || null;
+      ui.playersGuest = opts.playersGuest || null;
+      ui.chatHost = opts.chatHost || null;
+      ui.chatGuest = opts.chatGuest || null;
+      ui.inputHost = opts.inputHost || null;
+      ui.inputGuest = opts.inputGuest || null;
+      ui.formHost = opts.formHost || null;
+      ui.formGuest = opts.formGuest || null;
+      bindChatForm(ui.formHost, ui.inputHost);
+      bindChatForm(ui.formGuest, ui.inputGuest);
+    },
+
+    reset() {
+      guestName = null;
+      guestOnline = false;
+      hostName = "Host";
+      if (ui.chatHost) ui.chatHost.innerHTML = "";
+      if (ui.chatGuest) ui.chatGuest.innerHTML = "";
+      refreshAllPlayers();
+    },
+
+    onOpenAsHost() {
+      role = "host";
+      guestOnline = false;
+      guestName = null;
+      if (ui.chatHost) ui.chatHost.innerHTML = "";
+      addSystemLine(tFn("lobbyChatHint"));
+      refreshAllPlayers();
+    },
+
+    onOpenAsGuest() {
+      role = "guest";
+      if (ui.chatGuest) ui.chatGuest.innerHTML = "";
+      addSystemLine(tFn("lobbyChatHint"));
+      refreshAllPlayers();
+      if (window.WieIsHetOnline) {
+        window.WieIsHetOnline.sendLobbyJoin(myName);
+      }
+    },
+
+    handleMessage(msg) {
+      if (!msg || !msg.type) return false;
+      if (msg.type === "lobbyJoin" && role === "host") {
+        guestOnline = true;
+        guestName = msg.name || tFn("lobbyFriend");
+        refreshAllPlayers();
+        addSystemLine(tFn("lobbyFriendJoined").replace("{name}", guestName));
+        const welcome = tFn("lobbyWelcomeChat");
+        if (window.WieIsHetOnline) window.WieIsHetOnline.sendLobbyChat(welcome, myName);
+        appendChatLine(ui.chatHost, welcome, myName, true);
+        return true;
+      }
+      }
+      if (msg.type === "lobbyChat") {
+        const box = role === "host" ? ui.chatHost : ui.chatGuest;
+        const from = msg.name || (msg.fromHost ? hostName : tFn("lobbyFriend"));
+        if (msg.name && role === "guest" && !msg.fromHost) hostName = msg.name;
+        if (msg.name && role === "host" && msg.name !== myName) guestName = msg.name;
+        appendChatLine(box, msg.text, from, false);
+        return true;
+      }
+      if (msg.type === "connected") {
+        if (role === "host") {
+          guestOnline = true;
+          refreshAllPlayers();
+        }
+        return true;
+      }
+      if (msg.type === "disconnected") {
+        if (role === "host") {
+          guestOnline = false;
+          guestName = null;
+          refreshAllPlayers();
+          addSystemLine(tFn("lobbyFriendLeft"));
+        }
+        return true;
+      }
+      return false;
+    },
+  };
+})();

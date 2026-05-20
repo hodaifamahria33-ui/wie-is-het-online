@@ -758,8 +758,216 @@
 
     .btn-start-game:hover { transform: scale(1.03); }
 
-    .screen-lobby .content {
+    .screen-lobby .content,
+    .screen-joined .lobby-content-main .content {
       gap: 0.65rem;
+    }
+
+    .screen-lobby,
+    .screen-joined.lobby-joined-layout {
+      overflow: auto;
+    }
+
+    .lobby-layout {
+      display: flex;
+      flex-direction: row;
+      align-items: stretch;
+      width: 100%;
+      height: 100%;
+      max-width: 100%;
+      padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right))
+        max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+      gap: 0;
+      box-sizing: border-box;
+    }
+
+    .lobby-sidebar {
+      flex: 0 0 min(38vw, 300px);
+      max-width: 300px;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      padding: 1rem 0.85rem;
+      background: rgba(61, 45, 92, 0.12);
+      border-right: 2px solid rgba(139, 92, 246, 0.2);
+      min-height: 0;
+    }
+
+    .lobby-sidebar-title {
+      margin: 0;
+      font-size: 0.8rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #6b4ed4;
+      text-align: left;
+    }
+
+    .lobby-players {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .lobby-player {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.55rem 0.65rem;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.55);
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      font-size: 0.9rem;
+      color: #3d2d5c;
+      text-align: left;
+    }
+
+    .lobby-player--online .lobby-player-dot {
+      background: #22c55e;
+      box-shadow: 0 0 8px rgba(34, 197, 94, 0.6);
+    }
+
+    .lobby-player--waiting .lobby-player-dot {
+      background: #94a3b8;
+    }
+
+    .lobby-player-dot {
+      flex-shrink: 0;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #cbd5e1;
+    }
+
+    .lobby-player-name {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .lobby-player-badge {
+      flex-shrink: 0;
+      font-size: 0.65rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #15803d;
+      background: rgba(34, 197, 94, 0.15);
+      padding: 0.15rem 0.4rem;
+      border-radius: 6px;
+    }
+
+    .lobby-chat-panel {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    .lobby-chat-messages {
+      flex: 1;
+      min-height: 100px;
+      max-height: min(28vh, 220px);
+      overflow-y: auto;
+      padding: 0.5rem;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.7);
+      border: 1px solid rgba(139, 92, 246, 0.12);
+      text-align: left;
+    }
+
+    .lobby-chat-line {
+      margin: 0 0 0.4rem;
+      font-size: 0.82rem;
+      line-height: 1.35;
+      color: #3d2d5c;
+      word-break: break-word;
+    }
+
+    .lobby-chat-line--mine {
+      color: #5b21b6;
+    }
+
+    .lobby-chat-line--system {
+      color: #64748b;
+      font-style: italic;
+      font-size: 0.78rem;
+    }
+
+    .lobby-chat-who {
+      font-weight: 700;
+    }
+
+    .lobby-chat-form {
+      display: flex;
+      gap: 0.35rem;
+      margin: 0;
+    }
+
+    .lobby-chat-input {
+      flex: 1;
+      min-width: 0;
+      padding: 0.55rem 0.65rem;
+      border: 2px solid rgba(139, 92, 246, 0.25);
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-family: inherit;
+      background: #fff;
+      color: #3d2d5c;
+    }
+
+    .lobby-chat-send {
+      flex-shrink: 0;
+      width: 44px;
+      padding: 0.55rem;
+      border: none;
+      border-radius: 10px;
+      background: #8b5cf6;
+      color: #fff;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .lobby-main,
+    .lobby-content-main {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow-y: auto;
+    }
+
+    .lobby-content-main .content {
+      position: relative;
+      inset: auto;
+      height: auto;
+      padding: 1rem 1.25rem 1.5rem;
+    }
+
+    @media (max-width: 720px) {
+      .lobby-layout {
+        flex-direction: column;
+      }
+
+      .lobby-sidebar {
+        flex: 0 0 auto;
+        max-width: none;
+        border-right: none;
+        border-bottom: 2px solid rgba(139, 92, 246, 0.2);
+      }
+
+      .lobby-chat-messages {
+        max-height: 140px;
+      }
     }
 
     /* —— Spelscherm: countdown + tafel —— */
@@ -1538,30 +1746,62 @@
   </main>
 
   <!-- Join gelukt -->
-  <main id="screen-joined" class="screen screen-light hidden">
+  <main id="screen-joined" class="screen screen-light lobby-joined-layout hidden">
     <span class="glow" aria-hidden="true"></span>
-    <section class="content">
-      <h2 data-i18n-html="joinedTitle">Je zit in<span class="accent">het potje!</span></h2>
-      <p id="joined-code" class="pot-code">-----</p>
-      <p id="joined-status" class="hint joined-status">Verbinden met host…</p>
-      <p class="hint" data-i18n="joinedHint">Wacht tot de host het spel start</p>
-      <button id="btn-join-retry" class="btn secondary hidden" type="button" data-i18n="btnJoinRetry">OPNIEUW VERBINDEN</button>
-      <button id="btn-joined-back" class="btn back" type="button" data-i18n="btnBack">TERUG</button>
-    </section>
+    <div class="lobby-layout">
+      <aside class="lobby-sidebar">
+        <h3 class="lobby-sidebar-title" data-i18n="lobbyPlayersTitle">In het potje</h3>
+        <ul id="joined-players" class="lobby-players" aria-live="polite"></ul>
+        <div class="lobby-chat-panel">
+          <h3 class="lobby-sidebar-title" data-i18n="lobbyChatTitle">Chat</h3>
+          <div id="joined-chat-messages" class="lobby-chat-messages" aria-live="polite"></div>
+          <form id="joined-chat-form" class="lobby-chat-form">
+            <input id="joined-chat-input" class="lobby-chat-input" type="text" maxlength="200" autocomplete="off" data-i18n-placeholder="lobbyChatPlaceholder" placeholder="Typ een bericht…" />
+            <button type="submit" class="lobby-chat-send" aria-label="Verstuur">➤</button>
+          </form>
+        </div>
+      </aside>
+      <div class="lobby-content-main">
+        <section class="content">
+          <h2 data-i18n-html="joinedTitle">Je zit in<span class="accent">het potje!</span></h2>
+          <p id="joined-code" class="pot-code">-----</p>
+          <p id="joined-status" class="hint joined-status">Verbinden met host…</p>
+          <p class="hint" data-i18n="joinedHint">Wacht tot de host het spel start</p>
+          <button id="btn-join-retry" class="btn secondary hidden" type="button" data-i18n="btnJoinRetry">OPNIEUW VERBINDEN</button>
+          <button id="btn-joined-back" class="btn back" type="button" data-i18n="btnBack">TERUG</button>
+        </section>
+      </div>
+    </div>
   </main>
 
   <!-- Scherm 4: potje klaar -->
-  <main id="screen-lobby" class="screen screen-light hidden">
+  <main id="screen-lobby" class="screen screen-light screen-lobby hidden">
     <span class="glow" aria-hidden="true"></span>
-    <section class="content">
-      <h2 data-i18n-html="lobbyTitle">Je potje is<span class="accent">klaar!</span></h2>
-      <p id="lobby-code" class="pot-code">-----</p>
-      <p class="hint" data-i18n="lobbyHint">Stuur deze link naar je vrienden — zij joinen automatisch</p>
-      <button id="btn-copy-code" class="btn btn-copy-code" type="button" data-i18n="btnCopyCode">KOPIEER LINK</button>
-      <button id="btn-share-wa" class="btn secondary" type="button" data-i18n="btnShareWa">DEEL VIA WHATSAPP</button>
-      <button id="btn-start-game" class="btn btn-start-game" type="button" data-i18n="btnStartGame">START GAME</button>
-      <button id="btn-lobby-back" class="btn back" type="button" data-i18n="btnBack">TERUG</button>
-    </section>
+    <div class="lobby-layout">
+      <aside class="lobby-sidebar">
+        <h3 class="lobby-sidebar-title" data-i18n="lobbyPlayersTitle">In je potje</h3>
+        <ul id="lobby-players" class="lobby-players" aria-live="polite"></ul>
+        <div class="lobby-chat-panel">
+          <h3 class="lobby-sidebar-title" data-i18n="lobbyChatTitle">Chat</h3>
+          <div id="lobby-chat-messages" class="lobby-chat-messages" aria-live="polite"></div>
+          <form id="lobby-chat-form" class="lobby-chat-form">
+            <input id="lobby-chat-input" class="lobby-chat-input" type="text" maxlength="200" autocomplete="off" data-i18n-placeholder="lobbyChatPlaceholder" placeholder="Typ een bericht…" />
+            <button type="submit" class="lobby-chat-send" aria-label="Verstuur">➤</button>
+          </form>
+        </div>
+      </aside>
+      <div class="lobby-main">
+        <section class="content">
+          <h2 data-i18n-html="lobbyTitle">Je potje is<span class="accent">klaar!</span></h2>
+          <p id="lobby-code" class="pot-code">-----</p>
+          <p class="hint" data-i18n="lobbyHint">Stuur deze link naar je vrienden — zij joinen automatisch</p>
+          <button id="btn-copy-code" class="btn btn-copy-code" type="button" data-i18n="btnCopyCode">KOPIEER LINK</button>
+          <button id="btn-share-wa" class="btn secondary" type="button" data-i18n="btnShareWa">DEEL VIA WHATSAPP</button>
+          <button id="btn-start-game" class="btn btn-start-game" type="button" data-i18n="btnStartGame">START GAME</button>
+          <button id="btn-lobby-back" class="btn back" type="button" data-i18n="btnBack">TERUG</button>
+        </section>
+      </div>
+    </div>
   </main>
 
   <!-- Scherm 5: countdown + speeltafel -->
@@ -1682,9 +1922,10 @@
   </main>
 
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
-  <script src="assets/game/online-room.js?v=16"></script>
-  <script src="assets/game/character-traits.js?v=16"></script>
-  <script src="assets/game/game-play.js?v=16"></script>
+  <script src="assets/game/online-room.js?v=17"></script>
+  <script src="assets/game/lobby-room.js?v=17"></script>
+  <script src="assets/game/character-traits.js?v=17"></script>
+  <script src="assets/game/game-play.js?v=17"></script>
 
   <script>
     const I18N = {
@@ -1720,6 +1961,17 @@
         btnJoinRetry: "OPNIEUW VERBINDEN",
         lobbyTitle: 'Je potje is<span class="accent">klaar!</span>',
         lobbyHint: "Stuur deze link naar je vrienden — zij joinen automatisch",
+        lobbyPlayersTitle: "In je potje",
+        lobbyChatTitle: "Chat",
+        lobbyChatPlaceholder: "Typ een bericht…",
+        lobbyChatHint: "Praat even — daarna start de host het spel.",
+        lobbyYou: "jij",
+        lobbyFriend: "Vriend",
+        lobbyJoined: "Joined",
+        lobbyWaitingFriend: "Wacht op vriend…",
+        lobbyFriendJoined: "{name} is gejoined!",
+        lobbyFriendLeft: "Vriend is weggegaan.",
+        lobbyWelcomeChat: "Hoi! Klaar om te spelen?",
         btnCopyCode: "KOPIEER LINK",
         btnCopyDone: "✓ Link gekopieerd!",
         btnShareWa: "DEEL VIA WHATSAPP",
@@ -1797,6 +2049,17 @@
         btnJoinRetry: "RECONNECT",
         lobbyTitle: 'Your game is<span class="accent">ready!</span>',
         lobbyHint: "Send this link to your friends — they join automatically",
+        lobbyPlayersTitle: "In your game",
+        lobbyChatTitle: "Chat",
+        lobbyChatPlaceholder: "Type a message…",
+        lobbyChatHint: "Chat briefly — then the host starts the game.",
+        lobbyYou: "you",
+        lobbyFriend: "Friend",
+        lobbyJoined: "Joined",
+        lobbyWaitingFriend: "Waiting for friend…",
+        lobbyFriendJoined: "{name} joined!",
+        lobbyFriendLeft: "Friend left.",
+        lobbyWelcomeChat: "Hi! Ready to play?",
         btnCopyCode: "COPY LINK",
         btnCopyDone: "✓ Link copied!",
         btnShareWa: "SHARE ON WHATSAPP",
@@ -1863,6 +2126,9 @@
       });
       const qInput = document.getElementById("question-input");
       if (qInput) qInput.placeholder = t("questionPlaceholder");
+      document.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
+        el.placeholder = t(el.dataset.i18nPlaceholder);
+      });
       document.querySelectorAll(".lang-option").forEach((btn) => {
         btn.classList.toggle("active", btn.dataset.lang === lang);
       });
@@ -2118,10 +2384,47 @@
       startGameSession();
     }
 
+    function initLobbySocial(role) {
+      if (!window.WieLobby) return;
+      WieLobby.init({
+        t,
+        role,
+        playersHost: document.getElementById("lobby-players"),
+        playersGuest: document.getElementById("joined-players"),
+        chatHost: document.getElementById("lobby-chat-messages"),
+        chatGuest: document.getElementById("joined-chat-messages"),
+        inputHost: document.getElementById("lobby-chat-input"),
+        inputGuest: document.getElementById("joined-chat-input"),
+        formHost: document.getElementById("lobby-chat-form"),
+        formGuest: document.getElementById("joined-chat-form"),
+      });
+    }
+
+    function wireHostLobby() {
+      if (onlineGameUnsub) onlineGameUnsub();
+      if (!window.WieIsHetOnline) return;
+      initLobbySocial("host");
+      WieLobby.onOpenAsHost();
+      onlineGameUnsub = WieIsHetOnline.onMessage((msg) => {
+        if (window.WieLobby && WieLobby.handleMessage(msg)) return;
+        if (msg.type === "gameStart") {
+          if (window.WieIsHetPlay) WieIsHetPlay.hideEndOverlay();
+          resetGameScreen();
+          [screenStart, screenMode, screenBotDiff, screenMenu, screenHost, screenLobby, screenJoin, screenJoined].forEach((s) =>
+            s.classList.add("hidden")
+          );
+          screenGame.classList.remove("hidden");
+          startGameSession();
+        }
+      });
+    }
+
     function wireGuestOnline() {
       if (onlineGameUnsub) onlineGameUnsub();
       if (!window.WieIsHetOnline) return;
+      initLobbySocial("guest");
       onlineGameUnsub = WieIsHetOnline.onMessage((msg) => {
+        if (window.WieLobby && WieLobby.handleMessage(msg)) return;
         if (msg.type === "gameStart") {
           if (window.WieIsHetPlay) WieIsHetPlay.hideEndOverlay();
           resetGameScreen();
@@ -2237,6 +2540,7 @@
         onlineGameUnsub();
         onlineGameUnsub = null;
       }
+      if (window.WieLobby) WieLobby.reset();
       if (window.WieIsHetOnline) WieIsHetOnline.reset();
       sessionMode = "solo";
       sessionCode = "";
@@ -2340,6 +2644,8 @@
           sessionMode = "guest";
           sessionCode = c;
           setJoinedStatus("joinConnected", false);
+          wireGuestOnline();
+          if (window.WieLobby) WieLobby.onOpenAsGuest();
           return true;
         } catch (e) {
           if (attempt >= maxAttempts - 1) throw e;
@@ -2353,7 +2659,6 @@
       joinedCode.textContent = code.toUpperCase();
       screenJoined.classList.remove("hidden");
       screenJoined.classList.add("transition-active");
-      wireGuestOnline();
     }
 
     function joinViaLink(code) {
@@ -2547,9 +2852,14 @@
           sessionMode = "host";
           sessionCode = lobbyCode.textContent;
           if (window.WieIsHetOnline) {
-            WieIsHetOnline.setupHost(sessionCode).catch(() => {
-              sessionMode = "solo";
-            });
+            WieIsHetOnline.setupHost(sessionCode)
+              .then(() => wireHostLobby())
+              .catch(() => {
+                sessionMode = "solo";
+                wireHostLobby();
+              });
+          } else {
+            wireHostLobby();
           }
           screenHost.classList.add("hidden");
           screenHost.classList.remove("transition-out", "transition-active");

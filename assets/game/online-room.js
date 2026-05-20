@@ -153,6 +153,19 @@
       return send({ type: "turnHandoff" });
     },
 
+    sendLobbyJoin(name) {
+      return send({ type: "lobbyJoin", name: String(name || "").slice(0, 16) });
+    },
+
+    sendLobbyChat(text, name) {
+      return send({
+        type: "lobbyChat",
+        text: String(text || "").slice(0, 200),
+        name: String(name || "").slice(0, 16),
+        fromHost: role === "host",
+      });
+    },
+
     onMessage(fn) {
       listeners.add(fn);
       return () => listeners.delete(fn);
