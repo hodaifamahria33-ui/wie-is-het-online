@@ -9,7 +9,9 @@
   justify-content: center !important;
   gap: clamp(12px, 2.2vw, 28px) !important;
   width: auto !important;
-  max-width: min(99vw, calc(var(--game-board-width) + 300px)) !important;
+  max-width: min(99vw, calc(var(--game-board-width) + 360px)) !important;
+  padding-right: clamp(130px, 16vw, 185px) !important;
+  box-sizing: content-box !important;
   margin: 0 auto;
 }
 
@@ -29,14 +31,15 @@
 #game-table .secret-card-slot {
   order: 3;
   position: absolute !important;
-  left: calc(100% + clamp(10px, 2vw, 20px)) !important;
-  right: auto !important;
+  left: auto !important;
+  right: clamp(4px, 1vw, 12px) !important;
   top: 50% !important;
   flex-shrink: 0;
+  z-index: 18;
 }
 
 #game-table .secret-card-slot.visible {
-  transform: translateY(-50%) translateX(0) scale(1) !important;
+  transform: translateY(-50%) scale(1) !important;
 }
 
 #game-table .board-stack {
