@@ -42,7 +42,7 @@
 }
 
 #game-table .secret-card-slot.visible {
-  transform: translateY(-54%) translateX(var(--secret-card-offset-x, 44px)) scale(1) !important;
+  transform: translateY(-54%) translateX(var(--secret-card-offset-x, 88px)) scale(1) !important;
 }
 
 #game-table .board-stack {

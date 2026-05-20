@@ -5,7 +5,7 @@
   --game-board-width: min(99vw, min(calc(96vh * 2.1), 960px));
   --game-strip-width: min(99vw, calc(var(--game-board-width) + 220px));
   --board-tilt: 8deg;
-  --secret-card-offset-x: 44px;
+  --secret-card-offset-x: 88px;
 }
 
 #game-table .game-scene {
