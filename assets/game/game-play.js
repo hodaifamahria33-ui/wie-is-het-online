@@ -418,18 +418,37 @@
   }
 
   function hideQuestionDrawer() {
-    if (questionDrawer) questionDrawer.classList.add("hidden");
+    if (questionDrawer) {
+      questionDrawer.classList.add("hidden");
+      questionDrawer.style.display = "";
+    }
+    if (screenGame) screenGame.classList.remove("show-question-drawer");
     setQuestionInputEnabled(false);
   }
 
+  function resolveDrawerNodes() {
+    if (!questionDrawer) questionDrawer = document.getElementById("question-drawer");
+    if (!answerDrawer) answerDrawer = document.getElementById("answer-drawer");
+    if (!flipPhaseBar) flipPhaseBar = document.getElementById("flip-phase-bar");
+    if (!flipPhaseTimerEl) flipPhaseTimerEl = document.getElementById("flip-phase-timer");
+    if (!answerRevealOverlay) answerRevealOverlay = document.getElementById("answer-reveal-overlay");
+    if (!answerRevealText) answerRevealText = document.getElementById("answer-reveal-text");
+    if (!answerDrawerQuestion) answerDrawerQuestion = document.getElementById("answer-drawer-question");
+    if (!questionInput) questionInput = document.getElementById("question-input");
+    if (!btnSendQuestion) btnSendQuestion = document.getElementById("btn-send-question");
+  }
+
   function showQuestionDrawer() {
+    resolveDrawerNodes();
     if (!questionDrawer) return;
     hideAnswerDrawer();
     hideFlipPhaseBar();
     hideAnswerReveal();
     hideGameActions();
     hideBanner();
+    if (screenGame) screenGame.classList.add("show-question-drawer");
     questionDrawer.classList.remove("hidden");
+    questionDrawer.style.display = "flex";
     triggerDrawerPop(questionDrawer);
     const canAsk = state.phase === PHASE.MY_TURN && !state.askedThisTurn;
     setQuestionInputEnabled(canAsk);
@@ -440,10 +459,14 @@
   }
 
   function hideAnswerDrawer() {
-    if (answerDrawer) answerDrawer.classList.add("hidden");
+    if (answerDrawer) {
+      answerDrawer.classList.add("hidden");
+      answerDrawer.style.display = "";
+    }
   }
 
   function showAnswerDrawer(questionText) {
+    resolveDrawerNodes();
     if (!answerDrawer) return;
     hideQuestionDrawer();
     hideFlipPhaseBar();
@@ -452,6 +475,7 @@
       answerDrawerQuestion.textContent = questionText;
     }
     answerDrawer.classList.remove("hidden");
+    answerDrawer.style.display = "flex";
     triggerDrawerPop(answerDrawer);
   }
 

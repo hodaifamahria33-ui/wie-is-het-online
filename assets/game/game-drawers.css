@@ -1,11 +1,18 @@
 /* Onderste vraag-popup + grote JA/NEE reveal */
 
+.question-drawer.hidden {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
 .question-drawer {
   position: fixed;
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 60;
+  z-index: 200;
+  display: flex;
   display: flex;
   justify-content: center;
   padding: 0 12px max(14px, env(safe-area-inset-bottom, 12px));
@@ -86,11 +93,15 @@
   opacity: 0.9;
 }
 
+.flip-phase-bar.hidden {
+  display: none !important;
+}
+
 .flip-phase-bar {
   position: fixed;
   left: 50%;
   bottom: max(18px, env(safe-area-inset-bottom, 14px));
-  z-index: 58;
+  z-index: 190;
   transform: translateX(-50%) translateY(120%);
   display: flex;
   align-items: center;
@@ -136,10 +147,15 @@
   line-height: 1.2;
 }
 
+.answer-reveal-overlay.hidden {
+  display: none !important;
+}
+
 .answer-reveal-overlay {
   position: fixed;
   inset: 0;
-  z-index: 80;
+  z-index: 220;
+  display: flex;
   display: flex;
   align-items: center;
   justify-content: center;
