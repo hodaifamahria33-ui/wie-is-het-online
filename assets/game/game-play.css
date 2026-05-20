@@ -102,7 +102,7 @@
 
 .secret-card-slot.visible {
   opacity: 1;
-  transform: translateY(-50%) translateX(10px) scale(1);
+  transform: translateY(-50%) translateX(0) scale(1);
   filter: drop-shadow(0 14px 36px rgba(67, 56, 202, 0.45));
 }
 

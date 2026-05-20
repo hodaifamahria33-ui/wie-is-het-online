@@ -2,15 +2,22 @@
  * Bord groot en breed in beeld (klassieke layout).
  */
 .screen-game-view {
-  --wie-ui-top: calc(env(safe-area-inset-top, 0px) + 54px);
-  --wie-question-reserve: 188px;
-  --wie-board-gap: 28px;
-  --wie-secret-rail: clamp(132px, 14.5vw, 172px);
+  --wie-ui-top: calc(env(safe-area-inset-top, 0px) + 52px);
+  --wie-question-reserve: 210px;
+  --wie-board-gap: 40px;
+  --wie-secret-rail: clamp(158px, 18vw, 210px);
+  --wie-chest-rail: clamp(120px, 14vw, 160px);
 }
 
 #game-table {
-  --game-board-width: min(99vw, min(calc(96vh * 2.1), 960px));
-  --game-strip-width: min(99vw, calc(var(--game-board-width) + 220px));
+  --game-board-width: min(
+    calc(100vw - var(--wie-secret-rail) - var(--wie-chest-rail) - 24px),
+    min(calc(88vh * 2.05), 900px)
+  );
+  --game-strip-width: min(
+    calc(100vw - var(--wie-secret-rail) - 16px),
+    calc(var(--game-board-width) + var(--wie-chest-rail) + 32px)
+  );
   --board-tilt: 8deg;
 }
 
@@ -40,6 +47,10 @@
 .screen-game-view.turn-player #game-table .game-scene,
 .screen-game-view.phase-question #game-table .game-scene,
 .screen-game-view.phase-post-switch #game-table .game-scene {
+  display: grid;
+  place-items: start center;
+  align-content: start;
+  justify-items: center;
   padding-top: calc(
     var(--wie-ui-top) + var(--wie-question-reserve) + var(--wie-board-gap)
   );
@@ -181,10 +192,10 @@
 #game-table .secret-card-slot {
   position: fixed !important;
   left: auto !important;
-  right: max(2px, env(safe-area-inset-right, 4px)) !important;
+  right: max(8px, env(safe-area-inset-right, 8px)) !important;
   top: 50% !important;
   margin: 0;
-  width: clamp(102px, 11.5vw, 142px);
+  width: clamp(96px, 10vw, 128px);
   padding-bottom: 20px;
   box-sizing: content-box;
   z-index: 28;
@@ -200,7 +211,7 @@
 
 #game-table .secret-card-slot.visible {
   opacity: 1;
-  transform: translateY(-50%) translateX(10px) scale(1);
+  transform: translateY(-50%) translateX(0) scale(1);
   filter: drop-shadow(0 14px 36px rgba(67, 56, 202, 0.45));
   pointer-events: none;
 }
@@ -222,7 +233,7 @@
   }
   100% {
     opacity: 1;
-    transform: translateY(-50%) translateX(10px) scale(1);
+    transform: translateY(-50%) translateX(0) scale(1);
     filter: drop-shadow(0 14px 36px rgba(67, 56, 202, 0.45));
   }
 }
