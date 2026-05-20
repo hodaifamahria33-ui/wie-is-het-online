@@ -73,21 +73,27 @@
     transform-style: flat !important;
   }
 
-  /* Schatkist = raden → vast linksonder (buiten 3D-scene, anders werkt fixed niet) */
+  /* Schatkist = zelfde plek als geheime kaart: rechtsonder */
   #opponent-chest.opponent-chest,
   #game-table > .opponent-chest,
   #game-table .opponent-chest {
     position: fixed !important;
-    left: max(12px, env(safe-area-inset-left)) !important;
-    right: auto !important;
+    left: auto !important;
+    right: max(10px, env(safe-area-inset-right)) !important;
     top: auto !important;
-    bottom: max(80px, calc(env(safe-area-inset-bottom, 0px) + 72px)) !important;
-    width: clamp(68px, 19vw, 92px) !important;
-    z-index: 45 !important;
+    bottom: max(76px, calc(env(safe-area-inset-bottom, 0px) + 68px)) !important;
+    width: clamp(72px, 20vw, 96px) !important;
+    z-index: 46 !important;
     margin: 0 !important;
     transform: none !important;
     flex-shrink: 0 !important;
     pointer-events: auto !important;
+  }
+
+  /* Beide zichtbaar: schatkist net boven de geheime kaart, nog steeds rechts */
+  .screen-game-view.has-secret-visible #opponent-chest.opponent-chest,
+  .screen-game-view.has-secret-visible #game-table > .opponent-chest {
+    bottom: max(168px, calc(env(safe-area-inset-bottom, 0px) + 158px)) !important;
   }
 
   #opponent-chest .chest-label,
@@ -278,9 +284,13 @@
 
   #opponent-chest.opponent-chest,
   #game-table .opponent-chest {
-    width: 60px !important;
-    left: max(8px, env(safe-area-inset-left)) !important;
+    width: 64px !important;
+    right: max(8px, env(safe-area-inset-right)) !important;
     bottom: max(74px, calc(env(safe-area-inset-bottom, 0px) + 66px)) !important;
+  }
+
+  .screen-game-view.has-secret-visible #opponent-chest.opponent-chest {
+    bottom: max(158px, calc(env(safe-area-inset-bottom, 0px) + 148px)) !important;
   }
 }
 

@@ -15,18 +15,23 @@
   margin: 0 auto;
 }
 
-/* Desktop: schatkist links naast het bord */
+/* Desktop: schatkist rechtsonder (zelfde hoek als geheime kaart) */
 @media (min-width: 721px) {
   #game-table > .opponent-chest,
   #opponent-chest.opponent-chest {
     position: fixed;
-    left: max(14px, env(safe-area-inset-left));
-    top: 52%;
-    bottom: auto;
-    right: auto;
-    transform: translateY(-50%);
+    left: auto;
+    right: clamp(6px, 1.2vw, 18px);
+    top: auto;
+    bottom: max(24px, env(safe-area-inset-bottom, 16px));
+    transform: none;
     z-index: 38;
     width: clamp(88px, 12vw, 128px);
+  }
+
+  .screen-game-view.has-secret-visible #game-table > .opponent-chest,
+  .screen-game-view.has-secret-visible #opponent-chest.opponent-chest {
+    bottom: max(150px, calc(env(safe-area-inset-bottom, 0px) + 140px));
   }
 }
 
