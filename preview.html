@@ -1412,42 +1412,6 @@
       z-index: 12;
     }
 
-    .screen-start .btn-share-play {
-      background: rgba(255, 255, 255, 0.1);
-      color: #bae6fd;
-      border: 2px solid rgba(126, 200, 232, 0.55);
-      font-size: clamp(0.85rem, 2.4vw, 1rem);
-      padding: 0.7rem 1.6rem;
-      min-width: auto;
-      box-shadow: none;
-      letter-spacing: 0.1em;
-    }
-
-    .screen-start .btn-share-play.copied {
-      border-color: rgba(74, 222, 128, 0.7);
-      color: #bbf7d0;
-    }
-
-    .screen-start .start-public-label {
-      margin: 0.25rem 0 0;
-      font-size: clamp(0.75rem, 2.2vw, 0.88rem);
-      color: rgba(186, 230, 253, 0.85);
-      pointer-events: none;
-    }
-
-    .screen-start .start-public-url {
-      margin: 0 0 0.35rem;
-      padding: 0.35rem 0.75rem;
-      max-width: min(92vw, 420px);
-      font-size: clamp(0.65rem, 2vw, 0.8rem);
-      font-weight: 600;
-      color: #fef08a;
-      word-break: break-all;
-      background: rgba(0, 0, 0, 0.35);
-      border-radius: 8px;
-      pointer-events: none;
-    }
-
   </style>
 </head>
 <body>
@@ -1466,10 +1430,7 @@
     <h1 class="seo-brand">wiehasit.com</h1>
     <section class="content">
       <button id="btn-begin" class="btn" type="button" data-i18n="btnBegin" onclick="window.wieShowMode()">LATEN WE BEGINNEN</button>
-      <button id="btn-share-play" class="btn btn-share-play" type="button" data-i18n="btnSharePlayLink">KOPIEER PUBLIEKE LINK</button>
-      <p class="start-public-label" data-i18n="publicLinkLabel">Iedereen kan via deze link spelen:</p>
-      <p class="start-public-url" id="start-public-url" aria-live="polite"></p>
-      <p class="start-tagline" data-i18n="startTagline">Publieke link — 24/7 online, jij hoeft niet mee te doen</p>
+      <p class="start-tagline" data-i18n="startTagline">Raad het personage · Speel online</p>
     </section>
   </main>
 
@@ -1725,11 +1686,8 @@
       nl: {
         startTitleHtml: 'Wie <span class="start-title-accent">Is</span> Het?',
         startOnlineBadge: "ONLINE",
-        startTagline: "Publieke link — 24/7 online, jij hoeft niet mee te doen",
-        publicLinkLabel: "Iedereen kan via deze link spelen:",
+        startTagline: "Raad het personage · Speel online",
         btnBegin: "LATEN WE BEGINNEN",
-        btnSharePlayLink: "KOPIEER PUBLIEKE LINK",
-        btnSharePlayDone: "✓ Link gekopieerd!",
         modeTitle: 'Kies je<span class="accent">spelmodus</span>',
         btnPlayOnline: "Online spelen",
         btnPlayBot: "Tegen bot spelen",
@@ -1801,11 +1759,8 @@
       en: {
         startTitleHtml: 'Who <span class="start-title-accent">Is</span> It?',
         startOnlineBadge: "ONLINE",
-        startTagline: "Public link — online 24/7, you don't need to be playing",
-        publicLinkLabel: "Anyone can play via this link:",
+        startTagline: "Guess the character · Play online",
         btnBegin: "LET'S BEGIN",
-        btnSharePlayLink: "COPY PUBLIC LINK",
-        btnSharePlayDone: "✓ Link copied!",
         modeTitle: 'Choose your<span class="accent">game mode</span>',
         btnPlayOnline: "Play online",
         btnPlayBot: "Play against bot",
