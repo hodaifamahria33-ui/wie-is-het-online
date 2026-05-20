@@ -2176,6 +2176,50 @@
       if (window.WieIsHetPlay) WieIsHetPlay.reset();
     }
 
+    function resetToStartScreen() {
+      clearCountdown();
+      busy = false;
+      resetGameScreen();
+      if (window.WieIsHetPlay && WieIsHetPlay.hideEndOverlay) WieIsHetPlay.hideEndOverlay();
+      leaveOnlineSession();
+      document.querySelectorAll("main.screen").forEach((el) => {
+        el.classList.add("hidden");
+        el.classList.remove(
+          "transition-out",
+          "transition-active",
+          "transition-in-from-right",
+          "transition-in-from-left"
+        );
+      });
+      if (screenPhotoLoad) screenPhotoLoad.classList.add("hidden");
+      if (screenStart) screenStart.classList.remove("hidden");
+    }
+
+    window.wieResetToStart = resetToStartScreen;
+
+    function cleanLegacyUrlParams() {
+      const params = new URLSearchParams(window.location.search);
+      let changed = false;
+      ["speel", "play", "auto"].forEach((key) => {
+        if (params.has(key)) {
+          params.delete(key);
+          changed = true;
+        }
+      });
+      if (changed) {
+        const q = params.toString();
+        const next = window.location.pathname + (q ? "?" + q : "") + window.location.hash;
+        history.replaceState(null, "", next);
+      }
+    }
+
+    function joinCodeFromUrl() {
+      return String(new URLSearchParams(window.location.search).get("join") || "")
+        .toUpperCase()
+        .replace(/[^A-Z0-9]/g, "")
+        .slice(0, 5);
+    }
+
     function playAgainFromEnd() {
       if (window.WieIsHetPlay) WieIsHetPlay.hideEndOverlay();
       resetGameScreen();
@@ -2435,16 +2479,22 @@
       });
     });
 
+    cleanLegacyUrlParams();
+
     const publicPlayUrl = buildSharePlayUrl();
     const startPublicUrlEl = document.getElementById("start-public-url");
     if (startPublicUrlEl) startPublicUrlEl.textContent = publicPlayUrl;
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const linkCode = urlParams.get("join");
+    const linkCode = joinCodeFromUrl();
+    resetToStartScreen();
 
-    if (linkCode) {
+    if (linkCode.length >= 4) {
       joinViaLink(linkCode);
     }
+
+    window.addEventListener("pageshow", (event) => {
+      if (event.persisted) resetToStartScreen();
+    });
 
     const btnSharePlay = document.getElementById("btn-share-play");
     if (btnSharePlay) {
