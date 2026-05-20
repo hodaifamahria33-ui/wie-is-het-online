@@ -232,7 +232,14 @@
       addSystemLine(tFn("lobbyChatHint"));
       refreshAllPlayers();
       if (window.WieIsHetOnline) {
-        window.WieIsHetOnline.sendLobbyJoin(myName);
+        const sendJoin = () => {
+          if (window.WieIsHetOnline.isConnected && window.WieIsHetOnline.isConnected()) {
+            window.WieIsHetOnline.sendLobbyJoin(myName);
+          }
+        };
+        sendJoin();
+        setTimeout(sendJoin, 400);
+        setTimeout(sendJoin, 1200);
       }
     },
 

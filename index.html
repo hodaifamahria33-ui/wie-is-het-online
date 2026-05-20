@@ -230,7 +230,9 @@
         window.wieShowOnly("screen-lobby");
         window.wieInitLobby("host");
         if (window.WieIsHetOnline && window.WieIsHetOnline.setupHost) {
-          window.WieIsHetOnline.setupHost(code).catch(function () {});
+          window.WieIsHetOnline.setupHost(code).catch(function (e) {
+            console.warn("setupHost", e);
+          });
         }
       }
       if (load) {
@@ -259,8 +261,7 @@
         formHost: document.getElementById("lobby-chat-form"),
         formGuest: document.getElementById("joined-chat-form"),
       });
-      if (role === "guest" && window.WieLobby.onOpenAsGuest) window.WieLobby.onOpenAsGuest();
-      else if (window.WieLobby.onOpenAsHost) window.WieLobby.onOpenAsHost();
+      if (role === "host" && window.WieLobby.onOpenAsHost) window.WieLobby.onOpenAsHost();
     };
     window.wieSendChat = function (inputEl) {
       var input =
@@ -310,10 +311,21 @@
         if (joinedCode) joinedCode.textContent = code;
         window.wieShowOnly("screen-joined");
         window.wieInitLobby("guest");
-        if (window.WieIsHetOnline && window.WieIsHetOnline.setupGuest) {
-          if (window.WieIsHetOnline.reset) window.WieIsHetOnline.reset();
-          window.WieIsHetOnline.setupGuest(code).catch(function () {});
-        }
+        var status = document.getElementById("joined-status");
+        if (status) status.textContent = window.wieMsg("joinConnecting");
+        var tries = 0;
+        (function waitConnect() {
+          if (window.wieApp && window.wieApp.connectGuest) {
+            window.wieApp.connectGuest(code).catch(function () {
+              if (status) {
+                status.textContent = window.wieMsg("joinFailed");
+                status.classList.add("error");
+              }
+            });
+            return;
+          }
+          if (++tries < 120) setTimeout(waitConnect, 50);
+        })();
       }
       if (load) {
         window.wieShowOnly("screen-photo-load");
@@ -2240,7 +2252,7 @@
   </main>
 
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
-  <script src="assets/game/online-room.js?v=40"></script>
+  <script src="assets/game/online-room.js?v=41"></script>
   <script src="assets/game/lobby-room.js?v=40"></script>
   <script src="assets/game/character-traits.js?v=40"></script>
   <script src="assets/game/game-play.js?v=40"></script>
@@ -2275,7 +2287,8 @@
         joinedHint: "Wacht tot de host het spel start",
         joinConnecting: "Verbinden met host…",
         joinConnected: "Verbonden! Wacht tot de host START GAME drukt.",
-        joinFailed: "Kon host niet bereiken. Vraag een nieuwe link of probeer opnieuw.",
+        joinFailed: "Kon host niet bereiken. Host moet eerst een potje maken en in de lobby blijven.",
+        joinFailedHint: "Zelfde code · zelfde link (hodaifamahria33-ui.github.io). WiFi aan, geen privé-tab.",
         btnJoinRetry: "OPNIEUW VERBINDEN",
         lobbyTitle: 'Je potje is<span class="accent">klaar!</span>',
         lobbyHint: "Stuur deze link naar je vrienden — zij joinen automatisch",
@@ -2366,7 +2379,8 @@
         joinedHint: "Wait for the host to start the game",
         joinConnecting: "Connecting to host…",
         joinConnected: "Connected! Wait for the host to press START GAME.",
-        joinFailed: "Could not reach the host. Ask for a new link or try again.",
+        joinFailed: "Could not reach the host. Host must create a game and stay in the lobby.",
+        joinFailedHint: "Same code · same link. Use WiFi, not a private browser tab.",
         btnJoinRetry: "RECONNECT",
         lobbyTitle: 'Your game is<span class="accent">ready!</span>',
         lobbyHint: "Send this link to your friends — they join automatically",
@@ -3043,7 +3057,9 @@
 
     function setJoinedStatus(key, isError) {
       if (!joinedStatus) return;
-      joinedStatus.textContent = t(key);
+      let text = t(key);
+      if (isError && t("joinFailedHint")) text += " " + t("joinFailedHint");
+      joinedStatus.textContent = text;
       joinedStatus.classList.toggle("error", !!isError);
       if (btnJoinRetry) btnJoinRetry.classList.toggle("hidden", !isError);
     }
@@ -3053,23 +3069,29 @@
       if (!c || !window.WieIsHetOnline) throw new Error("no-online");
       setJoinedStatus("joinConnecting", false);
       if (btnJoinRetry) btnJoinRetry.classList.add("hidden");
-      const maxAttempts = 15;
+      const maxAttempts = 20;
+      let lastErr = null;
       for (let attempt = 0; attempt < maxAttempts; attempt++) {
         try {
           WieIsHetOnline.reset();
           await WieIsHetOnline.setupGuest(c);
+          if (!WieIsHetOnline.isConnected()) {
+            throw new Error("not-connected");
+          }
           sessionMode = "guest";
           sessionCode = c;
           setJoinedStatus("joinConnected", false);
           wireGuestOnline();
-          if (window.WieLobby) WieLobby.onOpenAsGuest();
           return true;
         } catch (e) {
+          lastErr = e;
+          console.warn("join attempt", attempt + 1, e);
           if (attempt >= maxAttempts - 1) throw e;
-          await new Promise((r) => setTimeout(r, 2000));
+          setJoinedStatus("joinConnecting", false);
+          await new Promise((r) => setTimeout(r, 1800));
         }
       }
-      return false;
+      throw lastErr || new Error("join-failed");
     }
 
     function showJoinedScreen(code) {
@@ -3329,6 +3351,7 @@
       },
       makePot: doMakePot,
       joinWithCode: doJoinWithCode,
+      connectGuest: connectGuestWithRetry,
       startBotGame,
       startSoloGame,
       startGameSession,

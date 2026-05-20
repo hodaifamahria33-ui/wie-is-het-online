@@ -3,12 +3,27 @@
  */
 (function () {
   const PEER_PREFIX = "wieishet-";
+  const PEER_TIMEOUT_MS = 22000;
+  const CONN_TIMEOUT_MS = 22000;
+
+  const PEER_OPTS = {
+    debug: 0,
+    config: {
+      iceServers: [
+        { urls: "stun:stun.l.google.com:19302" },
+        { urls: "stun:stun1.l.google.com:19302" },
+        { urls: "stun:stun.cloudflare.com:3478" },
+      ],
+    },
+  };
+
   let peer = null;
   let conn = null;
   let role = null;
   let roomCode = null;
   let connected = false;
   const listeners = new Set();
+  const pendingOutbox = [];
 
   function sanitizeCode(code) {
     return String(code || "")
@@ -31,21 +46,77 @@
     });
   }
 
+  function flushOutbox() {
+    if (!conn || !conn.open) return;
+    while (pendingOutbox.length) {
+      const data = pendingOutbox.shift();
+      try {
+        conn.send(data);
+      } catch (e) {
+        console.warn("flush send failed", e);
+        pendingOutbox.unshift(data);
+        break;
+      }
+    }
+  }
+
   function send(data) {
-    if (!conn || !conn.open) return false;
+    if (!conn || !conn.open) {
+      pendingOutbox.push(data);
+      return false;
+    }
     try {
       conn.send(data);
       return true;
     } catch (e) {
       console.warn("send failed", e);
+      pendingOutbox.push(data);
       return false;
     }
+  }
+
+  function waitForConnectionOpen(connection, ms) {
+    return new Promise((resolve, reject) => {
+      if (!connection) {
+        reject(new Error("no-connection"));
+        return;
+      }
+      if (connection.open) {
+        resolve();
+        return;
+      }
+      const timeout = setTimeout(() => reject(new Error("conn-timeout")), ms);
+      const onOpen = () => {
+        clearTimeout(timeout);
+        cleanup();
+        resolve();
+      };
+      const onError = (err) => {
+        clearTimeout(timeout);
+        cleanup();
+        reject(err || new Error("conn-error"));
+      };
+      const onClose = () => {
+        clearTimeout(timeout);
+        cleanup();
+        reject(new Error("conn-closed"));
+      };
+      function cleanup() {
+        connection.off("open", onOpen);
+        connection.off("error", onError);
+        connection.off("close", onClose);
+      }
+      connection.on("open", onOpen);
+      connection.on("error", onError);
+      connection.on("close", onClose);
+    });
   }
 
   function wireConnection(c) {
     conn = c;
     conn.on("open", () => {
       connected = true;
+      flushOutbox();
       emit({ type: "connected" });
     });
     conn.on("data", (data) => emit(data));
@@ -58,6 +129,7 @@
 
   function destroyPeer() {
     connected = false;
+    pendingOutbox.length = 0;
     if (conn) {
       try {
         conn.close();
@@ -72,6 +144,28 @@
     }
   }
 
+  function waitForPeerOpen(peerInstance, ms) {
+    return new Promise((resolve, reject) => {
+      if (!peerInstance) {
+        reject(new Error("no-peer"));
+        return;
+      }
+      if (peerInstance.open) {
+        resolve();
+        return;
+      }
+      const timeout = setTimeout(() => reject(new Error("peer-timeout")), ms);
+      peerInstance.once("open", () => {
+        clearTimeout(timeout);
+        resolve();
+      });
+      peerInstance.once("error", (err) => {
+        clearTimeout(timeout);
+        reject(err || new Error("peer-error"));
+      });
+    });
+  }
+
   function createHost(code) {
     return new Promise((resolve, reject) => {
       destroyPeer();
@@ -81,20 +175,22 @@
         reject(new Error("empty-code"));
         return;
       }
-      peer = new Peer(peerId(roomCode), { debug: 0 });
-      const timeout = setTimeout(() => reject(new Error("timeout")), 12000);
-      peer.on("open", () => {
-        clearTimeout(timeout);
-        peer.on("connection", (c) => {
-          if (conn && conn.open) return;
-          wireConnection(c);
-        });
-        resolve({ role, roomCode });
+      const id = peerId(roomCode);
+      peer = new Peer(id, { ...PEER_OPTS });
+
+      peer.on("connection", (incoming) => {
+        if (conn && conn.open) {
+          try {
+            incoming.close();
+          } catch (_) {}
+          return;
+        }
+        wireConnection(incoming);
       });
-      peer.on("error", (err) => {
-        clearTimeout(timeout);
-        reject(err);
-      });
+
+      waitForPeerOpen(peer, PEER_TIMEOUT_MS)
+        .then(() => resolve({ role, roomCode }))
+        .catch(reject);
     });
   }
 
@@ -107,18 +203,25 @@
         reject(new Error("empty-code"));
         return;
       }
-      peer = new Peer({ debug: 0 });
-      const timeout = setTimeout(() => reject(new Error("timeout")), 12000);
-      peer.on("open", () => {
-        clearTimeout(timeout);
-        const c = peer.connect(peerId(roomCode), { reliable: true });
-        wireConnection(c);
-        resolve({ role, roomCode });
-      });
-      peer.on("error", (err) => {
-        clearTimeout(timeout);
-        reject(err);
-      });
+
+      peer = new Peer({ ...PEER_OPTS });
+
+      waitForPeerOpen(peer, PEER_TIMEOUT_MS)
+        .then(() => {
+          const targetId = peerId(roomCode);
+          const c = peer.connect(targetId, { reliable: true });
+          return waitForConnectionOpen(c, CONN_TIMEOUT_MS).then(() => {
+            wireConnection(c);
+            if (c.open) {
+              connected = true;
+              flushOutbox();
+              emit({ type: "connected" });
+            }
+            return { role, roomCode };
+          });
+        })
+        .then(resolve)
+        .catch(reject);
     });
   }
 
@@ -126,7 +229,7 @@
     sanitizeCode,
     getRole: () => role,
     getRoomCode: () => roomCode,
-    isConnected: () => connected,
+    isConnected: () => connected && !!(conn && conn.open),
     isOnline: () => role === "host" || role === "guest",
     isHost: () => role === "host",
     isGuest: () => role === "guest",
