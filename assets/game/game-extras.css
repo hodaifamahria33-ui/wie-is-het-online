@@ -5,24 +5,9 @@
   align-items: center;
   justify-content: center;
   gap: clamp(10px, 2.5vw, 22px);
-  width: var(--game-board-width) !important;
-  max-width: 96vw !important;
+  width: auto !important;
+  max-width: min(99vw, calc(var(--game-board-width) + 300px)) !important;
   margin: 0 auto;
-  flex-wrap: wrap;
-}
-
-@media (max-width: 900px) {
-  #game-table .player-play-area {
-    flex-direction: column !important;
-    align-items: center !important;
-    width: var(--game-board-width) !important;
-    max-width: 96vw !important;
-  }
-
-  #game-table .opponent-chest {
-    order: 2;
-    margin-top: 0.35rem;
-  }
 }
 
 #game-table .board-stack {

@@ -1904,8 +1904,6 @@
       });
     }
 
-    ensureStartScreenVisible();
-
     const screenBotDiff = document.getElementById("screen-bot-diff");
     const screenMenu = document.getElementById("screen-menu");
     const screenHost = document.getElementById("screen-host");
@@ -2130,38 +2128,23 @@
       if (window.WieIsHetPlay) WieIsHetPlay.reset();
     }
 
-    function ensureStartScreenVisible() {
+    function resetToStartScreen() {
       clearCountdown();
       busy = false;
-      if (gameCountdown) gameCountdown.classList.add("hidden");
-      if (gameTable) gameTable.classList.add("hidden");
-      if (screenPhotoLoad) screenPhotoLoad.classList.add("hidden");
+      resetGameScreen();
+      if (window.WieIsHetPlay && WieIsHetPlay.hideEndOverlay) WieIsHetPlay.hideEndOverlay();
+      leaveOnlineSession();
       document.querySelectorAll("main.screen").forEach((el) => {
+        el.classList.add("hidden");
         el.classList.remove(
           "transition-out",
           "transition-active",
           "transition-in-from-right",
           "transition-in-from-left"
         );
-        if (el === screenStart) el.classList.remove("hidden");
-        else el.classList.add("hidden");
       });
-    }
-
-    function resetToStartScreen() {
-      try {
-        resetGameScreen();
-        if (window.WieIsHetPlay && WieIsHetPlay.hideEndOverlay) WieIsHetPlay.hideEndOverlay();
-        if (window.WieIsHetPlay && WieIsHetPlay.reset) WieIsHetPlay.reset();
-      } catch (err) {
-        console.warn("reset play", err);
-      }
-      try {
-        leaveOnlineSession();
-      } catch (err) {
-        console.warn("leave online", err);
-      }
-      ensureStartScreenVisible();
+      if (screenPhotoLoad) screenPhotoLoad.classList.add("hidden");
+      if (screenStart) screenStart.classList.remove("hidden");
     }
 
     window.wieResetToStart = resetToStartScreen;
@@ -2450,14 +2433,14 @@
     cleanLegacyUrlParams();
 
     const linkCode = joinCodeFromUrl();
+    resetToStartScreen();
+
     if (linkCode.length >= 4) {
       joinViaLink(linkCode);
-    } else {
-      ensureStartScreenVisible();
     }
 
     window.addEventListener("pageshow", (event) => {
-      if (event.persisted) ensureStartScreenVisible();
+      if (event.persisted) resetToStartScreen();
     });
 
     document.getElementById("btn-make-pot").addEventListener("click", () => {
