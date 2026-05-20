@@ -146,8 +146,8 @@
     sendSecretReady() {
       return send({ type: "secretReady" });
     },
-    sendFlip(index) {
-      return send({ type: "flip", index });
+    sendFlip(index, isDown) {
+      return send({ type: "flip", index, isDown: isDown !== false });
     },
     sendTurnHandoff() {
       return send({ type: "turnHandoff" });

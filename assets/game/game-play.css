@@ -142,13 +142,26 @@
   transform: rotateX(80deg) translateY(10%);
 }
 
-.card-tile.flip-anim {
+.card-tile.flip-anim-down {
   animation: cardFlipDown 0.45s ease forwards;
+}
+
+.card-tile.flip-anim-up {
+  animation: cardFlipUp 0.45s ease forwards;
 }
 
 @keyframes cardFlipDown {
   0% { transform: rotateX(-13deg); }
   100% { transform: rotateX(80deg) translateY(10%); }
+}
+
+@keyframes cardFlipUp {
+  0% { transform: rotateX(80deg) translateY(10%); }
+  100% { transform: rotateX(-13deg); }
+}
+
+.card-well.interactive:hover .card-tile.is-down {
+  filter: brightness(1.12);
 }
 
 .opponent-zone.turn-active {

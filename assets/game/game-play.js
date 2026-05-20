@@ -106,13 +106,16 @@
 
   function flipWell(well, anim) {
     const tile = well.querySelector(".card-tile");
-    if (!tile || tile.classList.contains("is-down")) return false;
+    if (!tile || tile.classList.contains("is-down") || tile.classList.contains("revealed-secret")) {
+      return false;
+    }
     if (anim) {
-      tile.classList.add("flip-anim");
+      tile.classList.remove("flip-anim-up");
+      tile.classList.add("flip-anim-down");
       tile.addEventListener(
         "animationend",
         () => {
-          tile.classList.remove("flip-anim");
+          tile.classList.remove("flip-anim-down");
           tile.classList.add("is-down");
         },
         { once: true }
@@ -123,9 +126,48 @@
     return true;
   }
 
-  function flipOpponentAt(index, anim) {
+  function unflipWell(well, anim) {
+    const tile = well.querySelector(".card-tile");
+    if (!tile || !tile.classList.contains("is-down") || tile.classList.contains("revealed-secret")) {
+      return false;
+    }
+    if (anim) {
+      tile.classList.remove("flip-anim-down");
+      tile.classList.add("flip-anim-up");
+      tile.addEventListener(
+        "animationend",
+        () => {
+          tile.classList.remove("flip-anim-up", "is-down");
+        },
+        { once: true }
+      );
+    } else {
+      tile.classList.remove("is-down", "flip-anim-down", "flip-anim-up");
+    }
+    return true;
+  }
+
+  /** @returns {"down"|"up"|null} */
+  function togglePlayerWell(well, anim) {
+    const tile = well.querySelector(".card-tile");
+    if (!tile || tile.classList.contains("revealed-secret")) return null;
+    if (tile.classList.contains("is-down")) {
+      return unflipWell(well, anim) ? "up" : null;
+    }
+    return flipWell(well, anim) ? "down" : null;
+  }
+
+  function syncPlayerFlipOnline(index, isDown) {
+    if (state.online && window.WieIsHetOnline) {
+      window.WieIsHetOnline.sendFlip(index, isDown);
+    }
+  }
+
+  function flipOpponentAt(index, anim, isDown) {
     const well = state.opponentWells[index];
-    if (well) flipWell(well, anim);
+    if (!well) return;
+    if (isDown === false) unflipWell(well, anim);
+    else flipWell(well, anim);
   }
 
   function cloneCardToSecret(well) {
@@ -295,7 +337,7 @@
     refreshWells();
     state.playerWells.forEach((w, i) => {
       const tile = w.querySelector(".card-tile");
-      if (tile && !tile.classList.contains("is-down") && i !== state.secretIndex) {
+      if (tile && i !== state.secretIndex && !tile.classList.contains("revealed-secret")) {
         w.classList.add("interactive");
       } else {
         w.classList.remove("interactive");
@@ -837,36 +879,18 @@
       return;
     }
 
-    if (state.phase === PHASE.MY_TURN) {
-      if (!flipWell(well, true)) return;
-      if (state.online && window.WieIsHetOnline) {
-        window.WieIsHetOnline.sendFlip(index);
-      }
-      endPlayerTurnAfterFlip();
-      return;
-    }
+    if (index === state.secretIndex) return;
 
     if (
+      state.phase === PHASE.MY_TURN ||
       state.phase === PHASE.ANSWER_QUESTION ||
-      state.phase === PHASE.POST_ANSWER_SWITCH
-    ) {
-      if (index === state.secretIndex) return;
-      if (!flipWell(well, true)) return;
-      if (state.online && window.WieIsHetOnline) {
-        window.WieIsHetOnline.sendFlip(index);
-      }
-      return;
-    }
-
-    if (
+      state.phase === PHASE.POST_ANSWER_SWITCH ||
       state.phase === PHASE.POST_ANSWER_FLIP_RUSH ||
       state.phase === PHASE.POST_ANSWER_FLIP_FREE
     ) {
-      if (index === state.secretIndex) return;
-      if (!flipWell(well, true)) return;
-      if (state.online && window.WieIsHetOnline) {
-        window.WieIsHetOnline.sendFlip(index);
-      }
+      const result = togglePlayerWell(well, true);
+      if (!result) return;
+      syncPlayerFlipOnline(index, result === "down");
     }
   }
 
@@ -877,7 +901,8 @@
       maybeBothSecretsReady();
     }
     if (msg.type === "flip" && typeof msg.index === "number") {
-      flipOpponentAt(msg.index, true);
+      const isDown = msg.isDown !== false;
+      flipOpponentAt(msg.index, true, isDown);
       if (opponentZone) opponentZone.classList.remove("turn-active");
     }
     if (msg.type === "question" && msg.questionText) {
