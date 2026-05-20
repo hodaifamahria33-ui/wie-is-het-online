@@ -175,14 +175,14 @@
   padding-bottom: 20px;
   box-sizing: content-box;
   z-index: 28;
-  transform: translateY(-54%) translateX(var(--secret-card-offset-x, 44px)) scale(0.94);
+  transform: translateY(-54%) translateX(var(--secret-card-offset-x, 88px)) scale(0.94);
   opacity: 0;
   pointer-events: none;
 }
 
 #game-table .secret-card-slot.visible {
   opacity: 1;
-  transform: translateY(-54%) translateX(var(--secret-card-offset-x, 44px)) scale(1);
+  transform: translateY(-54%) translateX(var(--secret-card-offset-x, 88px)) scale(1);
   pointer-events: none;
 }
 
