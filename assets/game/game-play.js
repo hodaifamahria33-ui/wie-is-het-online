@@ -175,7 +175,11 @@
 
   function cloneCardToSecret(well) {
     if (!secretSlot) return;
-    secretSlot.innerHTML = "";
+    Array.from(secretSlot.children).forEach((child) => {
+      if (!child.classList.contains("secret-card-pedestal")) {
+        child.remove();
+      }
+    });
     const face = well.querySelector(".card-face");
     if (!face) return;
     secretSlot.appendChild(face.cloneNode(true));
@@ -1006,7 +1010,11 @@
     state.usedQuestions = [];
     clearPostAnswerTimers();
     if (secretSlot) {
-      secretSlot.innerHTML = "";
+      Array.from(secretSlot.children).forEach((child) => {
+        if (!child.classList.contains("secret-card-pedestal")) {
+          child.remove();
+        }
+      });
       secretSlot.classList.remove("visible");
     }
     if (winOverlay) {
@@ -1128,7 +1136,11 @@
     hideQuestionPanel();
     hideOpponentAnswer();
     if (secretSlot) {
-      secretSlot.innerHTML = "";
+      Array.from(secretSlot.children).forEach((child) => {
+        if (!child.classList.contains("secret-card-pedestal")) {
+          child.remove();
+        }
+      });
       secretSlot.classList.remove("visible");
     }
     hideEndOverlay();

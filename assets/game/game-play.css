@@ -81,24 +81,26 @@
 }
 
 .secret-card-slot {
-  position: absolute;
+  position: fixed;
   left: auto;
-  right: clamp(4px, 1vw, 12px);
-  top: 50%;
-  width: clamp(80px, 13vw, 132px);
+  right: max(10px, env(safe-area-inset-right, 8px));
+  top: 52%;
+  width: clamp(102px, 11.5vw, 142px);
   margin: 0;
+  padding-bottom: 20px;
+  box-sizing: content-box;
   opacity: 0;
-  transform: translateY(-50%) scale(0.85);
+  transform: translateY(-54%) scale(0.88);
   transition:
     opacity 0.5s cubic-bezier(0.34, 1.2, 0.64, 1),
     transform 0.5s cubic-bezier(0.34, 1.2, 0.64, 1);
   pointer-events: none;
-  z-index: 16;
+  z-index: 28;
 }
 
 .secret-card-slot.visible {
   opacity: 1;
-  transform: translateY(-50%) scale(1);
+  transform: translateY(-54%) scale(1);
 }
 
 .secret-card-slot .card-face {
