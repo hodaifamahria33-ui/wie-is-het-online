@@ -111,14 +111,9 @@
       function finish() {
         if (lobbyCode) lobbyCode.textContent = code;
         window.wieShowOnly("screen-lobby");
+        window.wieInitLobby("host");
         if (window.WieIsHetOnline && window.WieIsHetOnline.setupHost) {
-          window.WieIsHetOnline.setupHost(code).then(function () {
-            if (window.WieLobby && window.WieLobby.onOpenAsHost) window.WieLobby.onOpenAsHost();
-          }).catch(function () {
-            if (window.WieLobby && window.WieLobby.onOpenAsHost) window.WieLobby.onOpenAsHost();
-          });
-        } else if (window.WieLobby && window.WieLobby.onOpenAsHost) {
-          window.WieLobby.onOpenAsHost();
+          window.WieIsHetOnline.setupHost(code).catch(function () {});
         }
       }
       if (load) {
@@ -132,6 +127,55 @@
       } else {
         finish();
       }
+    };
+    window.wieInitLobby = function (role) {
+      if (!window.WieLobby) return;
+      window.WieLobby.init({
+        t: window.wieMsg,
+        role: role || "host",
+        playersHost: document.getElementById("lobby-players"),
+        playersGuest: document.getElementById("joined-players"),
+        chatHost: document.getElementById("lobby-chat-messages"),
+        chatGuest: document.getElementById("joined-chat-messages"),
+        inputHost: document.getElementById("lobby-chat-input"),
+        inputGuest: document.getElementById("joined-chat-input"),
+        formHost: document.getElementById("lobby-chat-form"),
+        formGuest: document.getElementById("joined-chat-form"),
+      });
+      if (role === "guest" && window.WieLobby.onOpenAsGuest) window.WieLobby.onOpenAsGuest();
+      else if (window.WieLobby.onOpenAsHost) window.WieLobby.onOpenAsHost();
+    };
+    window.wieSendChat = function (inputEl) {
+      var input =
+        inputEl ||
+        document.getElementById("lobby-chat-input") ||
+        document.getElementById("joined-chat-input");
+      if (!input) return;
+      var text = String(input.value || "").trim();
+      if (!text) return;
+      if (window.WieLobby && window.WieLobby.sendMessage) {
+        window.WieLobby.sendMessage(text);
+      } else {
+        var hostBox = document.getElementById("lobby-chat-messages");
+        var guestBox = document.getElementById("joined-chat-messages");
+        var lobbyEl = document.getElementById("screen-lobby");
+        var joinedEl = document.getElementById("screen-joined");
+        var box = hostBox || guestBox;
+        if (joinedEl && guestBox && !joinedEl.classList.contains("hidden")) box = guestBox;
+        else if (lobbyEl && hostBox && !lobbyEl.classList.contains("hidden")) box = hostBox;
+        if (box) {
+          var line = document.createElement("div");
+          line.className = "lobby-chat-line lobby-chat-line--mine";
+          line.textContent = text;
+          box.appendChild(line);
+          box.scrollTop = box.scrollHeight;
+        }
+        if (window.WieIsHetOnline && window.WieIsHetOnline.sendLobbyChat) {
+          window.WieIsHetOnline.sendLobbyChat(text, "Speler");
+        }
+      }
+      input.value = "";
+      input.focus();
     };
     window.wieJoinWithCode = function () {
       if (window.wieApp && window.wieApp.joinWithCode) return window.wieApp.joinWithCode();
@@ -148,11 +192,10 @@
       function finish() {
         if (joinedCode) joinedCode.textContent = code;
         window.wieShowOnly("screen-joined");
+        window.wieInitLobby("guest");
         if (window.WieIsHetOnline && window.WieIsHetOnline.setupGuest) {
           if (window.WieIsHetOnline.reset) window.WieIsHetOnline.reset();
-          window.WieIsHetOnline.setupGuest(code).then(function () {
-            if (window.WieLobby && window.WieLobby.onOpenAsGuest) window.WieLobby.onOpenAsGuest();
-          }).catch(function () {});
+          window.WieIsHetOnline.setupGuest(code).catch(function () {});
         }
       }
       if (load) {
@@ -879,6 +922,8 @@
     }
 
     .lobby-layout {
+      position: relative;
+      z-index: 5;
       display: flex;
       flex-direction: row;
       align-items: stretch;
@@ -889,6 +934,13 @@
         max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
       gap: 0;
       box-sizing: border-box;
+      pointer-events: auto;
+    }
+
+    .screen-lobby .glow,
+    .screen-joined .glow {
+      z-index: 1;
+      pointer-events: none;
     }
 
     .lobby-sidebar {
@@ -1026,10 +1078,20 @@
       padding: 0.55rem 0.65rem;
       border: 2px solid rgba(139, 92, 246, 0.25);
       border-radius: 10px;
-      font-size: 0.9rem;
+      font-size: 16px;
       font-family: inherit;
       background: #fff;
       color: #3d2d5c;
+      pointer-events: auto;
+      touch-action: manipulation;
+      -webkit-user-select: text;
+      user-select: text;
+    }
+
+    .lobby-chat-input:focus {
+      outline: none;
+      border-color: #8b5cf6;
+      box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.25);
     }
 
     .lobby-chat-send {
@@ -1866,8 +1928,8 @@
           <h3 class="lobby-sidebar-title" data-i18n="lobbyChatTitle">Chat</h3>
           <div id="joined-chat-messages" class="lobby-chat-messages" aria-live="polite"></div>
           <form id="joined-chat-form" class="lobby-chat-form">
-            <input id="joined-chat-input" class="lobby-chat-input" type="text" maxlength="200" autocomplete="off" data-i18n-placeholder="lobbyChatPlaceholder" placeholder="Typ een bericht…" />
-            <button type="submit" class="lobby-chat-send" aria-label="Verstuur">➤</button>
+            <input id="joined-chat-input" class="lobby-chat-input" type="text" maxlength="200" autocomplete="off" data-i18n-placeholder="lobbyChatPlaceholder" placeholder="Typ een bericht…" onkeydown="if(event.key==='Enter'){event.preventDefault();window.wieSendChat(this);}" />
+            <button type="button" class="lobby-chat-send" aria-label="Verstuur" onclick="window.wieSendChat(document.getElementById('joined-chat-input'))">➤</button>
           </form>
         </div>
       </aside>
@@ -1895,8 +1957,8 @@
           <h3 class="lobby-sidebar-title" data-i18n="lobbyChatTitle">Chat</h3>
           <div id="lobby-chat-messages" class="lobby-chat-messages" aria-live="polite"></div>
           <form id="lobby-chat-form" class="lobby-chat-form">
-            <input id="lobby-chat-input" class="lobby-chat-input" type="text" maxlength="200" autocomplete="off" data-i18n-placeholder="lobbyChatPlaceholder" placeholder="Typ een bericht…" />
-            <button type="submit" class="lobby-chat-send" aria-label="Verstuur">➤</button>
+            <input id="lobby-chat-input" class="lobby-chat-input" type="text" maxlength="200" autocomplete="off" data-i18n-placeholder="lobbyChatPlaceholder" placeholder="Typ een bericht…" onkeydown="if(event.key==='Enter'){event.preventDefault();window.wieSendChat(this);}" />
+            <button type="button" class="lobby-chat-send" aria-label="Verstuur" onclick="window.wieSendChat(document.getElementById('lobby-chat-input'))">➤</button>
           </form>
         </div>
       </aside>
@@ -2032,8 +2094,8 @@
   </main>
 
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
-  <script src="assets/game/online-room.js?v=19"></script>
-  <script src="assets/game/lobby-room.js?v=19"></script>
+  <script src="assets/game/online-room.js?v=20"></script>
+  <script src="assets/game/lobby-room.js?v=20"></script>
   <script src="assets/game/character-traits.js?v=19"></script>
   <script src="assets/game/game-play.js?v=19"></script>
 
@@ -2496,6 +2558,7 @@
 
     function initLobbySocial(role) {
       if (!window.WieLobby) return;
+      window.wieInitLobby = initLobbySocial;
       WieLobby.init({
         t,
         role,
@@ -2512,9 +2575,9 @@
 
     function wireHostLobby() {
       if (onlineGameUnsub) onlineGameUnsub();
-      if (!window.WieIsHetOnline) return;
       initLobbySocial("host");
       WieLobby.onOpenAsHost();
+      if (!window.WieIsHetOnline) return;
       onlineGameUnsub = WieIsHetOnline.onMessage((msg) => {
         if (window.WieLobby && WieLobby.handleMessage(msg)) return;
         if (msg.type === "gameStart") {
@@ -2531,8 +2594,9 @@
 
     function wireGuestOnline() {
       if (onlineGameUnsub) onlineGameUnsub();
-      if (!window.WieIsHetOnline) return;
       initLobbySocial("guest");
+      WieLobby.onOpenAsGuest();
+      if (!window.WieIsHetOnline) return;
       onlineGameUnsub = WieIsHetOnline.onMessage((msg) => {
         if (window.WieLobby && WieLobby.handleMessage(msg)) return;
         if (msg.type === "gameStart") {

@@ -97,22 +97,60 @@
     renderPlayers(ui.playersGuest, false);
   }
 
+  function chatBoxForRole() {
+    if (role === "host") return ui.chatHost;
+    if (role === "guest") return ui.chatGuest;
+    return ui.chatHost || ui.chatGuest;
+  }
+
   function sendChat(text) {
     const trimmed = String(text || "").trim().slice(0, 200);
-    if (!trimmed || !window.WieIsHetOnline) return;
-    window.WieIsHetOnline.sendLobbyChat(trimmed, myName);
-    const box = role === "host" ? ui.chatHost : ui.chatGuest;
+    if (!trimmed) return;
+    const box = chatBoxForRole();
+    if (window.WieIsHetOnline && typeof window.WieIsHetOnline.sendLobbyChat === "function") {
+      window.WieIsHetOnline.sendLobbyChat(trimmed, myName);
+    }
     appendChatLine(box, trimmed, myName, true);
   }
 
   function bindChatForm(form, input) {
     if (!form || !input) return;
+    if (form.dataset.wieChatBound === "1") return;
+    form.dataset.wieChatBound = "1";
+    input.disabled = false;
+    input.readOnly = false;
+    input.removeAttribute("disabled");
+    input.removeAttribute("readonly");
     form.addEventListener("submit", (e) => {
       e.preventDefault();
       sendChat(input.value);
       input.value = "";
       input.focus();
     });
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        sendChat(input.value);
+        input.value = "";
+      }
+    });
+  }
+
+  function ensureChatBound() {
+    bindChatForm(ui.formHost, ui.inputHost);
+    bindChatForm(ui.formGuest, ui.inputGuest);
+    if (!ui.formHost || !ui.inputHost) {
+      bindChatForm(
+        document.getElementById("lobby-chat-form"),
+        document.getElementById("lobby-chat-input")
+      );
+    }
+    if (!ui.formGuest || !ui.inputGuest) {
+      bindChatForm(
+        document.getElementById("joined-chat-form"),
+        document.getElementById("joined-chat-input")
+      );
+    }
   }
 
   function addSystemLine(text) {
@@ -147,8 +185,11 @@
       ui.inputGuest = opts.inputGuest || null;
       ui.formHost = opts.formHost || null;
       ui.formGuest = opts.formGuest || null;
-      bindChatForm(ui.formHost, ui.inputHost);
-      bindChatForm(ui.formGuest, ui.inputGuest);
+      ensureChatBound();
+    },
+
+    sendMessage(text) {
+      sendChat(text);
     },
 
     reset() {
@@ -165,6 +206,12 @@
       guestOnline = false;
       guestName = null;
       if (ui.chatHost) ui.chatHost.innerHTML = "";
+      ensureChatBound();
+      if (ui.inputHost) {
+        ui.inputHost.disabled = false;
+        ui.inputHost.readOnly = false;
+        setTimeout(() => ui.inputHost.focus(), 100);
+      }
       addSystemLine(tFn("lobbyChatHint"));
       refreshAllPlayers();
     },
@@ -172,6 +219,12 @@
     onOpenAsGuest() {
       role = "guest";
       if (ui.chatGuest) ui.chatGuest.innerHTML = "";
+      ensureChatBound();
+      if (ui.inputGuest) {
+        ui.inputGuest.disabled = false;
+        ui.inputGuest.readOnly = false;
+        setTimeout(() => ui.inputGuest.focus(), 100);
+      }
       addSystemLine(tFn("lobbyChatHint"));
       refreshAllPlayers();
       if (window.WieIsHetOnline) {
