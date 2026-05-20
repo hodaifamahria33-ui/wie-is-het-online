@@ -18,12 +18,12 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Nunito:wght@600;700;800&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="assets/game/start-screen.css?v=45" />
-  <link rel="stylesheet" href="assets/game/premium-game.css?v=44" />
+  <link rel="stylesheet" href="assets/game/premium-game.css?v=45" />
   <link rel="stylesheet" href="assets/game/game-drawers.css?v=44" />
   <link rel="stylesheet" href="assets/game/game-hud.css?v=44" />
   <link rel="stylesheet" href="assets/game/game-layout.css?v=53" />
   <link rel="stylesheet" href="assets/game/character-variety.css?v=44" />
-  <link rel="stylesheet" href="assets/game/game-extras.css?v=53" />
+  <link rel="stylesheet" href="assets/game/game-extras.css?v=55" />
   <link rel="stylesheet" href="assets/game/game-play.css?v=53" />
   <meta name="description" content="wiehasit.com — gratis online Wie-is-het spel. Maak een potje, deel de code, raad het personage met vrienden of tegen de bot." />
   <meta name="keywords" content="wiehasit.com, wie has it, wie is het online, raadspel, gratis spel" />
@@ -183,6 +183,37 @@
           ? "Play Who Is It with me! Tap to join:\n" + url
           : "Speel Wie Is Het met me! Tik om mee te doen:\n" + url;
       window.open("https://wa.me/?text=" + encodeURIComponent(text), "_blank", "noopener");
+    };
+    window.wieGiveUpClick = function (ev) {
+      if (ev) {
+        ev.preventDefault();
+        ev.stopPropagation();
+      }
+      if (window.wieApp && window.wieApp.onGiveUp) return window.wieApp.onGiveUp();
+      var sg = document.getElementById("screen-game");
+      if (!sg || sg.classList.contains("hidden")) return;
+      var overlay = document.getElementById("win-overlay");
+      if (!overlay) return;
+      sg.classList.remove("game-give-up-pending", "give-up-shaking");
+      sg.classList.add("give-up-shaking");
+      window.setTimeout(function () {
+        sg.classList.remove("give-up-shaking");
+        sg.classList.add("game-give-up-pending");
+        var title = overlay.querySelector(".win-title");
+        var sub = overlay.querySelector(".win-sub");
+        var endActions = overlay.querySelector(".win-end-actions");
+        var giveUpActions = overlay.querySelector(".win-give-up-actions");
+        var reveal = overlay.querySelector(".lose-opponent-reveal");
+        var confetti = overlay.querySelector(".win-confetti");
+        if (reveal) reveal.classList.add("hidden");
+        if (endActions) endActions.classList.add("hidden");
+        if (confetti) confetti.style.display = "none";
+        if (title) title.textContent = window.wieMsg("giveUpTitle");
+        if (sub) sub.textContent = window.wieMsg("giveUpConfirm");
+        if (giveUpActions) giveUpActions.classList.remove("hidden");
+        overlay.classList.remove("hidden", "lose");
+        overlay.classList.add("active", "give-up");
+      }, 480);
     };
     window.wieStartGame = function () {
       if (window.wieApp && window.wieApp.startGame) return window.wieApp.startGame();
@@ -1926,7 +1957,7 @@
       position: fixed;
       top: max(14px, env(safe-area-inset-top));
       left: max(14px, env(safe-area-inset-left));
-      z-index: 35;
+      z-index: 450;
       background: #dc2626;
       color: #fff;
       border: none;
@@ -2335,25 +2366,30 @@
         <div class="table-surface table-surface--hidden" aria-hidden="true"></div>
       </div>
 
-      <div id="win-overlay" class="win-overlay hidden" role="dialog" aria-modal="true">
-        <div class="win-confetti" aria-hidden="true"></div>
-        <div class="win-card">
-          <p class="win-title">YOU WON!</p>
-          <p class="win-sub" data-i18n="winSub">Je raadde het personage!</p>
-          <div class="lose-opponent-reveal hidden" aria-hidden="true">
-            <p class="lose-reveal-label" data-i18n="opponentWas">Het was:</p>
-            <div class="lose-reveal-face"></div>
-            <p class="lose-reveal-name"></p>
-          </div>
-          <div class="win-end-actions hidden">
-            <button type="button" id="btn-play-again" class="btn-win-action btn-win-action--primary" data-i18n="btnPlayAgain">Opnieuw spelen</button>
-            <button type="button" id="btn-go-menu" class="btn-win-action btn-win-action--secondary" data-i18n="btnGoToMenu">Naar menu</button>
-          </div>
+    </section>
+
+    <div id="win-overlay" class="win-overlay hidden" role="dialog" aria-modal="true">
+      <div class="win-confetti" aria-hidden="true"></div>
+      <div class="win-card">
+        <p class="win-title">YOU WON!</p>
+        <p class="win-sub" data-i18n="winSub">Je raadde het personage!</p>
+        <div class="lose-opponent-reveal hidden" aria-hidden="true">
+          <p class="lose-reveal-label" data-i18n="opponentWas">Het was:</p>
+          <div class="lose-reveal-face"></div>
+          <p class="lose-reveal-name"></p>
+        </div>
+        <div class="win-end-actions hidden">
+          <button type="button" id="btn-play-again" class="btn-win-action btn-win-action--primary" data-i18n="btnPlayAgain">Opnieuw spelen</button>
+          <button type="button" id="btn-go-menu" class="btn-win-action btn-win-action--secondary" data-i18n="btnGoToMenu">Naar menu</button>
+        </div>
+        <div class="win-give-up-actions hidden">
+          <button type="button" id="btn-give-up-menu" class="btn-win-action btn-win-action--primary" data-i18n="giveUpGoMenu">Ja, naar menu</button>
+          <button type="button" id="btn-give-up-stay" class="btn-win-action btn-win-action--secondary" data-i18n="giveUpStay">Nee, verder spelen</button>
         </div>
       </div>
+    </div>
 
-      <button id="btn-give-up" class="btn-give-up" type="button" data-i18n="btnGiveUp">OPGEVEN</button>
-    </section>
+    <button id="btn-give-up" class="btn-give-up" type="button" data-i18n="btnGiveUp" onclick="window.wieGiveUpClick(event)">OPGEVEN</button>
 
     <aside id="secret-card-slot" class="secret-card-slot" aria-label="Jouw geheim personage">
       <div class="secret-card-pedestal" aria-hidden="true"></div>
@@ -2421,7 +2457,7 @@
   <script src="assets/game/online-room.js?v=42"></script>
   <script src="assets/game/lobby-room.js?v=40"></script>
   <script src="assets/game/character-traits.js?v=40"></script>
-  <script src="assets/game/game-play.js?v=40"></script>
+  <script src="assets/game/game-play.js?v=42"></script>
 
   <script>
     const I18N = {
@@ -2515,6 +2551,10 @@
         chestHint: "Tik om te raden",
         btnPlayAgain: "Opnieuw spelen",
         btnGoToMenu: "Naar menu",
+        giveUpTitle: "Opgeven?",
+        giveUpConfirm: "Wil je terug naar het menu?",
+        giveUpGoMenu: "Ja, naar menu",
+        giveUpStay: "Nee, verder spelen",
         errHostEmpty: "Kies een code (max 5 tekens)",
         errJoinEmpty: "Vul een potcode in",
         langAria: "Taal kiezen"
@@ -2609,6 +2649,10 @@
         chestHint: "Tap to guess",
         btnPlayAgain: "Play again",
         btnGoToMenu: "Go to menu",
+        giveUpTitle: "Give up?",
+        giveUpConfirm: "Do you want to go back to the menu?",
+        giveUpGoMenu: "Yes, go to menu",
+        giveUpStay: "No, keep playing",
         errHostEmpty: "Pick a code (max 5 characters)",
         errJoinEmpty: "Enter a game code",
         langAria: "Choose language"
@@ -3455,7 +3499,39 @@
     onClick("btn-copy-code", doCopyLink);
     onClick("btn-share-wa", doShareWa);
 
-    onClick("btn-give-up", () => {
+    function hideGiveUpDialog() {
+      const overlay = document.getElementById("win-overlay");
+      if (window.WieIsHetPlay && WieIsHetPlay.hideGiveUpConfirm) {
+        WieIsHetPlay.hideGiveUpConfirm();
+        return;
+      }
+      if (overlay) {
+        overlay.classList.add("hidden");
+        overlay.classList.remove("active", "give-up");
+        overlay.querySelector(".win-give-up-actions")?.classList.add("hidden");
+        const confetti = overlay.querySelector(".win-confetti");
+        if (confetti) confetti.style.display = "";
+      }
+      if (screenGame) {
+        screenGame.classList.remove("game-give-up-pending", "give-up-shaking");
+      }
+    }
+
+    function onGiveUpClick() {
+      if (!screenGame || screenGame.classList.contains("hidden")) return;
+      if (window.WieIsHetPlay && typeof WieIsHetPlay.showGiveUpConfirm === "function") {
+        try {
+          WieIsHetPlay.showGiveUpConfirm();
+          return;
+        } catch (err) {
+          console.warn("showGiveUpConfirm", err);
+        }
+      }
+      window.wieGiveUpClick();
+    }
+
+    function leaveGameAfterGiveUp() {
+      hideGiveUpDialog();
       resetGameScreen();
       if (sessionMode === "host") {
         transition(screenGame, screenLobby, "transition-in-from-left");
@@ -3465,7 +3541,13 @@
         leaveOnlineSession();
         transition(screenGame, screenMenu, "transition-in-from-left");
       }
-    });
+    }
+
+    onClick("btn-give-up", onGiveUpClick);
+
+    onClick("btn-give-up-menu", leaveGameAfterGiveUp);
+
+    onClick("btn-give-up-stay", hideGiveUpDialog);
 
     onClick("btn-play-again", playAgainFromEnd);
     onClick("btn-go-menu", goToMenuFromEnd);
@@ -3622,6 +3704,8 @@
       startGame: doStartGame,
       copyLink: doCopyLink,
       shareWa: doShareWa,
+      onGiveUp: onGiveUpClick,
+      hideGiveUp: hideGiveUpDialog,
     };
   </script>
 </body>

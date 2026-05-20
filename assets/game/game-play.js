@@ -1033,15 +1033,117 @@
     if (actions) actions.classList.remove("hidden");
   }
 
+  function hideGiveUpActions() {
+    const giveUpActions = winOverlay?.querySelector(".win-give-up-actions");
+    if (giveUpActions) giveUpActions.classList.add("hidden");
+    const confetti = winOverlay?.querySelector(".win-confetti");
+    if (confetti) confetti.style.display = "";
+  }
+
   function hideEndOverlay() {
     if (winOverlay) {
       winOverlay.classList.add("hidden");
-      winOverlay.classList.remove("active", "lose");
+      winOverlay.classList.remove("active", "lose", "give-up");
     }
     const actions = winOverlay?.querySelector(".win-end-actions");
     if (actions) actions.classList.add("hidden");
-    if (screenGame) screenGame.classList.remove("game-won");
+    hideGiveUpActions();
+    if (screenGame) {
+      screenGame.classList.remove("game-won", "give-up-shaking", "game-give-up-pending");
+    }
     clearOpponentReveal();
+  }
+
+  function showGiveUpConfirm() {
+    winOverlay = winOverlay || document.getElementById("win-overlay");
+    screenGame = screenGame || document.getElementById("screen-game");
+    if (!winOverlay || !screenGame) return;
+    if (screenGame.classList.contains("hidden")) return;
+    if (state.phase === PHASE.WON || state.phase === PHASE.LOST) return;
+
+    screenGame.classList.remove("game-give-up-pending", "give-up-shaking");
+    clearInteractivity();
+    screenGame.classList.add("give-up-shaking");
+
+    window.setTimeout(() => {
+      if (!winOverlay || !screenGame) return;
+      screenGame.classList.remove("give-up-shaking");
+      screenGame.classList.add("game-give-up-pending");
+
+      const title = winOverlay.querySelector(".win-title");
+      const sub = winOverlay.querySelector(".win-sub");
+      const reveal = winOverlay.querySelector(".lose-opponent-reveal");
+      const endActions = winOverlay.querySelector(".win-end-actions");
+      const giveUpActions = winOverlay.querySelector(".win-give-up-actions");
+      const confetti = winOverlay.querySelector(".win-confetti");
+
+      clearOpponentReveal();
+      if (reveal) reveal.classList.add("hidden");
+      if (endActions) endActions.classList.add("hidden");
+      if (confetti) confetti.style.display = "none";
+      if (title) title.textContent = tFn("giveUpTitle");
+      if (sub) sub.textContent = tFn("giveUpConfirm");
+      if (giveUpActions) giveUpActions.classList.remove("hidden");
+
+      winOverlay.classList.remove("hidden", "lose", "active");
+      void winOverlay.offsetWidth;
+      winOverlay.classList.add("active", "give-up");
+    }, 480);
+  }
+
+  function restoreAfterGiveUpCancel() {
+    if (!screenGame) return;
+    screenGame.classList.remove("game-give-up-pending");
+
+    switch (state.phase) {
+      case PHASE.PICK_SECRET:
+        if (state.secretIndex === null) {
+          state.playerWells.forEach((w) => w.classList.add("interactive"));
+        }
+        break;
+      case PHASE.MY_TURN:
+        enableMyFlips();
+        if (!state.askedThisTurn) showQuestionPanel("ask");
+        break;
+      case PHASE.POST_ANSWER_SWITCH:
+        enableCardFlips();
+        showPostAnswerPanel("switch");
+        break;
+      case PHASE.POST_ANSWER_FLIP_RUSH:
+        enableMyFlips();
+        showPostAnswerPanel("flip");
+        break;
+      case PHASE.POST_ANSWER_FLIP_FREE:
+        enableMyFlips();
+        showPostAnswerPanel("free");
+        break;
+      case PHASE.GUESS:
+        state.playerWells.forEach((w) => {
+          const tile = w.querySelector(".card-tile");
+          if (tile && !tile.classList.contains("is-down")) {
+            w.classList.add("guess-mode", "interactive");
+          }
+        });
+        break;
+      case PHASE.THEIR_TURN:
+        if (opponentZone) opponentZone.classList.add("turn-active");
+        break;
+      case PHASE.ANSWER_QUESTION:
+        showQuestionPanel("answer");
+        break;
+      default:
+        break;
+    }
+  }
+
+  function hideGiveUpConfirm() {
+    if (winOverlay) {
+      winOverlay.classList.add("hidden");
+      winOverlay.classList.remove("active", "give-up");
+    }
+    hideGiveUpActions();
+    if (screenGame) screenGame.classList.remove("give-up-shaking");
+    restoreAfterGiveUpCancel();
   }
 
   function showWin() {
@@ -1396,6 +1498,8 @@
     beginPickSecretPhase,
     reset,
     hideEndOverlay,
+    showGiveUpConfirm,
+    hideGiveUpConfirm,
     getPhase: () => state.phase,
     handleOnlineMessage: onOnlineMessage,
   };

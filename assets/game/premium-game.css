@@ -332,6 +332,11 @@
 }
 
 .screen-game-view .btn-give-up {
+  position: fixed;
+  top: max(14px, env(safe-area-inset-top));
+  left: max(14px, env(safe-area-inset-left));
+  z-index: 450;
+  pointer-events: auto;
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
