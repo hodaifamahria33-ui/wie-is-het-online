@@ -191,7 +191,6 @@
         appendChatLine(ui.chatHost, welcome, myName, true);
         return true;
       }
-      }
       if (msg.type === "lobbyChat") {
         const box = role === "host" ? ui.chatHost : ui.chatGuest;
         const from = msg.name || (msg.fromHost ? hostName : tFn("lobbyFriend"));

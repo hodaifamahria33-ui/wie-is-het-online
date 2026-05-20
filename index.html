@@ -51,11 +51,23 @@
       var mode = document.getElementById("screen-mode");
       if (!start || !mode) return;
       start.classList.add("hidden");
+      start.style.display = "";
       mode.classList.remove("hidden");
       ["transition-out", "transition-in-from-right", "transition-in-from-left", "transition-active"].forEach(function (c) {
         start.classList.remove(c);
         mode.classList.remove(c);
       });
+    };
+    window.wieShowScreen = function (fromId, toId) {
+      var from = document.getElementById(fromId);
+      var to = document.getElementById(toId);
+      if (!to) return;
+      document.querySelectorAll("main.screen").forEach(function (el) {
+        if (el !== to) el.classList.add("hidden");
+        el.classList.remove("transition-out", "transition-in-from-right", "transition-in-from-left", "transition-active");
+      });
+      if (from) from.classList.add("hidden");
+      to.classList.remove("hidden");
     };
   </script>
   <style>
@@ -1635,7 +1647,7 @@
   </div>
 
   <!-- Scherm 1: beginscherm (promo-foto) -->
-  <main id="screen-start" class="screen screen-start" style="display:block">
+  <main id="screen-start" class="screen screen-start">
     <img class="start-bg" src="og-image.png" alt="wiehasit.com — online Wie-is-het spel" />
     <span class="start-shade" aria-hidden="true"></span>
     <h1 class="seo-brand">wiehasit.com</h1>
@@ -1650,9 +1662,9 @@
     <span class="glow" aria-hidden="true"></span>
     <section class="content">
       <h2 data-i18n-html="modeTitle">Kies je<span class="accent">spelmodus</span></h2>
-      <button id="btn-play-online" class="btn" type="button" data-i18n="btnPlayOnline">Online spelen</button>
-      <button id="btn-play-bot" class="btn secondary" type="button" data-i18n="btnPlayBot">Tegen bot spelen</button>
-      <button id="btn-mode-back" class="btn back" type="button" data-i18n="btnBack">TERUG</button>
+      <button id="btn-play-online" class="btn" type="button" data-i18n="btnPlayOnline" onclick="window.wieShowScreen('screen-mode','screen-menu')">Online spelen</button>
+      <button id="btn-play-bot" class="btn secondary" type="button" data-i18n="btnPlayBot" onclick="window.wieShowScreen('screen-mode','screen-bot-diff')">Tegen bot spelen</button>
+      <button id="btn-mode-back" class="btn back" type="button" data-i18n="btnBack" onclick="window.wieShowScreen('screen-mode','screen-start')">TERUG</button>
     </section>
   </main>
 
@@ -1922,10 +1934,10 @@
   </main>
 
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
-  <script src="assets/game/online-room.js?v=17"></script>
-  <script src="assets/game/lobby-room.js?v=17"></script>
-  <script src="assets/game/character-traits.js?v=17"></script>
-  <script src="assets/game/game-play.js?v=17"></script>
+  <script src="assets/game/online-room.js?v=18"></script>
+  <script src="assets/game/lobby-room.js?v=18"></script>
+  <script src="assets/game/character-traits.js?v=18"></script>
+  <script src="assets/game/game-play.js?v=18"></script>
 
   <script>
     const I18N = {
@@ -2187,8 +2199,6 @@
       if (el) el.addEventListener("click", handler);
     }
 
-    ensureStartScreenVisible();
-
     const screenBotDiff = document.getElementById("screen-bot-diff");
     const screenMenu = document.getElementById("screen-menu");
     const screenHost = document.getElementById("screen-host");
@@ -2206,6 +2216,8 @@
     const joinError = document.getElementById("join-error");
     const lobbyCode = document.getElementById("lobby-code");
     const joinedCode = document.getElementById("joined-code");
+
+    ensureStartScreenVisible();
 
     const TRANSITION_MS = 300;
     const PHOTO_LOAD_MS = 1200;
@@ -2465,6 +2477,7 @@
         );
         if (el === screenStart) {
           el.classList.remove("hidden");
+          el.style.display = "";
         } else {
           el.classList.add("hidden");
         }
@@ -2830,8 +2843,8 @@
       if (event.persisted) ensureStartScreenVisible();
     });
 
-    window.addEventListener("error", () => {
-      ensureStartScreenVisible();
+    window.addEventListener("error", (event) => {
+      console.warn("wieishet error", event.message || event);
     });
 
     onClick("btn-make-pot", () => {
