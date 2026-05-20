@@ -342,7 +342,6 @@
 
   function setPostAnswerBoardMode(active) {
     if (screenGame) screenGame.classList.toggle("phase-post-switch", Boolean(active));
-    if (questionPanel) questionPanel.classList.toggle("mode-switch-active", Boolean(active));
   }
 
   function bindWellClickHandlers() {
