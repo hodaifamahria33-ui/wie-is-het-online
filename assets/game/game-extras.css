@@ -200,6 +200,19 @@
 #player-board,
 #player-board .card-well.interactive {
   pointer-events: auto;
+  cursor: pointer;
+}
+
+#player-board .card-well.interactive .card-tile,
+#player-board .card-well.interactive .card-tile.is-down {
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+#player-board .card-well.interactive.is-down-slot {
+  outline: 2px solid rgba(250, 204, 21, 0.35);
+  outline-offset: 1px;
+  border-radius: 6px;
 }
 
 .question-bar.hidden {

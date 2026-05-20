@@ -116,6 +116,12 @@
 .card-well.interactive {
   cursor: pointer;
   pointer-events: auto;
+  position: relative;
+  z-index: 1;
+}
+
+.card-well.interactive.is-down-slot {
+  z-index: 2;
 }
 
 .card-well.interactive:hover .card-tile:not(.is-down) {

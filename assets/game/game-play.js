@@ -104,45 +104,48 @@
     if (opponentChest) opponentChest.classList.remove("chest-guess-ready");
   }
 
+  function isCardFaceDown(tile) {
+    if (!tile) return false;
+    return tile.classList.contains("is-down") || tile.classList.contains("flip-anim-down");
+  }
+
   function flipWell(well, anim) {
     const tile = well.querySelector(".card-tile");
-    if (!tile || tile.classList.contains("is-down") || tile.classList.contains("revealed-secret")) {
+    if (!tile || isCardFaceDown(tile) || tile.classList.contains("revealed-secret")) {
       return false;
     }
+    tile.classList.remove("flip-anim-up");
+    tile.classList.add("is-down");
     if (anim) {
-      tile.classList.remove("flip-anim-up");
       tile.classList.add("flip-anim-down");
       tile.addEventListener(
         "animationend",
         () => {
           tile.classList.remove("flip-anim-down");
-          tile.classList.add("is-down");
         },
         { once: true }
       );
-    } else {
-      tile.classList.add("is-down");
     }
     return true;
   }
 
   function unflipWell(well, anim) {
     const tile = well.querySelector(".card-tile");
-    if (!tile || !tile.classList.contains("is-down") || tile.classList.contains("revealed-secret")) {
+    if (!tile || !isCardFaceDown(tile) || tile.classList.contains("revealed-secret")) {
       return false;
     }
+    tile.classList.remove("is-down", "flip-anim-down");
     if (anim) {
-      tile.classList.remove("flip-anim-down");
       tile.classList.add("flip-anim-up");
       tile.addEventListener(
         "animationend",
         () => {
-          tile.classList.remove("flip-anim-up", "is-down");
+          tile.classList.remove("flip-anim-up");
         },
         { once: true }
       );
     } else {
-      tile.classList.remove("is-down", "flip-anim-down", "flip-anim-up");
+      tile.classList.remove("flip-anim-up");
     }
     return true;
   }
@@ -151,7 +154,7 @@
   function togglePlayerWell(well, anim) {
     const tile = well.querySelector(".card-tile");
     if (!tile || tile.classList.contains("revealed-secret")) return null;
-    if (tile.classList.contains("is-down")) {
+    if (isCardFaceDown(tile)) {
       return unflipWell(well, anim) ? "up" : null;
     }
     return flipWell(well, anim) ? "down" : null;
@@ -339,8 +342,14 @@
       const tile = w.querySelector(".card-tile");
       if (tile && i !== state.secretIndex && !tile.classList.contains("revealed-secret")) {
         w.classList.add("interactive");
+        w.classList.toggle("is-down-slot", isCardFaceDown(tile));
+        w.setAttribute(
+          "aria-label",
+          isCardFaceDown(tile) ? tFn("cardTapToRestore") : tFn("cardTapToFlip")
+        );
       } else {
-        w.classList.remove("interactive");
+        w.classList.remove("interactive", "is-down-slot");
+        w.removeAttribute("aria-label");
       }
     });
     if (opponentChest) opponentChest.classList.remove("chest-guess-ready");
@@ -891,6 +900,7 @@
       const result = togglePlayerWell(well, true);
       if (!result) return;
       syncPlayerFlipOnline(index, result === "down");
+      enableCardFlips();
     }
   }
 
