@@ -1,22 +1,22 @@
-═══ Wie Is Het? Online — WhatsApp link + foto ═══
+═══ Wie Is Het? Online — live link ═══
 
-STAP 1 (1 minuut, gratis)
-  → Open: https://app.netlify.com/drop
+SPEEL OP JE TELEFOON:
+  https://hodaifamahria33-ui.github.io/wie-is-het-online/
 
-STAP 2
-  → Sleep deze hele map: WieIsHetOnline
+Zo vind je het op Google (na indexering, ±1 week):
+  Zoek op: Wie Is Het Potje
 
-STAP 3
-  → Netlify geeft je een link, bv:
-     https://leuke-naam-123.netlify.app
+Of meteen:
+  1. Open Chrome of Safari op je telefoon
+  2. Plak de link hierboven
+  3. Delen → «Zet op beginscherm» → heet: Potje
 
-STAP 4
-  → Open die link in Chrome (NIET preview.html van je pc!)
+Google sneller? Zie GOOGLE-ZOEKEN.txt
 
-STAP 5
+Delen met vrienden (WhatsApp):
   → Host game → DEEL VIA WHATSAPP
-  → Nu gaat alleen de link + foto naar vrienden ✅
+  → Alleen de link + foto gaat mee ✅
 
-Lokaal spelen zonder WhatsApp?
+Lokaal op je pc:
   → Dubbelklik: start-online.bat
-  → Opent http://localhost:8765
+  → http://localhost:8765

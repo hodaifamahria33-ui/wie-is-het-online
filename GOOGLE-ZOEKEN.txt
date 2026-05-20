@@ -1,0 +1,24 @@
+═══ Zo vind je het op Google ═══
+
+Zoek op (exact deze woorden):
+
+    Wie Is Het Potje
+
+Of:
+
+    Wie Is Het Potje online spel
+
+Directe link (werkt altijd, ook vóór Google):
+    https://hodaifamahria33-ui.github.io/wie-is-het-online/
+
+─── Google sneller laten indexeren (1× doen, ±5 min) ───
+
+1. Ga naar: https://search.google.com/search-console
+2. Klik «Property toevoegen» → URL-prefix
+3. Plak: https://hodaifamahria33-ui.github.io/wie-is-het-online/
+4. Kies verificatie via «HTML-tag» en kopieer de code (content="....")
+5. Stuur die code door — dan zetten we hem in de site
+6. Daarna: Sitemaps → nieuwe sitemap → sitemap.xml → Verzenden
+7. URL-inspectie → je link → «Indexering aanvragen»
+
+Na 1–7 dagen zou «Wie Is Het Potje» in Google moeten verschijnen.
