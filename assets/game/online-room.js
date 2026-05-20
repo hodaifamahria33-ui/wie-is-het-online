@@ -4,7 +4,7 @@
 (function () {
   const PEER_PREFIX = "wieishet-";
   const PEER_TIMEOUT_MS = 22000;
-  const CONN_TIMEOUT_MS = 22000;
+  const CONN_TIMEOUT_MS = 14000;
 
   const PEER_OPTS = {
     debug: 0,
@@ -75,6 +75,20 @@
     }
   }
 
+  function mapJoinError(err) {
+    const type = String(err && err.type ? err.type : "").toLowerCase();
+    const msg = String(err && err.message ? err.message : err || "").toLowerCase();
+    if (
+      type === "peer-unavailable" ||
+      msg.includes("unavailable") ||
+      msg.includes("could not connect") ||
+      msg.includes("not found")
+    ) {
+      return new Error("lobby-not-found");
+    }
+    return err instanceof Error ? err : new Error(msg || "conn-error");
+  }
+
   function waitForConnectionOpen(connection, ms) {
     return new Promise((resolve, reject) => {
       if (!connection) {
@@ -94,7 +108,7 @@
       const onError = (err) => {
         clearTimeout(timeout);
         cleanup();
-        reject(err || new Error("conn-error"));
+        reject(mapJoinError(err));
       };
       const onClose = () => {
         clearTimeout(timeout);

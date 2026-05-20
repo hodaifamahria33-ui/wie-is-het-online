@@ -316,11 +316,17 @@
         var tries = 0;
         (function waitConnect() {
           if (window.wieApp && window.wieApp.connectGuest) {
-            window.wieApp.connectGuest(code).catch(function () {
-              if (status) {
-                status.textContent = window.wieMsg("joinFailed");
-                status.classList.add("error");
-              }
+            window.wieApp.connectGuest(code).catch(function (e) {
+              if (!status) return;
+              var nf =
+                String((e && e.message) || e || "")
+                  .toLowerCase()
+                  .indexOf("lobby-not-found") >= 0 ||
+                String((e && e.message) || e || "")
+                  .toLowerCase()
+                  .indexOf("unavailable") >= 0;
+              status.textContent = window.wieMsg(nf ? "joinLobbyNotFound" : "joinFailed");
+              status.classList.add("error");
             });
             return;
           }
@@ -360,6 +366,11 @@
     }
 
     .screen.hidden { display: none; }
+
+    .hidden,
+    .is-hidden {
+      display: none !important;
+    }
 
     .screen.transition-out {
       opacity: 0;
@@ -1248,27 +1259,136 @@
       overflow-y: auto;
     }
 
-    .lobby-content-main .content {
+    .screen-lobby .lobby-main .content,
+    .screen-joined .lobby-content-main .content {
       position: relative;
       inset: auto;
+      width: 100%;
+      max-width: 420px;
       height: auto;
+      min-height: 0;
       padding: 1rem 1.25rem 1.5rem;
+      box-sizing: border-box;
+      pointer-events: auto;
+    }
+
+    .screen-lobby h2,
+    .screen-joined h2 {
+      color: #3d2d5c;
+      text-shadow: none;
+      font-size: clamp(1.35rem, 5vw, 2rem);
+      margin: 0 0 0.35rem;
+      line-height: 1.15;
+    }
+
+    .screen-lobby .lobby-main,
+    .screen-joined .lobby-content-main {
+      flex: 0 0 auto;
+      justify-content: flex-start;
+      align-items: stretch;
+      width: 100%;
+    }
+
+    .screen-lobby .pot-code,
+    .screen-joined .pot-code {
+      font-size: clamp(1.6rem, 9vw, 2.25rem);
+      margin: 0.15rem 0 0.5rem;
+      line-height: 1.1;
+    }
+
+    .screen-lobby .btn,
+    .screen-joined .btn {
+      min-width: 0;
+      width: 100%;
+      max-width: 100%;
+      padding: 0.85rem 1.25rem;
+      font-size: 1rem;
+      border-radius: 12px;
+      margin: 0.3rem 0;
+    }
+
+    .screen-lobby .hint,
+    .screen-joined .hint {
+      font-size: 0.85rem;
+      line-height: 1.35;
+      margin: 0.15rem 0;
+    }
+
+    .joined-status.error {
+      color: #dc2626;
+      font-weight: 700;
+      font-size: 0.95rem;
     }
 
     @media (max-width: 720px) {
+      .screen-lobby,
+      .screen-joined.lobby-joined-layout {
+        overflow-x: hidden;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
       .lobby-layout {
         flex-direction: column;
+        height: auto;
+        min-height: 100%;
+        min-height: 100dvh;
+        padding: max(8px, env(safe-area-inset-top)) 10px max(12px, env(safe-area-inset-bottom));
+      }
+
+      .lobby-main,
+      .lobby-content-main {
+        order: 1;
+        flex: 0 0 auto;
       }
 
       .lobby-sidebar {
-        flex: 0 0 auto;
+        order: 2;
+        flex: 1 1 auto;
         max-width: none;
+        width: 100%;
         border-right: none;
-        border-bottom: 2px solid rgba(139, 92, 246, 0.2);
+        border-top: 2px solid rgba(139, 92, 246, 0.2);
+        padding: 0.75rem 0.5rem 0.5rem;
+        min-height: 0;
+      }
+
+      .screen-lobby .lobby-main .content,
+      .screen-joined .lobby-content-main .content {
+        max-width: none;
+        padding: 0.65rem 0.5rem 0.75rem;
+        gap: 0.35rem;
+      }
+
+      .screen-lobby h2,
+      .screen-joined h2 {
+        font-size: 1.25rem;
+        margin-bottom: 0.2rem;
+      }
+
+      .screen-lobby .pot-code,
+      .screen-joined .pot-code {
+        font-size: 1.75rem;
+        letter-spacing: 0.12em;
       }
 
       .lobby-chat-messages {
-        max-height: 140px;
+        max-height: min(22vh, 160px);
+        min-height: 72px;
+      }
+
+      .lobby-players {
+        gap: 0.35rem;
+      }
+
+      .lobby-player {
+        padding: 0.45rem 0.55rem;
+        font-size: 0.82rem;
+      }
+
+      #screen-joined.join-error .lobby-sidebar {
+        opacity: 0.45;
+        pointer-events: none;
       }
     }
 
@@ -2252,7 +2372,7 @@
   </main>
 
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
-  <script src="assets/game/online-room.js?v=41"></script>
+  <script src="assets/game/online-room.js?v=42"></script>
   <script src="assets/game/lobby-room.js?v=40"></script>
   <script src="assets/game/character-traits.js?v=40"></script>
   <script src="assets/game/game-play.js?v=40"></script>
@@ -2287,6 +2407,7 @@
         joinedHint: "Wacht tot de host het spel start",
         joinConnecting: "Verbinden met host…",
         joinConnected: "Verbonden! Wacht tot de host START GAME drukt.",
+        joinLobbyNotFound: "Deze lobby bestaat niet. Check de code of vraag een nieuwe link.",
         joinFailed: "Kon host niet bereiken. Host moet eerst een potje maken en in de lobby blijven.",
         joinFailedHint: "Zelfde code · zelfde link (hodaifamahria33-ui.github.io). WiFi aan, geen privé-tab.",
         btnJoinRetry: "OPNIEUW VERBINDEN",
@@ -2379,6 +2500,7 @@
         joinedHint: "Wait for the host to start the game",
         joinConnecting: "Connecting to host…",
         joinConnected: "Connected! Wait for the host to press START GAME.",
+        joinLobbyNotFound: "This lobby does not exist. Check the code or ask for a new link.",
         joinFailed: "Could not reach the host. Host must create a game and stay in the lobby.",
         joinFailedHint: "Same code · same link. Use WiFi, not a private browser tab.",
         btnJoinRetry: "RECONNECT",
@@ -3055,13 +3177,27 @@
     const joinedStatus = document.getElementById("joined-status");
     const btnJoinRetry = document.getElementById("btn-join-retry");
 
+    function isLobbyNotFound(err) {
+      const s = String(err?.message || err?.type || err || "").toLowerCase();
+      return (
+        s.includes("lobby-not-found") ||
+        s.includes("peer-unavailable") ||
+        s.includes("unavailable") ||
+        s.includes("could not connect")
+      );
+    }
+
     function setJoinedStatus(key, isError) {
       if (!joinedStatus) return;
       let text = t(key);
-      if (isError && t("joinFailedHint")) text += " " + t("joinFailedHint");
+      if (isError && key === "joinFailed" && t("joinFailedHint")) text += " " + t("joinFailedHint");
       joinedStatus.textContent = text;
       joinedStatus.classList.toggle("error", !!isError);
-      if (btnJoinRetry) btnJoinRetry.classList.toggle("hidden", !isError);
+      if (screenJoined) screenJoined.classList.toggle("join-error", !!isError);
+      if (btnJoinRetry) {
+        btnJoinRetry.classList.toggle("hidden", !isError);
+        btnJoinRetry.classList.toggle("is-hidden", !isError);
+      }
     }
 
     async function connectGuestWithRetry(code) {
@@ -3086,6 +3222,11 @@
         } catch (e) {
           lastErr = e;
           console.warn("join attempt", attempt + 1, e);
+          if (isLobbyNotFound(e)) {
+            setJoinedStatus("joinLobbyNotFound", true);
+            if (joinError) joinError.textContent = t("joinLobbyNotFound");
+            throw e;
+          }
           if (attempt >= maxAttempts - 1) throw e;
           setJoinedStatus("joinConnecting", false);
           await new Promise((r) => setTimeout(r, 1800));
@@ -3096,8 +3237,18 @@
 
     function showJoinedScreen(code) {
       joinedCode.textContent = code.toUpperCase();
-      screenJoined.classList.remove("hidden");
+      screenJoined.classList.remove("hidden", "join-error");
       screenJoined.classList.add("transition-active");
+    }
+
+    function backToJoinWithError(messageKey) {
+      sessionMode = "solo";
+      if (joinError) joinError.textContent = t(messageKey);
+      if (joinCodeInput && joinedCode) joinCodeInput.value = joinedCode.textContent.trim();
+      screenJoined.classList.add("hidden");
+      screenJoined.classList.remove("join-error", "transition-active");
+      screenJoin.classList.remove("hidden");
+      [screenStart, screenMode, screenMenu, screenHost, screenLobby].forEach((s) => s.classList.add("hidden"));
     }
 
     function joinViaLink(code) {
@@ -3108,9 +3259,12 @@
       );
       runJoinLoading(c, () => {
         showJoinedScreen(c);
-        connectGuestWithRetry(c).catch(() => {
-          sessionMode = "solo";
-          setJoinedStatus("joinFailed", true);
+        connectGuestWithRetry(c).catch((e) => {
+          if (isLobbyNotFound(e)) backToJoinWithError("joinLobbyNotFound");
+          else {
+            sessionMode = "solo";
+            setJoinedStatus("joinFailed", true);
+          }
         });
       });
     }
@@ -3119,7 +3273,11 @@
       btnJoinRetry.addEventListener("click", () => {
         const c = joinedCode.textContent.trim();
         if (!c || c === "-----") return;
-        connectGuestWithRetry(c).catch(() => setJoinedStatus("joinFailed", true));
+        if (screenJoined) screenJoined.classList.remove("join-error");
+        if (joinError) joinError.textContent = "";
+        connectGuestWithRetry(c).catch((e) => {
+          if (!isLobbyNotFound(e)) setJoinedStatus("joinFailed", true);
+        });
       });
     }
 
@@ -3289,9 +3447,12 @@
       runJoinLoading(code, () => {
         const c = code.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 5);
         showJoinedScreen(c);
-        connectGuestWithRetry(c).catch(() => {
-          sessionMode = "solo";
-          setJoinedStatus("joinFailed", true);
+        connectGuestWithRetry(c).catch((e) => {
+          if (isLobbyNotFound(e)) backToJoinWithError("joinLobbyNotFound");
+          else {
+            sessionMode = "solo";
+            setJoinedStatus("joinFailed", true);
+          }
         });
       });
     }
