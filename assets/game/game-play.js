@@ -286,14 +286,21 @@
     return yes ? tFn("answerYes") : tFn("answerNo");
   }
 
-  function enableMyFlips() {
+  function enableCardFlips() {
     state.playerWells.forEach((w, i) => {
       const tile = w.querySelector(".card-tile");
       if (tile && !tile.classList.contains("is-down") && i !== state.secretIndex) {
         w.classList.add("interactive");
       }
     });
-    if (opponentChest) opponentChest.classList.add("chest-guess-ready");
+    if (opponentChest) opponentChest.classList.remove("chest-guess-ready");
+  }
+
+  function enableMyFlips() {
+    enableCardFlips();
+    if (opponentChest && state.phase === PHASE.MY_TURN) {
+      opponentChest.classList.add("chest-guess-ready");
+    }
   }
 
   function setQuestionInputEnabled(enabled) {
@@ -418,12 +425,7 @@
 
   function onSwitchTurnClick() {
     if (state.phase !== PHASE.POST_ANSWER_SWITCH) return;
-    clearPostAnswerTimers();
-    hidePostAnswerPanel();
-    if (state.online && window.WieIsHetOnline) {
-      window.WieIsHetOnline.send({ type: "switchTurn" });
-    }
-    beginTheirTurn();
+    finishPostAnswerSwitchPhase();
   }
 
   function beginPostAnswerFlipRush() {
@@ -468,10 +470,21 @@
     beginTheirTurn();
   }
 
+  function finishPostAnswerSwitchPhase() {
+    if (state.phase !== PHASE.POST_ANSWER_SWITCH) return;
+    clearPostAnswerTimers();
+    hidePostAnswerPanel();
+    clearInteractivity();
+    if (state.online && window.WieIsHetOnline) {
+      window.WieIsHetOnline.send({ type: "switchTurn" });
+    }
+    beginTheirTurn();
+  }
+
   function beginPostAnswerSwitchPhase() {
     state.phase = PHASE.POST_ANSWER_SWITCH;
     setScreenTurn("my");
-    clearInteractivity();
+    enableCardFlips();
     showPostAnswerPanel("switch");
     setBanner(tFn("switchPrompt"));
     runCountdownTimer(
@@ -479,7 +492,7 @@
       () => {},
       () => {
         if (state.phase === PHASE.POST_ANSWER_SWITCH) {
-          beginPostAnswerFlipRush();
+          finishPostAnswerSwitchPhase();
         }
       }
     );
@@ -489,7 +502,7 @@
     state.phase = PHASE.ANSWER_QUESTION;
     state.pendingQuestion = { text: questionText, id: questionId };
     setScreenTurn("question");
-    enableMyFlips();
+    enableCardFlips();
     setBanner(questionText);
     showQuestionPanel("answer");
     const qDisplay = questionPanel?.querySelector(".opponent-question-text");
@@ -701,9 +714,7 @@
   }
 
   function canGuessNow() {
-    return (
-      state.phase === PHASE.MY_TURN || state.phase === PHASE.ANSWER_QUESTION
-    );
+    return state.phase === PHASE.MY_TURN;
   }
 
   function beginGuessMode() {
@@ -824,7 +835,10 @@
       return;
     }
 
-    if (state.phase === PHASE.ANSWER_QUESTION) {
+    if (
+      state.phase === PHASE.ANSWER_QUESTION ||
+      state.phase === PHASE.POST_ANSWER_SWITCH
+    ) {
       if (index === state.secretIndex) return;
       if (!flipWell(well, true)) return;
       if (state.online && window.WieIsHetOnline) {
