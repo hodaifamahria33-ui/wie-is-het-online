@@ -10,13 +10,14 @@
   <meta name="robots" content="index, follow" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="mobile-web-app-capable" content="yes" />
-  <meta name="theme-color" content="#1c1036" />
+  <meta name="theme-color" content="#9fd4ff" />
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" href="og-image.png" type="image/png" />
   <link rel="apple-touch-icon" href="og-image.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Nunito:wght@600;700;800&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/game/start-screen.css?v=43" />
   <link rel="stylesheet" href="assets/game/premium-game.css?v=40" />
   <link rel="stylesheet" href="assets/game/game-play.css?v=40" />
   <link rel="stylesheet" href="assets/game/game-extras.css?v=40" />
@@ -47,8 +48,9 @@
   }
   </script>
   <script>
-    document.documentElement.style.backgroundColor = "#1a0f2e";
+    document.documentElement.style.backgroundColor = "#b8e8ff";
     window.wieShowMode = function () {
+      if (window.WieStartMusic && window.WieStartMusic.stop) window.WieStartMusic.stop();
       var start = document.getElementById("screen-start");
       var mode = document.getElementById("screen-mode");
       if (!start || !mode) return;
@@ -1965,91 +1967,6 @@
       color: #6b4ed4;
     }
 
-    /* Beginscherm met promo-foto */
-    .screen-start {
-      background: #1a0f2e;
-    }
-
-    .start-bg {
-      position: absolute;
-      left: 0;
-      width: 100%;
-      height: 112%;
-      top: -10vh;
-      object-fit: cover;
-      object-position: center 22%;
-      pointer-events: none;
-    }
-
-    .start-shade {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(
-        180deg,
-        rgba(26, 15, 46, 0.1) 0%,
-        rgba(26, 15, 46, 0) 30%,
-        rgba(26, 15, 46, 0) 55%,
-        rgba(18, 12, 35, 0.5) 78%,
-        rgba(12, 8, 28, 0.92) 100%
-      );
-      pointer-events: none;
-    }
-
-    .screen-start .cards,
-    .screen-start .glow { display: none; }
-
-    .screen-start .content {
-      inset: auto 0 0 0;
-      top: auto;
-      height: auto;
-      justify-content: flex-end;
-      flex-direction: column;
-      gap: 0.75rem;
-      padding: 0 24px clamp(52px, 8vh, 88px);
-      pointer-events: none;
-      z-index: 10;
-    }
-
-    .screen-start .content .btn,
-    .screen-start .content .start-tagline {
-      pointer-events: auto;
-    }
-
-    .screen-start .seo-brand {
-      position: absolute;
-      left: 0;
-      right: 0;
-      bottom: max(12px, env(safe-area-inset-bottom));
-      z-index: 12;
-      margin: 0;
-      padding: 0 1rem;
-      font-size: clamp(0.7rem, 2.8vw, 0.85rem);
-      font-weight: 600;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      text-align: center;
-      color: rgba(255, 255, 255, 0.55);
-      text-shadow: 0 1px 8px rgba(0, 0, 0, 0.8);
-      pointer-events: none;
-    }
-
-    .screen-start .btn {
-      font-size: clamp(1.15rem, 2.5vw, 1.65rem);
-      padding: 1rem 3.5rem;
-      box-shadow: 0 12px 48px rgba(0, 0, 0, 0.45);
-    }
-
-    .screen-start .start-tagline {
-      position: relative;
-      bottom: auto;
-      left: auto;
-      right: auto;
-      font-size: clamp(0.85rem, 1.6vw, 1.05rem);
-      color: rgba(126, 200, 232, 0.9);
-      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
-      z-index: 12;
-    }
-
   </style>
 </head>
 <body>
@@ -2061,15 +1978,60 @@
     </div>
   </div>
 
-  <!-- Scherm 1: beginscherm (promo-foto) -->
+  <!-- Scherm 1: beginscherm -->
   <main id="screen-start" class="screen screen-start">
-    <img class="start-bg" src="og-image.png" alt="wiehasit.com — online Wie-is-het spel" />
-    <span class="start-shade" aria-hidden="true"></span>
-    <h1 class="seo-brand">wiehasit.com</h1>
-    <section class="content">
-      <button id="btn-begin" class="btn" type="button" data-i18n="btnBegin" onclick="window.wieShowMode()">LATEN WE BEGINNEN</button>
-      <p class="start-tagline" data-i18n="startTagline">Raad het personage · Speel online</p>
-    </section>
+    <button id="btn-music-toggle" class="btn-music-toggle" type="button" aria-pressed="false" data-i18n-aria="musicAria" aria-label="Muziek aan/uit">🔊</button>
+
+    <span class="start-deco start-deco--bubble d1" aria-hidden="true">?</span>
+    <span class="start-deco start-deco--bubble-w d2" aria-hidden="true">?</span>
+    <span class="start-deco start-deco--star d3" aria-hidden="true">★</span>
+    <span class="start-deco start-deco--plus d4" aria-hidden="true">+</span>
+    <span class="start-deco start-deco--star d5" aria-hidden="true">★</span>
+    <span class="start-deco start-deco--dot d6" style="background:#c4b5fd" aria-hidden="true"></span>
+    <span class="start-deco start-deco--dot d7" style="background:#fde047" aria-hidden="true"></span>
+    <span class="start-deco start-deco--plus d8" aria-hidden="true">+</span>
+
+    <div class="start-card start-card--tl" style="--rot:-6deg" aria-hidden="true">
+      <div class="start-card-face">
+        <svg viewBox="0 0 64 72" width="100%" aria-hidden="true"><ellipse cx="32" cy="22" rx="18" ry="20" fill="#4c1d95"/><path d="M12 72 Q32 48 52 72" fill="#5b21b6"/></svg>
+      </div>
+      <span class="start-card-q">?</span>
+    </div>
+    <div class="start-card start-card--tr" style="--rot:5deg" aria-hidden="true">
+      <div class="start-card-face">
+        <svg viewBox="0 0 64 72" width="100%" aria-hidden="true"><ellipse cx="32" cy="24" rx="17" ry="19" fill="#0c4a6e"/><rect x="14" y="38" width="36" height="28" rx="8" fill="#0369a1"/></svg>
+      </div>
+      <span class="start-card-q">?</span>
+    </div>
+    <div class="start-card start-card--bl" style="--rot:-4deg" aria-hidden="true">
+      <div class="start-card-face">
+        <svg viewBox="0 0 64 72" width="100%" aria-hidden="true"><ellipse cx="32" cy="24" rx="17" ry="19" fill="#9f1239"/><circle cx="24" cy="26" r="5" fill="none" stroke="#fff" stroke-width="2"/><circle cx="40" cy="26" r="5" fill="none" stroke="#fff" stroke-width="2"/><rect x="12" y="40" width="40" height="24" rx="6" fill="#be123c"/></svg>
+      </div>
+      <span class="start-card-q">?</span>
+    </div>
+    <div class="start-card start-card--br" style="--rot:6deg" aria-hidden="true">
+      <div class="start-card-face">
+        <svg viewBox="0 0 64 72" width="100%" aria-hidden="true"><ellipse cx="32" cy="22" rx="18" ry="18" fill="#854d0e"/><circle cx="22" cy="30" r="4" fill="#fbbf24"/><circle cx="42" cy="30" r="4" fill="#fbbf24"/></svg>
+      </div>
+      <span class="start-card-q">?</span>
+    </div>
+
+    <svg class="start-prop start-prop--leaf" viewBox="0 0 80 80" aria-hidden="true"><path d="M40 8 C8 28 8 60 40 72 C72 60 72 28 40 8Z" fill="#4ade80"/><path d="M40 20 L40 68" stroke="#166534" stroke-width="3" fill="none"/></svg>
+    <svg class="start-prop start-prop--glass" viewBox="0 0 64 64" aria-hidden="true"><circle cx="26" cy="26" r="14" fill="none" stroke="#7c3aed" stroke-width="5"/><line x1="36" y1="36" x2="56" y2="56" stroke="#7c3aed" stroke-width="6" stroke-linecap="round"/></svg>
+    <svg class="start-prop start-prop--note" viewBox="0 0 72 80" aria-hidden="true"><rect x="8" y="12" width="56" height="64" rx="6" fill="#fff" stroke="#a78bfa" stroke-width="3"/><line x1="16" y1="28" x2="56" y2="28" stroke="#c4b5fd" stroke-width="2"/><line x1="16" y1="40" x2="48" y2="40" stroke="#c4b5fd" stroke-width="2"/></svg>
+    <svg class="start-prop start-prop--pawn" viewBox="0 0 48 64" aria-hidden="true"><ellipse cx="24" cy="54" rx="16" ry="8" fill="#6d28d9"/><path d="M24 8 C32 20 34 36 24 48 C14 36 16 20 24 8Z" fill="#8b5cf6"/></svg>
+
+    <div class="start-scene">
+      <div class="start-hero">
+        <span class="start-bulb" aria-hidden="true">💡</span>
+        <h1 id="start-title" class="start-title" data-i18n-html="startTitleHtml">Wie <span class="start-word-ben">Ben</span> Ik?</h1>
+        <div class="start-actions">
+          <button id="btn-begin" class="btn-start-begin" type="button" data-i18n="btnBegin">LET'S BEGIN</button>
+          <p class="start-tagline" data-i18n="startTagline">Raad de verborgen persoon en ontdek wie jij bent!</p>
+        </div>
+      </div>
+    </div>
+    <p class="seo-brand">wiehasit.com</p>
   </main>
 
   <!-- Spelmodus: online of bot -->
@@ -2372,6 +2334,7 @@
   </main>
 
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+  <script src="assets/game/start-music.js?v=43"></script>
   <script src="assets/game/online-room.js?v=42"></script>
   <script src="assets/game/lobby-room.js?v=40"></script>
   <script src="assets/game/character-traits.js?v=40"></script>
@@ -2380,10 +2343,11 @@
   <script>
     const I18N = {
       nl: {
-        startTitleHtml: 'Wie <span class="start-title-accent">Is</span> Het?',
+        startTitleHtml: 'Wie <span class="start-word-ben">Ben</span> Ik?',
         startOnlineBadge: "ONLINE",
-        startTagline: "Raad het personage · Speel online",
+        startTagline: "Raad de verborgen persoon en ontdek wie jij bent!",
         btnBegin: "LATEN WE BEGINNEN",
+        musicAria: "Muziek aan of uit",
         modeTitle: 'Kies je<span class="accent">spelmodus</span>',
         btnPlayOnline: "Online spelen",
         btnPlayBot: "Tegen bot spelen",
@@ -2473,10 +2437,11 @@
         langAria: "Taal kiezen"
       },
       en: {
-        startTitleHtml: 'Who <span class="start-title-accent">Is</span> It?',
+        startTitleHtml: 'Who <span class="start-word-ben">Am</span> I?',
         startOnlineBadge: "ONLINE",
-        startTagline: "Guess the character · Play online",
+        startTagline: "Guess the hidden person and discover who you are!",
         btnBegin: "LET'S BEGIN",
+        musicAria: "Toggle music",
         modeTitle: 'Choose your <span class="accent">game mode</span>',
         btnPlayOnline: "Play online",
         btnPlayBot: "Play against bot",
@@ -2642,11 +2607,62 @@
     const screenMode = document.getElementById("screen-mode");
 
     const btnBeginEl = document.getElementById("btn-begin");
+    const btnMusicToggle = document.getElementById("btn-music-toggle");
+
+    function syncMusicButton() {
+      if (!btnMusicToggle || !window.WieStartMusic) return;
+      const on = !WieStartMusic.isMuted();
+      btnMusicToggle.textContent = on ? "🔊" : "🔇";
+      btnMusicToggle.classList.toggle("is-muted", !on);
+      btnMusicToggle.setAttribute("aria-pressed", on ? "true" : "false");
+    }
+
+    function tryStartMusic() {
+      if (!window.WieStartMusic) return;
+      WieStartMusic.unlock();
+      if (!WieStartMusic.isMuted()) WieStartMusic.play();
+      syncMusicButton();
+    }
+
+    if (btnMusicToggle && window.WieStartMusic) {
+      btnMusicToggle.addEventListener("click", (e) => {
+        e.stopPropagation();
+        WieStartMusic.unlock();
+        WieStartMusic.toggle();
+        syncMusicButton();
+      });
+      syncMusicButton();
+    }
+
+    if (screenStart) {
+      screenStart.addEventListener(
+        "click",
+        () => {
+          tryStartMusic();
+        },
+        { once: true }
+      );
+    }
+
     if (btnBeginEl) {
       btnBeginEl.addEventListener("click", (e) => {
         e.preventDefault();
+        tryStartMusic();
         window.wieShowMode();
       });
+    }
+
+    function resumeStartMusicIfVisible() {
+      if (
+        screenStart &&
+        !screenStart.classList.contains("hidden") &&
+        window.WieStartMusic &&
+        !WieStartMusic.isMuted()
+      ) {
+        WieStartMusic.unlock();
+        WieStartMusic.play();
+        syncMusicButton();
+      }
     }
 
     function onClick(id, handler) {
@@ -3022,6 +3038,7 @@
           el.classList.add("hidden");
         }
       });
+      resumeStartMusicIfVisible();
     }
 
     function resetToStartScreen() {
@@ -3318,6 +3335,7 @@
 
     onClick("btn-mode-back", () => {
       transition(screenMode, screenStart, "transition-in-from-left");
+      setTimeout(resumeStartMusicIfVisible, 320);
     });
 
     onClick("btn-play-online", () => {
