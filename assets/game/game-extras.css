@@ -162,7 +162,7 @@
   40% { transform: scale(1.06); }
 }
 
-/* Compacte vraagbalk — geen chatlijst */
+/* Compacte vraagbalk — blokkeert nooit het bord (alleen knoppen/velden klikbaar) */
 .question-bar {
   position: fixed;
   left: 50%;
@@ -171,6 +171,15 @@
   z-index: 45;
   width: min(92vw, 480px);
   box-sizing: border-box;
+  pointer-events: none;
+}
+
+.question-bar input,
+.question-bar button,
+.question-bar textarea,
+.question-bar .answer-chip,
+.question-bar .btn-switch-turn,
+.question-bar .btn-end-flip-phase {
   pointer-events: auto;
 }
 
@@ -197,10 +206,26 @@
   z-index: 21;
 }
 
+#game-table,
+#game-table .game-scene,
+#game-table .board-stack,
+#game-table .player-play-area,
+#game-table .board-stand--front,
+#game-table .board-tray--player {
+  pointer-events: auto;
+}
+
+#game-table .board-stack {
+  position: relative;
+  z-index: 12;
+}
+
 #player-board,
+#player-board .card-well,
 #player-board .card-well.interactive {
   pointer-events: auto;
   cursor: pointer;
+  touch-action: manipulation;
 }
 
 #player-board .card-well.interactive .card-tile,

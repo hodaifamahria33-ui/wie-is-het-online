@@ -1664,9 +1664,9 @@
   </main>
 
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
-  <script src="assets/game/online-room.js?v=6"></script>
-  <script src="assets/game/character-traits.js?v=6"></script>
-  <script src="assets/game/game-play.js?v=6"></script>
+  <script src="assets/game/online-room.js?v=7"></script>
+  <script src="assets/game/character-traits.js?v=7"></script>
+  <script src="assets/game/game-play.js?v=7"></script>
 
   <script>
     const I18N = {
@@ -1935,7 +1935,6 @@
       if (!player || !opponent) return;
       player.innerHTML = "";
       opponent.innerHTML = "";
-      delete player.dataset.playWired;
       for (let i = 0; i < CARD_NAMES.length; i++) {
         const name = CARD_NAMES[i];
 
@@ -2020,7 +2019,10 @@
             gameTable.classList.remove("hidden");
             countdownTimeout = null;
             initGamePlay();
-            if (window.WieIsHetPlay) WieIsHetPlay.beginPickSecretPhase();
+            if (window.WieIsHetPlay) {
+              WieIsHetPlay.wireBoards();
+              WieIsHetPlay.beginPickSecretPhase();
+            }
           }, 700);
         }
       }

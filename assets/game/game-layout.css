@@ -77,17 +77,18 @@
   right: 0;
   top: 0;
   visibility: hidden;
-  pointer-events: none;
+  pointer-events: none !important;
   opacity: 0;
-  z-index: 1;
+  z-index: 0;
   transform: perspective(900px) rotateX(calc(var(--board-tilt) * -1)) translateZ(-12px);
   transform-origin: center center;
 }
 
 #game-table .board-stand--front {
   position: relative;
-  z-index: 2;
+  z-index: 4;
   width: 100%;
+  pointer-events: auto;
   transform: perspective(900px) rotateX(calc(var(--board-tilt) * -1));
   transform-origin: center center;
   filter: drop-shadow(0 24px 56px rgba(0, 0, 0, 0.55));
@@ -132,11 +133,12 @@
 
 #game-table .player-play-area {
   position: relative;
-  z-index: 2;
+  z-index: 5;
   width: var(--game-board-width);
   max-width: var(--game-board-width);
   margin: 0 auto;
   display: block;
+  pointer-events: auto;
 }
 
 #game-table .secret-card-slot {

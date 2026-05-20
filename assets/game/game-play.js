@@ -336,6 +336,24 @@
     if (questionPanel) questionPanel.classList.toggle("mode-switch-active", Boolean(active));
   }
 
+  function bindWellClickHandlers() {
+    refreshWells();
+    state.playerWells.forEach((well, index) => {
+      if (well.dataset.flipBound === "1") return;
+      well.dataset.flipBound = "1";
+      well.addEventListener(
+        "click",
+        (e) => {
+          e.stopPropagation();
+          refreshWells();
+          const idx = state.playerWells.indexOf(well);
+          if (idx >= 0) onPlayerWellClick(idx);
+        },
+        { passive: false }
+      );
+    });
+  }
+
   function enableCardFlips() {
     refreshWells();
     state.playerWells.forEach((w, i) => {
@@ -352,6 +370,7 @@
         w.removeAttribute("aria-label");
       }
     });
+    bindWellClickHandlers();
     if (opponentChest) opponentChest.classList.remove("chest-guess-ready");
   }
 
@@ -990,18 +1009,31 @@
     });
   }
 
+  function handleBoardClick(e) {
+    const board = document.getElementById("player-board");
+    if (!board) return;
+    const well = e.target.closest(".card-well");
+    if (!well || !board.contains(well)) return;
+    e.preventDefault();
+    e.stopPropagation();
+    refreshWells();
+    const idx = state.playerWells.indexOf(well);
+    if (idx >= 0) onPlayerWellClick(idx);
+  }
+
   function wireBoards() {
     refreshWells();
     const board = document.getElementById("player-board");
-    if (!board || board.dataset.playWired === "1") return;
-    board.dataset.playWired = "1";
-    board.addEventListener("click", (e) => {
-      const well = e.target.closest(".card-well");
-      if (!well || !board.contains(well)) return;
-      if (state.playerWells.indexOf(well) < 0) refreshWells();
-      const idx = state.playerWells.indexOf(well);
-      if (idx >= 0) onPlayerWellClick(idx);
-    });
+    const gameTable = document.getElementById("game-table");
+    if (board && board.dataset.playWired !== "1") {
+      board.dataset.playWired = "1";
+      board.addEventListener("click", handleBoardClick);
+    }
+    if (gameTable && gameTable.dataset.playWired !== "1") {
+      gameTable.dataset.playWired = "1";
+      gameTable.addEventListener("click", handleBoardClick);
+    }
+    bindWellClickHandlers();
   }
 
   function wireQuestionPanel() {
@@ -1085,6 +1117,7 @@
       state.online = Boolean(opts.online);
       state.isHost = opts.isHost !== false;
       state.botDifficulty = opts.botDifficulty || "medium";
+      wireBoards();
       wireQuestionPanel();
       wireChest();
       saveChestDefault();
