@@ -995,6 +995,10 @@
     setScreenTurn("pick");
     setBanner(tFn("phasePickSecret"));
     state.playerWells.forEach((w) => w.classList.add("interactive"));
+    bindWellClickHandlers();
+    if (opponentChest && !state.online) {
+      opponentChest.classList.remove("chest-guess-ready");
+    }
   }
 
   function refreshWells() {
@@ -1025,13 +1029,17 @@
     refreshWells();
     const board = document.getElementById("player-board");
     const gameTable = document.getElementById("game-table");
-    if (board && board.dataset.playWired !== "1") {
-      board.dataset.playWired = "1";
-      board.addEventListener("click", handleBoardClick);
+    if (board) {
+      if (board.dataset.playWired !== "1") {
+        board.dataset.playWired = "1";
+        board.addEventListener("click", handleBoardClick);
+      }
     }
-    if (gameTable && gameTable.dataset.playWired !== "1") {
-      gameTable.dataset.playWired = "1";
-      gameTable.addEventListener("click", handleBoardClick);
+    if (gameTable) {
+      if (gameTable.dataset.playWired !== "1") {
+        gameTable.dataset.playWired = "1";
+        gameTable.addEventListener("click", handleBoardClick);
+      }
     }
     bindWellClickHandlers();
   }
@@ -1117,6 +1125,10 @@
       state.online = Boolean(opts.online);
       state.isHost = opts.isHost !== false;
       state.botDifficulty = opts.botDifficulty || "medium";
+      if (!state.online && state.botDifficulty) {
+        state.remoteSecretReady = false;
+        state.localSecretReady = false;
+      }
       wireBoards();
       wireQuestionPanel();
       wireChest();

@@ -204,17 +204,11 @@
     window.wieStartBotGame = function (difficulty) {
       var d = difficulty || "medium";
       if (window.wieApp && window.wieApp.startBotGame) return window.wieApp.startBotGame(d);
-      if (window.wieApp && window.wieApp.startSoloGame) return window.wieApp.startSoloGame(d);
-      localStorage.setItem("wieBotDifficulty", d);
-      localStorage.setItem("wieSessionMode", "solo");
-      window.wieShowOnly("screen-game");
-      var countdown = document.getElementById("game-countdown");
-      var table = document.getElementById("game-table");
-      if (countdown) countdown.classList.remove("hidden");
-      if (table) table.classList.add("hidden");
-      setTimeout(function () {
-        if (window.wieApp && window.wieApp.startGameSession) window.wieApp.startGameSession();
-      }, 80);
+      var tries = 0;
+      (function waitApp() {
+        if (window.wieApp && window.wieApp.startBotGame) return window.wieApp.startBotGame(d);
+        if (++tries < 80) setTimeout(waitApp, 40);
+      })();
     };
     window.wieMakePot = function () {
       if (window.wieApp && window.wieApp.makePot) return window.wieApp.makePot();
@@ -2217,8 +2211,8 @@
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
   <script src="assets/game/online-room.js?v=20"></script>
   <script src="assets/game/lobby-room.js?v=21"></script>
-  <script src="assets/game/character-traits.js?v=19"></script>
-  <script src="assets/game/game-play.js?v=19"></script>
+  <script src="assets/game/character-traits.js?v=21"></script>
+  <script src="assets/game/game-play.js?v=21"></script>
 
   <script>
     const I18N = {
@@ -2614,14 +2608,21 @@
       });
     }
 
+    function finishCountdownStartPlay() {
+      countdownTimeout = null;
+      if (gameCountdown) gameCountdown.classList.add("hidden");
+      if (gameTable) gameTable.classList.remove("hidden");
+      if (screenGame) screenGame.classList.remove("hidden");
+      initGamePlay();
+      if (window.WieIsHetPlay) {
+        WieIsHetPlay.beginPickSecretPhase();
+      }
+      applyLanguage();
+    }
+
     function runCountdownThenTable() {
       if (!gameCountdown || !countdownNum) {
-        if (gameTable) gameTable.classList.remove("hidden");
-        initGamePlay();
-        if (window.WieIsHetPlay) {
-          WieIsHetPlay.wireBoards();
-          WieIsHetPlay.beginPickSecretPhase();
-        }
+        finishCountdownStartPlay();
         return;
       }
       clearCountdown();
@@ -2642,14 +2643,7 @@
           countdownTimeout = setTimeout(tick, 1000);
         } else {
           countdownTimeout = setTimeout(() => {
-            gameCountdown.classList.add("hidden");
-            gameTable.classList.remove("hidden");
-            countdownTimeout = null;
-            initGamePlay();
-            if (window.WieIsHetPlay) {
-              WieIsHetPlay.wireBoards();
-              WieIsHetPlay.beginPickSecretPhase();
-            }
+            finishCountdownStartPlay();
           }, 700);
         }
       }
@@ -2658,6 +2652,10 @@
 
     function initGamePlay() {
       if (!window.WieIsHetPlay) return;
+      const onlineMatch =
+        (sessionMode === "host" || sessionMode === "guest") &&
+        window.WieIsHetOnline &&
+        WieIsHetOnline.isConnected();
       WieIsHetPlay.init({
         t,
         cardNames: CARD_NAMES,
@@ -2669,7 +2667,7 @@
         opponentAnswerEl: document.getElementById("opponent-answer"),
         questionPanel: document.getElementById("question-panel"),
         winOverlay: document.getElementById("win-overlay"),
-        online: sessionMode !== "solo" && window.WieIsHetOnline && WieIsHetOnline.isConnected(),
+        online: onlineMatch,
         isHost: sessionMode === "host",
         botDifficulty: sessionMode === "solo" ? botDifficulty : null,
       });
@@ -2775,8 +2773,8 @@
       clearCountdown();
       if (gameCountdown) gameCountdown.classList.add("hidden");
       if (gameTable) gameTable.classList.add("hidden");
+      if (window.WieIsHetPlay) WieIsHetPlay.reset();
       buildGameBoards();
-      if (window.WieIsHetPlay) WieIsHetPlay.wireBoards();
       runCountdownThenTable();
     }
 
