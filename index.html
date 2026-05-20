@@ -183,9 +183,11 @@
         window.WieIsHetOnline.broadcastGameStart();
       }
       window.wieShowOnly("screen-game");
-      setTimeout(function () {
-        if (window.wieApp && window.wieApp.startGameSession) window.wieApp.startGameSession();
-      }, 350);
+      if (window.wieApp && window.wieApp.startGameSession) {
+        window.wieApp.startGameSession();
+      } else if (window.wieRunCountdown) {
+        window.wieRunCountdown();
+      }
     };
     window.wieGoHost = function () {
       if (window.wieApp && window.wieApp.goHost) return window.wieApp.goHost();
@@ -2613,9 +2615,22 @@
     }
 
     function runCountdownThenTable() {
+      if (!gameCountdown || !countdownNum) {
+        if (gameTable) gameTable.classList.remove("hidden");
+        initGamePlay();
+        if (window.WieIsHetPlay) {
+          WieIsHetPlay.wireBoards();
+          WieIsHetPlay.beginPickSecretPhase();
+        }
+        return;
+      }
+      clearCountdown();
       buildCountdownPhotos();
+      if (screenGame) screenGame.classList.remove("hidden");
       gameCountdown.classList.remove("hidden");
+      gameCountdown.style.display = "";
       gameTable.classList.add("hidden");
+      countdownNum.textContent = String(COUNTDOWN_SEC);
       let n = COUNTDOWN_SEC;
       function tick() {
         countdownNum.textContent = n > 0 ? String(n) : t("countdownGo");
@@ -2669,12 +2684,10 @@
       } catch (err) {
         console.warn("leave online", err);
       }
-      if (busy) {
-        startSoloGame(botDifficulty);
-        return;
-      }
-      transition(screenBotDiff, screenGame, "transition-in-from-right");
-      setTimeout(startGameSession, TRANSITION_MS + 50);
+      if (window.WieIsHetPlay) WieIsHetPlay.hideEndOverlay();
+      resetGameScreen();
+      showGameScreen();
+      startGameSession();
     }
 
     function startSoloGame(difficulty) {
@@ -2718,10 +2731,7 @@
         if (msg.type === "gameStart") {
           if (window.WieIsHetPlay) WieIsHetPlay.hideEndOverlay();
           resetGameScreen();
-          [screenStart, screenMode, screenBotDiff, screenMenu, screenHost, screenLobby, screenJoin, screenJoined].forEach((s) =>
-            s.classList.add("hidden")
-          );
-          screenGame.classList.remove("hidden");
+          showGameScreen();
           startGameSession();
         }
       });
@@ -2738,20 +2748,39 @@
         if (msg.type === "gameStart") {
           if (window.WieIsHetPlay) WieIsHetPlay.hideEndOverlay();
           resetGameScreen();
-          [screenStart, screenMode, screenBotDiff, screenMenu, screenHost, screenLobby, screenJoin, screenJoined].forEach((s) =>
-            s.classList.add("hidden")
-          );
-          screenGame.classList.remove("hidden");
+          showGameScreen();
           startGameSession();
         }
       });
     }
 
+    function showGameScreen() {
+      busy = false;
+      document.querySelectorAll("main.screen").forEach((el) => {
+        el.classList.remove(
+          "transition-out",
+          "transition-active",
+          "transition-in-from-right",
+          "transition-in-from-left"
+        );
+        if (el === screenGame) {
+          el.classList.remove("hidden");
+        } else {
+          el.classList.add("hidden");
+        }
+      });
+    }
+
     function startGameSession() {
+      clearCountdown();
+      if (gameCountdown) gameCountdown.classList.add("hidden");
+      if (gameTable) gameTable.classList.add("hidden");
       buildGameBoards();
       if (window.WieIsHetPlay) WieIsHetPlay.wireBoards();
       runCountdownThenTable();
     }
+
+    window.wieRunCountdown = runCountdownThenTable;
 
     function resetGameScreen() {
       clearCountdown();
@@ -3174,12 +3203,13 @@
     function doStartGame() {
       const c = (lobbyCode ? lobbyCode.textContent : "").replace(/\s/g, "").trim();
       if (!c || c === "-----") return;
-      busy = false;
+      if (window.WieIsHetPlay) WieIsHetPlay.hideEndOverlay();
+      resetGameScreen();
       if (window.WieIsHetOnline && sessionMode === "host") {
         WieIsHetOnline.broadcastGameStart();
       }
-      transition(screenLobby, screenGame, "transition-in-from-right");
-      setTimeout(startGameSession, TRANSITION_MS + 50);
+      showGameScreen();
+      startGameSession();
     }
 
     function doCopyLink() {
