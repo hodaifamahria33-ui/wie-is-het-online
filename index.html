@@ -17,11 +17,11 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/game/premium-game.css" />
-  <link rel="stylesheet" href="assets/game/game-play.css" />
-  <link rel="stylesheet" href="assets/game/game-layout.css" />
-  <link rel="stylesheet" href="assets/game/game-extras.css" />
-  <link rel="stylesheet" href="assets/game/character-variety.css" />
+  <link rel="stylesheet" href="assets/game/premium-game.css?v=24" />
+  <link rel="stylesheet" href="assets/game/game-play.css?v=24" />
+  <link rel="stylesheet" href="assets/game/game-layout.css?v=24" />
+  <link rel="stylesheet" href="assets/game/game-extras.css?v=24" />
+  <link rel="stylesheet" href="assets/game/character-variety.css?v=24" />
   <meta name="description" content="wiehasit.com — gratis online Wie-is-het spel. Maak een potje, deel de code, raad het personage met vrienden of tegen de bot." />
   <meta name="keywords" content="wiehasit.com, wie has it, wie is het online, raadspel, gratis spel" />
   <meta property="og:type" content="website" />
@@ -176,6 +176,7 @@
     };
     window.wieStartGame = function () {
       if (window.wieApp && window.wieApp.startGame) return window.wieApp.startGame();
+      if (window.wieLaunchGame) return window.wieLaunchGame();
       var el = document.getElementById("lobby-code");
       var c = el ? el.textContent.replace(/\s/g, "").trim() : "";
       if (!c || c === "-----") return;
@@ -1365,8 +1366,13 @@
     .game-table {
       position: absolute;
       inset: 0;
-      overflow: hidden;
-      --game-board-width: min(99vw, min(calc(96vh * 2.1), 960px));
+      overflow: visible;
+      --game-board-width: min(96vw, calc((100vh - 100px) / 2.35), 680px);
+    }
+
+    .game-countdown:not(.hidden) {
+      display: flex !important;
+      z-index: 100;
     }
 
     .game-table.hidden { display: none; }
@@ -2209,10 +2215,10 @@
   </main>
 
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
-  <script src="assets/game/online-room.js?v=20"></script>
-  <script src="assets/game/lobby-room.js?v=21"></script>
-  <script src="assets/game/character-traits.js?v=21"></script>
-  <script src="assets/game/game-play.js?v=21"></script>
+  <script src="assets/game/online-room.js?v=24"></script>
+  <script src="assets/game/lobby-room.js?v=24"></script>
+  <script src="assets/game/character-traits.js?v=24"></script>
+  <script src="assets/game/game-play.js?v=24"></script>
 
   <script>
     const I18N = {
@@ -2608,15 +2614,50 @@
       });
     }
 
+    function fitGameBoardToViewport() {
+      const stack = document.querySelector("#game-table .board-stack");
+      const scene = document.querySelector("#game-table .game-scene");
+      if (!stack || !scene || !gameTable || gameTable.classList.contains("hidden")) return;
+      stack.style.transform = "";
+      const pad = 76;
+      const maxH = Math.max(160, scene.clientHeight - pad);
+      const maxW = Math.max(160, scene.clientWidth - pad);
+      const h = stack.offsetHeight || stack.scrollHeight;
+      const w = stack.offsetWidth || stack.scrollWidth;
+      if (!h || !w) return;
+      const scale = Math.min(1, maxW / w, maxH / h);
+      if (scale < 0.99) stack.style.transform = "scale(" + scale + ")";
+    }
+
     function finishCountdownStartPlay() {
       countdownTimeout = null;
-      if (gameCountdown) gameCountdown.classList.add("hidden");
+      if (gameCountdown) {
+        gameCountdown.classList.add("hidden");
+        gameCountdown.style.display = "";
+      }
+      buildGameBoards();
       if (gameTable) gameTable.classList.remove("hidden");
-      if (screenGame) screenGame.classList.remove("hidden");
+      if (screenGame) {
+        screenGame.classList.remove("hidden");
+        screenGame.classList.add("game-session-active");
+      }
       initGamePlay();
       if (window.WieIsHetPlay) {
-        WieIsHetPlay.beginPickSecretPhase();
+        WieIsHetPlay.wireBoards();
+        try {
+          WieIsHetPlay.beginPickSecretPhase();
+        } catch (err) {
+          console.error("beginPickSecretPhase", err);
+          const banner = document.getElementById("game-turn-banner");
+          if (banner) {
+            banner.textContent = t("phasePickSecret");
+            banner.classList.remove("hidden");
+          }
+          if (screenGame) screenGame.classList.add("phase-pick-secret", "turn-player");
+        }
       }
+      requestAnimationFrame(fitGameBoardToViewport);
+      setTimeout(fitGameBoardToViewport, 150);
       applyLanguage();
     }
 
@@ -2629,8 +2670,8 @@
       buildCountdownPhotos();
       if (screenGame) screenGame.classList.remove("hidden");
       gameCountdown.classList.remove("hidden");
-      gameCountdown.style.display = "";
-      gameTable.classList.add("hidden");
+      gameCountdown.style.display = "flex";
+      if (gameTable) gameTable.classList.add("hidden");
       countdownNum.textContent = String(COUNTDOWN_SEC);
       let n = COUNTDOWN_SEC;
       function tick() {
@@ -2642,9 +2683,7 @@
           n--;
           countdownTimeout = setTimeout(tick, 1000);
         } else {
-          countdownTimeout = setTimeout(() => {
-            finishCountdownStartPlay();
-          }, 700);
+          countdownTimeout = setTimeout(finishCountdownStartPlay, 700);
         }
       }
       tick();
@@ -2653,7 +2692,7 @@
     function initGamePlay() {
       if (!window.WieIsHetPlay) return;
       const onlineMatch =
-        (sessionMode === "host" || sessionMode === "guest") &&
+        sessionMode !== "solo" &&
         window.WieIsHetOnline &&
         WieIsHetOnline.isConnected();
       WieIsHetPlay.init({
@@ -2673,7 +2712,11 @@
       });
     }
 
+    let startingGame = false;
+
     function startBotGame(difficulty) {
+      if (startingGame) return;
+      startingGame = true;
       botDifficulty = difficulty || "medium";
       sessionMode = "solo";
       sessionCode = "";
@@ -2684,8 +2727,12 @@
       }
       if (window.WieIsHetPlay) WieIsHetPlay.hideEndOverlay();
       resetGameScreen();
-      showGameScreen();
-      startGameSession();
+      busy = false;
+      transition(screenBotDiff, screenGame, "transition-in-from-right");
+      setTimeout(() => {
+        startGameSession();
+        startingGame = false;
+      }, TRANSITION_MS + 50);
     }
 
     function startSoloGame(difficulty) {
@@ -2771,20 +2818,43 @@
 
     function startGameSession() {
       clearCountdown();
-      if (gameCountdown) gameCountdown.classList.add("hidden");
-      if (gameTable) gameTable.classList.add("hidden");
-      if (window.WieIsHetPlay) WieIsHetPlay.reset();
       buildGameBoards();
+      if (window.WieIsHetPlay) {
+        try {
+          WieIsHetPlay.reset();
+        } catch (err) {
+          console.warn("play reset", err);
+        }
+        WieIsHetPlay.wireBoards();
+      }
+      if (gameTable) gameTable.classList.add("hidden");
       runCountdownThenTable();
     }
 
     window.wieRunCountdown = runCountdownThenTable;
+    window.wieBuildBoards = buildGameBoards;
+
+    window.addEventListener("resize", () => {
+      fitGameBoardToViewport();
+    });
 
     function resetGameScreen() {
       clearCountdown();
-      gameCountdown.classList.add("hidden");
-      gameTable.classList.add("hidden");
-      if (window.WieIsHetPlay) WieIsHetPlay.reset();
+      if (gameCountdown) {
+        gameCountdown.classList.add("hidden");
+        gameCountdown.style.display = "";
+      }
+      if (gameTable) gameTable.classList.add("hidden");
+      if (screenGame) screenGame.classList.remove("game-session-active");
+      const stack = document.querySelector("#game-table .board-stack");
+      if (stack) stack.style.transform = "";
+      if (window.WieIsHetPlay) {
+        try {
+          WieIsHetPlay.reset();
+        } catch (err) {
+          console.warn("play reset", err);
+        }
+      }
     }
 
     function ensureStartScreenVisible() {
@@ -3073,10 +3143,6 @@
       transition(screenBotDiff, screenMode, "transition-in-from-left");
     });
 
-    onClick("btn-bot-easy", () => startBotGame("easy"));
-    onClick("btn-bot-medium", () => startBotGame("medium"));
-    onClick("btn-bot-hard", () => startBotGame("hard"));
-
     onClick("btn-back", () => {
       transition(screenMenu, screenMode, "transition-in-from-left");
     });
@@ -3096,12 +3162,17 @@
 
     onClick("btn-copy-code", doCopyLink);
     onClick("btn-share-wa", doShareWa);
-    onClick("btn-start-game", doStartGame);
 
     onClick("btn-give-up", () => {
       resetGameScreen();
-      leaveOnlineSession();
-      transition(screenGame, screenLobby, "transition-in-from-left");
+      if (sessionMode === "host") {
+        transition(screenGame, screenLobby, "transition-in-from-left");
+      } else if (sessionMode === "guest") {
+        transition(screenGame, screenJoined, "transition-in-from-left");
+      } else {
+        leaveOnlineSession();
+        transition(screenGame, screenMenu, "transition-in-from-left");
+      }
     });
 
     onClick("btn-play-again", playAgainFromEnd);
@@ -3199,16 +3270,26 @@
     onClick("btn-join-game", doJoinWithCode);
 
     function doStartGame() {
+      if (startingGame) return;
       const c = (lobbyCode ? lobbyCode.textContent : "").replace(/\s/g, "").trim();
       if (!c || c === "-----") return;
-      if (window.WieIsHetPlay) WieIsHetPlay.hideEndOverlay();
-      resetGameScreen();
-      if (window.WieIsHetOnline && sessionMode === "host") {
-        WieIsHetOnline.broadcastGameStart();
+      startingGame = true;
+      try {
+        if (window.WieIsHetPlay) WieIsHetPlay.hideEndOverlay();
+        resetGameScreen();
+        if (window.WieIsHetOnline && sessionMode === "host") {
+          WieIsHetOnline.broadcastGameStart();
+        }
+        showGameScreen();
+        startGameSession();
+      } finally {
+        setTimeout(() => {
+          startingGame = false;
+        }, 4500);
       }
-      showGameScreen();
-      startGameSession();
     }
+
+    window.wieLaunchGame = doStartGame;
 
     function doCopyLink() {
       const c = (lobbyCode ? lobbyCode.textContent : "").replace(/\s/g, "").trim();

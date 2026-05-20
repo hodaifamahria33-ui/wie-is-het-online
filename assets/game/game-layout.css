@@ -2,24 +2,31 @@
  * Bord gecentreerd in beeld, zo groot mogelijk.
  */
 #game-table {
-  --game-board-width: min(99vw, min(calc(96vh * 2.1), 960px));
+  --game-board-width: min(96vw, calc((100vh - 100px) / 2.35), 680px);
   --board-tilt: 8deg;
 }
 
 #game-table .game-scene {
   position: absolute;
   inset: 0;
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding:
     calc(env(safe-area-inset-top, 0px) + 54px)
-    6px
-    6px;
+    8px
+    12px;
   box-sizing: border-box;
   perspective: 1100px;
   perspective-origin: 50% 50%;
   transform: none !important;
-  overflow: hidden;
+  overflow: visible;
+}
+
+.screen-game-view.game-session-active #game-table:not(.hidden) .board-stack,
+.screen-game-view.game-session-active #game-table:not(.hidden) .board-stand--front {
+  opacity: 1 !important;
+  visibility: visible !important;
 }
 
 #game-table .opponent-zone {
@@ -69,6 +76,8 @@
   max-width: var(--game-board-width);
   transform-style: preserve-3d;
   margin: 0 auto;
+  flex-shrink: 0;
+  transform-origin: center center;
 }
 
 #game-table .board-stand--rear {
