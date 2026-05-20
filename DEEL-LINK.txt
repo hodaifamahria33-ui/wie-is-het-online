@@ -1,0 +1,20 @@
+═══ Publieke speellink (altijd online) ═══
+
+Je hoeft NIET online te zijn. Het spel staat op internet (GitHub Pages).
+
+DEZE LINK DEELEN MET IEDEREEN:
+  https://hodaifamahria33-ui.github.io/wie-is-het-online/
+
+Wat gebeurt er?
+  • Vriend opent de link → spel start meteen (tegen de bot)
+  • Werkt 24/7, ook als jij uit bent of slaapt
+  • Geen host, geen potcode, geen wachten op jou
+
+Op je telefoon (beginscherm in het spel):
+  • KOPIEER PUBLIEKE LINK → plak in WhatsApp / Snapchat / etc.
+
+Jij wilt zelf het menu (online hosten of moeilijkheid)?
+  https://hodaifamahria33-ui.github.io/wie-is-het-online/?menu=1
+
+Online potje met vrienden (jij host):
+  ?menu=1 → Online spelen → HOST GAME → deel join-link uit de lobby

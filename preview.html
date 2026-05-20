@@ -1428,6 +1428,26 @@
       color: #bbf7d0;
     }
 
+    .screen-start .start-public-label {
+      margin: 0.25rem 0 0;
+      font-size: clamp(0.75rem, 2.2vw, 0.88rem);
+      color: rgba(186, 230, 253, 0.85);
+      pointer-events: none;
+    }
+
+    .screen-start .start-public-url {
+      margin: 0 0 0.35rem;
+      padding: 0.35rem 0.75rem;
+      max-width: min(92vw, 420px);
+      font-size: clamp(0.65rem, 2vw, 0.8rem);
+      font-weight: 600;
+      color: #fef08a;
+      word-break: break-all;
+      background: rgba(0, 0, 0, 0.35);
+      border-radius: 8px;
+      pointer-events: none;
+    }
+
   </style>
 </head>
 <body>
@@ -1446,8 +1466,10 @@
     <h1 class="seo-brand">wiehasit.com</h1>
     <section class="content">
       <button id="btn-begin" class="btn" type="button" data-i18n="btnBegin" onclick="window.wieShowMode()">LATEN WE BEGINNEN</button>
-      <button id="btn-share-play" class="btn btn-share-play" type="button" data-i18n="btnSharePlayLink">DEEL MET VRIENDEN</button>
-      <p class="start-tagline" data-i18n="startTagline">Stuur de link — iedereen speelt zelf, geen host nodig</p>
+      <button id="btn-share-play" class="btn btn-share-play" type="button" data-i18n="btnSharePlayLink">KOPIEER PUBLIEKE LINK</button>
+      <p class="start-public-label" data-i18n="publicLinkLabel">Iedereen kan via deze link spelen:</p>
+      <p class="start-public-url" id="start-public-url" aria-live="polite"></p>
+      <p class="start-tagline" data-i18n="startTagline">Publieke link — 24/7 online, jij hoeft niet mee te doen</p>
     </section>
   </main>
 
@@ -1703,9 +1725,10 @@
       nl: {
         startTitleHtml: 'Wie <span class="start-title-accent">Is</span> Het?',
         startOnlineBadge: "ONLINE",
-        startTagline: "Stuur de link — iedereen speelt zelf, geen host nodig",
+        startTagline: "Publieke link — 24/7 online, jij hoeft niet mee te doen",
+        publicLinkLabel: "Iedereen kan via deze link spelen:",
         btnBegin: "LATEN WE BEGINNEN",
-        btnSharePlayLink: "DEEL MET VRIENDEN",
+        btnSharePlayLink: "KOPIEER PUBLIEKE LINK",
         btnSharePlayDone: "✓ Link gekopieerd!",
         modeTitle: 'Kies je<span class="accent">spelmodus</span>',
         btnPlayOnline: "Online spelen",
@@ -1778,9 +1801,10 @@
       en: {
         startTitleHtml: 'Who <span class="start-title-accent">Is</span> It?',
         startOnlineBadge: "ONLINE",
-        startTagline: "Send the link — everyone plays solo, no host needed",
+        startTagline: "Public link — online 24/7, you don't need to be playing",
+        publicLinkLabel: "Anyone can play via this link:",
         btnBegin: "LET'S BEGIN",
-        btnSharePlayLink: "SHARE WITH FRIENDS",
+        btnSharePlayLink: "COPY PUBLIC LINK",
         btnSharePlayDone: "✓ Link copied!",
         modeTitle: 'Choose your<span class="accent">game mode</span>',
         btnPlayOnline: "Play online",
@@ -2107,8 +2131,7 @@
     }
 
     function buildSharePlayUrl() {
-      const base = window.location.href.split("?")[0].split("#")[0];
-      return base + "?speel=1";
+      return window.location.href.split("?")[0].split("#")[0];
     }
 
     function startSoloGame(difficulty) {

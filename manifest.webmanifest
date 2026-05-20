@@ -1,8 +1,8 @@
 {
   "name": "wiehasit.com",
   "short_name": "wiehasit",
-  "description": "wiehasit.com — gratis online Wie-is-het spel. Speel met vrienden of tegen de bot.",
-  "start_url": "./",
+  "description": "wiehasit.com — gratis Wie-is-het spel, 24/7 online. Open de link en speel meteen.",
+  "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "background_color": "#1c1036",
