@@ -1,0 +1,22 @@
+═══ Wie Is Het? Online — WhatsApp link + foto ═══
+
+STAP 1 (1 minuut, gratis)
+  → Open: https://app.netlify.com/drop
+
+STAP 2
+  → Sleep deze hele map: WieIsHetOnline
+
+STAP 3
+  → Netlify geeft je een link, bv:
+     https://leuke-naam-123.netlify.app
+
+STAP 4
+  → Open die link in Chrome (NIET preview.html van je pc!)
+
+STAP 5
+  → Host game → DEEL VIA WHATSAPP
+  → Nu gaat alleen de link + foto naar vrienden ✅
+
+Lokaal spelen zonder WhatsApp?
+  → Dubbelklik: start-online.bat
+  → Opent http://localhost:8765

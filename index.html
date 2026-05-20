@@ -1,0 +1,2327 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Wie Is Het? Online</title>
+  <meta name="application-name" content="Wie Is Het? Online" />
+  <meta name="apple-mobile-web-app-title" content="Wie Is Het?" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#1c1036" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="og-image.png" type="image/png" />
+  <link rel="apple-touch-icon" href="og-image.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/game/premium-game.css" />
+  <link rel="stylesheet" href="assets/game/game-play.css" />
+  <link rel="stylesheet" href="assets/game/game-layout.css" />
+  <link rel="stylesheet" href="assets/game/game-extras.css" />
+  <link rel="stylesheet" href="assets/game/character-variety.css" />
+  <meta name="description" content="Wie Is Het? Online — raad het personage. Speel met vrienden of tegen de bot." />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Wie Is Het? Online" />
+  <meta property="og:description" content="Tap om mee te doen!" />
+  <meta property="og:image" content="og-image.png" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: "Segoe UI", system-ui, sans-serif;
+    }
+
+    .screen {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(180deg, #1c1036 0%, #121830 100%);
+      overflow: hidden;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .screen.hidden { display: none; }
+
+    .screen.transition-out {
+      opacity: 0;
+      transform: translateX(-36px) scale(0.97);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .screen.transition-in-from-right,
+    .screen.transition-in-from-left {
+      z-index: 2;
+    }
+
+    .screen.transition-in-from-right {
+      opacity: 0;
+      transform: translateX(36px) scale(0.97);
+    }
+
+    .screen.transition-in-from-left {
+      opacity: 0;
+      transform: translateX(-36px) scale(0.97);
+    }
+
+    .screen.transition-active {
+      opacity: 1;
+      transform: translateX(0) scale(1);
+    }
+
+    .glow {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 70vmin;
+      height: 50vmin;
+      transform: translate(-50%, -50%);
+      background: radial-gradient(ellipse, rgba(126, 200, 232, 0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .cards {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .card {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 14px;
+      background: rgba(235, 230, 250, 0.12);
+      border: 2px solid rgba(255, 255, 255, 0.18);
+      backdrop-filter: blur(8px);
+      animation: bob 7s ease-in-out infinite;
+      transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) rotate(var(--rot));
+    }
+
+    .face {
+      width: 55%;
+      height: 55%;
+      border-radius: 50%;
+      background: rgba(140, 158, 217, 0.35);
+      position: relative;
+    }
+
+    .face::before,
+    .face::after {
+      content: "";
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background: rgba(30, 20, 50, 0.5);
+      border-radius: 50%;
+      top: 42%;
+    }
+
+    .face::before { left: 28%; }
+    .face::after { right: 28%; }
+
+    .c1 { width: 140px; height: 185px; --x: -340px; --y: -200px; --rot: -14deg; }
+    .c2 { width: 130px; height: 168px; --x: 320px;  --y: -160px; --rot: 11deg;  animation-delay: 1s; }
+    .c3 { width: 120px; height: 158px; --x: -300px; --y: 140px;  --rot: 8deg;   animation-delay: 2s; }
+    .c4 { width: 128px; height: 165px; --x: 290px;  --y: 180px;  --rot: -9deg;  animation-delay: 0.5s; }
+    .c5 { width: 110px; height: 145px; --x: -40px;  --y: -280px; --rot: 5deg;   animation-delay: 1.5s; opacity: 0.65; }
+    .c6 { width: 118px; height: 152px; --x: 80px;   --y: 260px;  --rot: -6deg;  animation-delay: 2.5s; }
+    .c7 { width: 100px; height: 132px; --x: -180px; --y: 20px;   --rot: 4deg;   animation-delay: 0.8s; opacity: 0.5; }
+    .c8 { width: 100px; height: 132px; --x: 200px;  --y: 40px;   --rot: -7deg;  animation-delay: 1.8s; opacity: 0.5; }
+
+    @media (max-width: 900px) {
+      .c1 { --x: -42vw; --y: -22vh; width: 100px; height: 132px; }
+      .c2 { --x: 38vw;  --y: -18vh; width: 95px;  height: 125px; }
+      .c3 { --x: -40vw; --y: 16vh;  width: 88px;  height: 115px; }
+      .c4 { --x: 36vw;  --y: 20vh;  width: 92px;  height: 120px; }
+      .c5 { --x: -5vw;  --y: -30vh; width: 80px;  height: 105px; }
+      .c6 { --x: 8vw;   --y: 28vh;  width: 85px;  height: 110px; }
+      .c7 { --x: -22vw; --y: 2vh;   width: 72px;  height: 95px; }
+      .c8 { --x: 24vw;  --y: 4vh;   width: 72px;  height: 95px; }
+    }
+
+    @keyframes bob {
+      0%, 100% {
+        transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) rotate(var(--rot));
+      }
+      50% {
+        transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y) - 14px)) rotate(var(--rot));
+      }
+    }
+
+    .content {
+      position: absolute;
+      inset: 0;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 24px;
+      gap: 0.5rem;
+    }
+
+    h1, h2 {
+      color: #fff;
+      font-size: clamp(2.5rem, 6vw, 4.5rem);
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: clamp(1rem, 3vh, 2rem);
+      text-shadow: 0 4px 32px rgba(0, 0, 0, 0.45);
+    }
+
+    h2 { font-size: clamp(2rem, 5vw, 3.5rem); }
+
+    .accent {
+      display: block;
+      color: #7ec8e8;
+      font-size: 0.72em;
+      margin-top: 0.1em;
+    }
+
+    .btn {
+      background: #ffeb29;
+      color: #1f1433;
+      border: none;
+      border-radius: 18px;
+      padding: 1rem 3.5rem;
+      font-size: clamp(1.1rem, 2vw, 1.6rem);
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      box-shadow: 0 10px 40px rgba(255, 235, 41, 0.3);
+      margin: 0.35rem 0;
+      min-width: min(90vw, 320px);
+    }
+
+    .btn:hover { transform: scale(1.04); }
+
+    .btn.secondary {
+      background: rgba(36, 26, 66, 0.9);
+      color: #fff;
+      box-shadow: none;
+      border: 2px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .btn.back {
+      background: rgba(51, 41, 89, 0.9);
+      color: #7ec8e8;
+      font-size: 0.95rem;
+      padding: 0.7rem 2rem;
+      min-width: auto;
+      box-shadow: none;
+      margin-top: 1.5rem;
+    }
+
+    .footer {
+      position: absolute;
+      bottom: clamp(20px, 4vh, 48px);
+      left: 0;
+      right: 0;
+      text-align: center;
+      color: rgba(126, 200, 232, 0.75);
+      font-size: clamp(0.85rem, 1.5vw, 1.05rem);
+      z-index: 10;
+    }
+
+    /* Licht schermen: host, lobby, join */
+    .screen-light h2 {
+      color: #3d2d5c;
+      text-shadow: none;
+      margin-bottom: 0.75rem;
+    }
+
+    .screen-light .accent {
+      display: inline;
+      color: #8b5cf6;
+      font-size: 1em;
+      margin-top: 0;
+    }
+
+    .screen-light .btn {
+      background: #e87868;
+      color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 6px 20px rgba(232, 120, 104, 0.25);
+      border: none;
+      animation: none;
+    }
+
+    .screen-light .btn:hover {
+      transform: scale(1.03);
+      box-shadow: 0 8px 24px rgba(232, 120, 104, 0.32);
+    }
+
+    .screen-light .btn.secondary {
+      background: #fff;
+      color: #3d2d5c;
+      border: 2px solid #d4c4f5;
+      box-shadow: 0 4px 16px rgba(100, 80, 150, 0.1);
+    }
+
+    .screen-light .btn.back {
+      background: #ebe4f8;
+      color: #7c5cbf;
+      box-shadow: none;
+    }
+
+    #screen-lobby .btn-copy-code {
+      background: #8b5cf6;
+      box-shadow: 0 6px 20px rgba(139, 92, 246, 0.3);
+    }
+
+    #screen-lobby .btn-copy-code.copied {
+      background: #22c55e;
+      box-shadow: 0 6px 20px rgba(34, 197, 94, 0.35);
+    }
+
+    #screen-lobby .btn-start-game {
+      background: #e87868;
+      box-shadow: 0 6px 20px rgba(232, 120, 104, 0.28);
+    }
+
+    #screen-lobby .pot-code {
+      color: #6d5cad;
+    }
+
+    /* —— Scherm 2: menu (levendig) —— */
+    #screen-menu {
+      background: linear-gradient(
+        -45deg,
+        #0c1445 0%,
+        #1a0f4a 25%,
+        #2d1b69 50%,
+        #1e3a5f 75%,
+        #0f766e 100%
+      );
+      background-size: 400% 400%;
+      animation: menuBgShift 14s ease infinite;
+    }
+
+    @keyframes menuBgShift {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    #screen-menu .glow {
+      background: radial-gradient(
+        ellipse,
+        rgba(56, 189, 248, 0.45) 0%,
+        rgba(167, 139, 250, 0.25) 45%,
+        transparent 72%
+      );
+      animation: glowPulse 5s ease-in-out infinite;
+    }
+
+    @keyframes glowPulse {
+      0%, 100% { opacity: 0.75; transform: translate(-50%, -50%) scale(1); }
+      50% { opacity: 1; transform: translate(-50%, -50%) scale(1.12); }
+    }
+
+    #screen-menu .cards { display: none; }
+
+    .decor {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .bubble {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      border-radius: 50%;
+      animation: bob 8s ease-in-out infinite;
+      transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y)));
+    }
+
+    .b1 { width: 140px; height: 140px; --x: -38vw; --y: -18vh; background: rgba(255, 160, 140, 0.4); }
+    .b2 { width: 120px; height: 120px; --x: 36vw; --y: -14vh; background: rgba(120, 200, 255, 0.45); animation-delay: 1s; }
+    .b3 { width: 100px; height: 100px; --x: -34vw; --y: 20vh; background: rgba(170, 140, 255, 0.38); animation-delay: 2s; }
+    .b4 { width: 130px; height: 130px; --x: 35vw; --y: 22vh; background: rgba(255, 210, 120, 0.42); animation-delay: 0.5s; }
+    .b5 { width: 80px; height: 80px; --x: -8vw; --y: -28vh; background: rgba(120, 240, 200, 0.5); animation-delay: 1.5s; }
+    .b6 { width: 90px; height: 90px; --x: 12vw; --y: 26vh; background: rgba(255, 150, 200, 0.4); animation-delay: 2.5s; }
+
+    .polaroid {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 12px 40px rgba(80, 60, 120, 0.15);
+      animation: bob 7s ease-in-out infinite;
+      transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) rotate(var(--rot));
+    }
+
+    #screen-menu .polaroid {
+      background: linear-gradient(145deg, #fff 0%, #e0e7ff 100%);
+      border: 2px solid rgba(255, 255, 255, 0.65);
+      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
+      animation: menuCardFloat 5.5s ease-in-out infinite;
+    }
+
+    @keyframes menuCardFloat {
+      0%, 100% {
+        transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) rotate(var(--rot));
+      }
+      50% {
+        transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y) - 22px)) rotate(calc(var(--rot) + 5deg));
+      }
+    }
+
+    .polaroid .face {
+      background: rgba(150, 130, 220, 0.45);
+    }
+
+    #screen-menu .polaroid .face {
+      background: linear-gradient(135deg, #22d3ee 0%, #a78bfa 100%);
+    }
+
+    .p1 { width: 110px; height: 140px; --x: -22vw; --y: -4vh; --rot: -8deg; }
+    .p2 { width: 105px; height: 135px; --x: 24vw; --y: -8vh; --rot: 10deg; animation-delay: 1s; }
+    .p3 { width: 100px; height: 128px; --x: -20vw; --y: 14vh; --rot: 6deg; animation-delay: 2s; }
+    .p4 { width: 108px; height: 138px; --x: 22vw; --y: 12vh; --rot: -11deg; animation-delay: 0.5s; }
+
+    .qm {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      font-size: 4rem;
+      font-weight: 800;
+      color: rgba(139, 92, 246, 0.22);
+      transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y)));
+      pointer-events: none;
+    }
+
+    #screen-menu .qm {
+      color: rgba(56, 189, 248, 0.4);
+      text-shadow: 0 0 24px rgba(56, 189, 248, 0.5);
+      animation: qmPulse 4s ease-in-out infinite;
+    }
+
+    @keyframes qmPulse {
+      0%, 100% { opacity: 0.35; transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) scale(1); }
+      50% { opacity: 0.7; transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y) - 10px)) scale(1.08); }
+    }
+
+    #screen-menu .bubble {
+      animation: menuBubble 8s ease-in-out infinite;
+      filter: blur(1px);
+    }
+
+    @keyframes menuBubble {
+      0%, 100% { transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) scale(1); }
+      50% { transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y) - 18px)) scale(1.15); }
+    }
+
+    #screen-menu .b1 { background: rgba(34, 211, 238, 0.35); }
+    #screen-menu .b2 { background: rgba(167, 139, 250, 0.4); }
+    #screen-menu .b3 { background: rgba(244, 114, 182, 0.35); }
+    #screen-menu .b4 { background: rgba(250, 204, 21, 0.3); }
+    #screen-menu .b5 { background: rgba(52, 211, 153, 0.38); }
+    #screen-menu .b6 { background: rgba(96, 165, 250, 0.38); }
+
+    .menu-spark {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 0 14px #38bdf8, 0 0 28px #a78bfa;
+      animation: sparkTwinkle 2.5s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    .menu-spark.s1 { left: 12%; top: 18%; animation-delay: 0s; }
+    .menu-spark.s2 { left: 88%; top: 22%; animation-delay: 0.6s; }
+    .menu-spark.s3 { left: 8%; top: 72%; animation-delay: 1.2s; }
+    .menu-spark.s4 { left: 92%; top: 68%; animation-delay: 0.3s; }
+    .menu-spark.s5 { left: 50%; top: 8%; animation-delay: 1.8s; width: 4px; height: 4px; }
+
+    @keyframes sparkTwinkle {
+      0%, 100% { opacity: 0.2; transform: scale(0.6); }
+      50% { opacity: 1; transform: scale(1.4); }
+    }
+
+    .q1 { --x: -28vw; --y: 0; font-size: 3.5rem; }
+    .q2 { --x: 30vw; --y: 2vh; font-size: 3rem; }
+    .q3 { --x: 0; --y: 28vh; font-size: 2.5rem; }
+
+    #screen-menu .menu-content h2 {
+      color: #fff;
+      text-shadow: 0 4px 24px rgba(56, 189, 248, 0.45);
+      animation: menuTitleIn 0.75s cubic-bezier(0.34, 1.4, 0.64, 1) both;
+    }
+
+    #screen-menu .menu-content .accent {
+      color: #38bdf8;
+      animation: accentShine 2.5s ease-in-out infinite;
+    }
+
+    @keyframes accentShine {
+      0%, 100% { color: #38bdf8; }
+      50% { color: #f472b6; }
+    }
+
+    @keyframes menuTitleIn {
+      from { opacity: 0; transform: translateY(-28px) scale(0.92); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    #screen-menu .btn {
+      background: linear-gradient(135deg, #06b6d4 0%, #6366f1 45%, #ec4899 100%);
+      background-size: 220% 220%;
+      color: #fff;
+      border-radius: 12px;
+      padding: 0.95rem 2.5rem;
+      box-shadow: 0 8px 32px rgba(99, 102, 241, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      animation: menuBtnGradient 5s ease infinite, menuBtnIn 0.65s cubic-bezier(0.34, 1.3, 0.64, 1) both;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    #btn-host { animation-delay: 0s, 0.2s; }
+    #btn-join-menu { animation-delay: 0s, 0.32s; }
+    #btn-back { animation-delay: 0s, 0.44s; }
+
+    @keyframes menuBtnGradient {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    @keyframes menuBtnIn {
+      from { opacity: 0; transform: translateY(24px) scale(0.9); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    #screen-menu .btn:hover {
+      transform: scale(1.06) translateY(-2px);
+      box-shadow: 0 12px 40px rgba(236, 72, 153, 0.5);
+    }
+
+    #screen-menu .btn.secondary {
+      background: rgba(255, 255, 255, 0.95);
+      color: #1e1b4b;
+      border: 2px solid rgba(56, 189, 248, 0.5);
+      box-shadow: 0 8px 28px rgba(56, 189, 248, 0.25);
+      animation: menuBtnIn 0.65s cubic-bezier(0.34, 1.3, 0.64, 1) both;
+      animation-delay: 0.32s;
+    }
+
+    #screen-menu .btn.secondary:hover {
+      border-color: #ec4899;
+      box-shadow: 0 10px 36px rgba(244, 114, 182, 0.35);
+    }
+
+    #screen-menu .btn.back {
+      background: rgba(255, 255, 255, 0.12);
+      color: #a5f3fc;
+      border: 1px solid rgba(165, 243, 252, 0.35);
+      border-radius: 10px;
+      backdrop-filter: blur(8px);
+      animation: menuBtnIn 0.65s cubic-bezier(0.34, 1.3, 0.64, 1) both;
+      animation-delay: 0.44s;
+    }
+
+    #screen-menu .btn.back:hover {
+      background: rgba(255, 255, 255, 0.22);
+      color: #fff;
+    }
+
+    #screen-menu .lang-globe {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .screen-mode-pick .content {
+      text-align: center;
+    }
+
+    .screen-mode-pick h2 {
+      margin-bottom: 1.5rem;
+    }
+
+    .screen-mode-pick .btn {
+      display: block;
+      width: min(90vw, 320px);
+      margin: 0.65rem auto;
+      border-radius: 12px;
+      padding: 0.95rem 2rem;
+      font-weight: 800;
+    }
+
+    .screen-mode-pick .btn:not(.back) {
+      background: linear-gradient(135deg, #06b6d4 0%, #6366f1 50%, #ec4899 100%);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      box-shadow: 0 8px 28px rgba(99, 102, 241, 0.4);
+    }
+
+    .screen-mode-pick .btn.secondary {
+      background: rgba(255, 255, 255, 0.95);
+      color: #1e1b4b;
+      border: 2px solid rgba(56, 189, 248, 0.5);
+    }
+
+    .screen-mode-pick .btn.back {
+      background: rgba(30, 27, 75, 0.08);
+      color: #4338ca;
+      border: 1px solid rgba(99, 102, 241, 0.25);
+    }
+
+    .btn-diff--easy {
+      background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%) !important;
+    }
+
+    .btn-diff--medium {
+      background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%) !important;
+      color: #1a1a2e !important;
+    }
+
+    .btn-diff--hard {
+      background: linear-gradient(135deg, #f87171 0%, #dc2626 100%) !important;
+    }
+
+    .screen-light {
+      background: linear-gradient(165deg, #e8f4fc 0%, #f0e8ff 45%, #fff5f0 100%);
+    }
+
+    .screen-light .glow {
+      background: radial-gradient(ellipse, rgba(139, 92, 246, 0.18) 0%, transparent 70%);
+    }
+
+    .code-input {
+      width: min(90vw, 320px);
+      padding: 1rem 1.25rem;
+      font-size: 1.75rem;
+      font-weight: 800;
+      text-align: center;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      border: 2px solid rgba(139, 92, 246, 0.35);
+      border-radius: 14px;
+      background: #fff;
+      color: #3d2d5c;
+      margin: 0.5rem 0;
+    }
+
+    .code-input:focus {
+      outline: none;
+      border-color: #8b5cf6;
+      box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.2);
+    }
+
+    .hint { color: rgba(61, 45, 92, 0.65); font-size: 0.95rem; margin-bottom: 0.25rem; }
+    .error { color: #e85d6a; font-size: 0.9rem; min-height: 1.2rem; margin: 0.25rem 0 0.5rem; }
+
+    .pot-code {
+      font-size: clamp(2.5rem, 8vw, 4rem);
+      font-weight: 800;
+      color: #8b5cf6;
+      letter-spacing: 0.25em;
+      margin: 0.5rem 0 1rem;
+    }
+
+    .screen-loading-photos {
+      background: linear-gradient(165deg, #e8f4fc 0%, #f5f0ff 50%, #fff8f5 100%);
+      z-index: 50;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    .screen-loading-photos.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .loading-photos {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .loading-photos .polaroid {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 12px 36px rgba(80, 60, 120, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: bob 5s ease-in-out infinite;
+      transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) rotate(var(--rot));
+    }
+
+    .loading-photos .polaroid .face { background: rgba(150, 130, 220, 0.5); }
+
+    .lp1 { width: 100px; height: 128px; --x: -200px; --y: -80px; --rot: -8deg; }
+    .lp2 { width: 95px; height: 122px; --x: 190px; --y: -60px; --rot: 10deg; animation-delay: 0.6s; }
+    .lp3 { width: 88px; height: 115px; --x: -170px; --y: 90px; --rot: 6deg; animation-delay: 1.2s; }
+    .lp4 { width: 92px; height: 118px; --x: 180px; --y: 100px; --rot: -9deg; animation-delay: 0.3s; }
+    .lp5 { width: 80px; height: 105px; --x: 0; --y: -150px; --rot: 4deg; animation-delay: 1.5s; }
+
+    .loading-text {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+    }
+
+    .loading-text h2 {
+      color: #3d2d5c;
+      font-size: clamp(1.4rem, 4vw, 2rem);
+      margin-bottom: 0.35rem;
+    }
+
+    .loading-text p { color: #8b5cf6; font-weight: 600; }
+
+    .btn-copy-code {
+      color: #fff;
+      border-radius: 10px;
+      transition: transform 0.2s ease, background 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .btn-copy-code:hover:not(.copied) { transform: scale(1.04); }
+
+    .btn-copy-code.copied {
+      animation: copyPop 0.5s ease;
+    }
+
+    @keyframes copyPop {
+      0% { transform: scale(1); }
+      35% { transform: scale(1.07); }
+      65% { transform: scale(0.98); }
+      100% { transform: scale(1); }
+    }
+
+    .pot-code.copy-flash {
+      animation: codeFlash 0.55s ease;
+    }
+
+    @keyframes codeFlash {
+      0%, 100% { transform: scale(1); color: #8b5cf6; }
+      45% { transform: scale(1.12); color: #16a34a; }
+    }
+
+    .btn-start-game {
+      color: #fff;
+      border-radius: 10px;
+    }
+
+    .btn-start-game:hover { transform: scale(1.03); }
+
+    .screen-lobby .content {
+      gap: 0.65rem;
+    }
+
+    /* —— Spelscherm: countdown + tafel —— */
+    .screen-game-view {
+      background: linear-gradient(180deg, #1a1035 0%, #2d1f5c 40%, #1e2a4a 100%);
+    }
+
+    .screen-game-view .glow {
+      background: radial-gradient(ellipse, rgba(139, 92, 246, 0.25) 0%, transparent 65%);
+    }
+
+    .game-countdown {
+      position: absolute;
+      inset: 0;
+      z-index: 20;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(ellipse at center, rgba(45, 31, 92, 0.95) 0%, rgba(15, 10, 35, 0.98) 70%);
+    }
+
+    .game-countdown.hidden { display: none; }
+
+    .countdown-photos {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .countdown-polaroid {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      padding: 6px 6px 18px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 14px 40px rgba(0, 0, 0, 0.45);
+      transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) rotate(var(--rot));
+      opacity: 0;
+      animation:
+        countdownPhotoIn 0.55s cubic-bezier(0.34, 1.2, 0.64, 1) forwards,
+        countdownBob 2.8s ease-in-out 0.55s infinite;
+    }
+
+    .countdown-polaroid img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 4px;
+      background: #e2e8f0;
+    }
+
+    .countdown-polaroid.cp1 { width: 88px; height: 108px; --x: -220px; --y: -70px; --rot: -10deg; animation-delay: 0s, 0.55s; }
+    .countdown-polaroid.cp2 { width: 82px; height: 102px; --x: 210px; --y: -85px; --rot: 12deg; animation-delay: 0.08s, 0.63s; }
+    .countdown-polaroid.cp3 { width: 76px; height: 96px; --x: -190px; --y: 95px; --rot: 7deg; animation-delay: 0.16s, 0.71s; }
+    .countdown-polaroid.cp4 { width: 80px; height: 100px; --x: 200px; --y: 88px; --rot: -8deg; animation-delay: 0.12s, 0.67s; }
+    .countdown-polaroid.cp5 { width: 72px; height: 90px; --x: -40px; --y: -155px; --rot: 5deg; animation-delay: 0.2s, 0.75s; }
+    .countdown-polaroid.cp6 { width: 74px; height: 92px; --x: 50px; --y: 150px; --rot: -6deg; animation-delay: 0.1s, 0.65s; }
+    .countdown-polaroid.cp7 { width: 68px; height: 86px; --x: -280px; --y: 20px; --rot: 14deg; animation-delay: 0.18s, 0.73s; }
+    .countdown-polaroid.cp8 { width: 70px; height: 88px; --x: 270px; --y: 10px; --rot: -11deg; animation-delay: 0.14s, 0.69s; }
+
+    @keyframes countdownPhotoIn {
+      0% { opacity: 0; transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) rotate(var(--rot)) scale(0.4); }
+      100% { opacity: 1; transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) rotate(var(--rot)) scale(1); }
+    }
+
+    @keyframes countdownBob {
+      0%, 100% { transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) rotate(var(--rot)); }
+      50% { transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y) - 10px)) rotate(calc(var(--rot) + 2deg)); }
+    }
+
+    .countdown-center {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .countdown-label {
+      color: rgba(200, 190, 255, 0.85);
+      font-size: clamp(1rem, 2.5vw, 1.35rem);
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+
+    .countdown-num {
+      font-size: clamp(5rem, 18vw, 9rem);
+      font-weight: 800;
+      color: #fff;
+      text-shadow: 0 0 40px rgba(139, 92, 246, 0.8);
+      line-height: 1;
+    }
+
+    .countdown-num.pop {
+      animation: countPop 0.45s cubic-bezier(0.34, 1.5, 0.64, 1);
+    }
+
+    @keyframes countPop {
+      0% { transform: scale(0.5); opacity: 0.3; }
+      60% { transform: scale(1.12); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .game-table {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      --game-board-width: min(99vw, min(calc(96vh * 2.1), 960px));
+    }
+
+    .game-table.hidden { display: none; }
+
+    .game-scene {
+      position: absolute;
+      inset: 0;
+      perspective: 1000px;
+      perspective-origin: 50% 50%;
+    }
+
+    .table-surface {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: min(86vw, 660px);
+      height: 30vh;
+      z-index: 1;
+      transform: translate(-50%, -50%) rotateX(52deg);
+      transform-style: preserve-3d;
+      background:
+        linear-gradient(105deg, transparent 40%, rgba(255, 255, 255, 0.04) 50%, transparent 60%),
+        linear-gradient(180deg, #6b4a32 0%, #4a3222 45%, #2e1f14 100%);
+      border-radius: 14px;
+      border: 2px solid rgba(255, 220, 180, 0.12);
+      box-shadow:
+        0 30px 80px rgba(0, 0, 0, 0.55),
+        inset 0 3px 0 rgba(255, 255, 255, 0.12),
+        inset 0 -12px 24px rgba(0, 0, 0, 0.25);
+    }
+
+    .opponent-zone {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 6;
+    }
+
+    .opponent-chair {
+      display: none;
+      width: 100px;
+      height: 55px;
+      margin: 0.15rem auto 0;
+      background: linear-gradient(180deg, #4a3728 0%, #2d1f14 100%);
+      border-radius: 8px 8px 4px 4px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+      order: 3;
+    }
+
+    .opponent-figure {
+      position: relative;
+      width: 100%;
+      margin: 0 0 -3.25rem;
+      z-index: 7;
+      order: 1;
+    }
+
+    .opponent-character-wrap {
+      position: relative;
+      width: min(78vw, 300px);
+      margin: 0 auto;
+      background: transparent;
+      animation: characterSit 5s ease-in-out infinite;
+      transform-origin: center bottom;
+    }
+
+    @keyframes characterSit {
+      0%, 100% {
+        transform: translateY(0) rotateY(0deg);
+      }
+      35% {
+        transform: translateY(-4px) rotateY(-2.5deg);
+      }
+      65% {
+        transform: translateY(-4px) rotateY(2.5deg);
+      }
+    }
+
+    .opponent-character {
+      display: block;
+      width: 100%;
+      height: auto;
+      max-height: 28vh;
+      object-fit: contain;
+      object-position: center bottom;
+      background: transparent;
+      filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.35));
+      animation: characterBreathe 4.2s ease-in-out infinite;
+    }
+
+    @keyframes characterBreathe {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.015); }
+    }
+
+    /* fallback rond gezicht als character niet laadt */
+    .opponent-head {
+      display: none;
+      width: clamp(100px, 22vw, 158px);
+      height: clamp(100px, 22vw, 158px);
+      margin: 0 auto;
+      border-radius: 50%;
+      background: linear-gradient(145deg, #f5d0b5 0%, #e8b896 100%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .opponent-head.fallback-show { display: block; }
+
+    .board-stand {
+      width: var(--game-board-width);
+      max-width: var(--game-board-width);
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+    }
+
+    .board-stand--opponent {
+      order: 2;
+      z-index: 10;
+      transform: perspective(560px) rotateX(-16deg);
+      transform-origin: center bottom;
+      margin-top: -0.25rem;
+    }
+
+    .board-stand--player {
+      transform: perspective(560px) rotateX(16deg);
+      transform-origin: center top;
+      z-index: 11;
+      margin-bottom: -1.25rem;
+    }
+
+    .board-tray {
+      width: 100%;
+      padding: 14px 16px 18px;
+      border-radius: 22px;
+      box-sizing: border-box;
+      position: relative;
+      z-index: 2;
+      border: 4px solid rgba(255, 255, 255, 0.45);
+      box-shadow:
+        0 16px 40px rgba(0, 0, 0, 0.45),
+        inset 0 3px 0 rgba(255, 255, 255, 0.45),
+        inset 0 -6px 14px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Klassiek Wie is het: blauw bord tegenstander */
+    .board-tray--opponent {
+      background: linear-gradient(180deg, #4d9bff 0%, #2563eb 28%, #1d4ed8 55%, #1e40af 100%);
+    }
+
+    /* Klassiek Wie is het: rood bord speler */
+    .board-tray--player {
+      background: linear-gradient(180deg, #ff6b7a 0%, #e11d48 28%, #be123c 55%, #9f1239 100%);
+    }
+
+    .board-tray::after {
+      content: "";
+      position: absolute;
+      left: 12px;
+      right: 12px;
+      bottom: 6px;
+      height: 8px;
+      border-radius: 0 0 10px 10px;
+      background: rgba(0, 0, 0, 0.18);
+      pointer-events: none;
+    }
+
+    .board-base {
+      width: 94%;
+      height: 12px;
+      margin-top: -2px;
+      border-radius: 0 0 12px 12px;
+      position: relative;
+      z-index: 1;
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.4);
+    }
+
+    .board-base--opponent {
+      background: linear-gradient(180deg, #1e3a8a 0%, #172554 100%);
+    }
+
+    .board-base--player {
+      background: linear-gradient(180deg, #881337 0%, #4c0519 100%);
+    }
+
+    .opponent-board-back,
+    .player-board {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      grid-template-rows: repeat(4, auto);
+      gap: 4px;
+      width: 100%;
+      padding: 8px 10px 10px;
+      box-sizing: border-box;
+      border-radius: 12px;
+      box-shadow: inset 0 4px 14px rgba(0, 0, 0, 0.35);
+    }
+
+    .board-tray--opponent .opponent-board-back {
+      background: linear-gradient(180deg, #1e3a5f 0%, #0f2744 100%);
+    }
+
+    .board-tray--player .player-board {
+      background: linear-gradient(180deg, #6b1a2a 0%, #450a16 100%);
+    }
+
+    .card-well {
+      aspect-ratio: 4 / 5;
+      position: relative;
+      perspective: 220px;
+      border-radius: 4px;
+      background: rgba(0, 0, 0, 0.28);
+      box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.45);
+    }
+
+    .card-tile {
+      position: absolute;
+      inset: 3px 2px 2px;
+      transform-origin: center bottom;
+      transform: rotateX(-11deg);
+      transition: transform 0.25s ease;
+    }
+
+    .card-tile.is-down {
+      transform: rotateX(78deg) translateY(8%);
+      z-index: 0;
+    }
+
+    .card-face,
+    .card-back-face {
+      height: 100%;
+      border-radius: 5px 5px 3px 3px;
+      border: 2px solid rgba(255, 255, 255, 0.85);
+      box-shadow:
+        0 4px 10px rgba(0, 0, 0, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.6);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      background: #f8f8f8;
+    }
+
+    .card-photo {
+      flex: 1;
+      min-height: 0;
+      display: block;
+      background: #e0e0e0;
+      overflow: hidden;
+    }
+
+    .card-photo .card-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 12%;
+      display: block;
+    }
+
+    .card-photo .face-ph {
+      width: 78%;
+      height: 78%;
+      border-radius: 50%;
+      background: linear-gradient(145deg, #fcd9b6 0%, #e8b896 55%, #d4a574 100%);
+      position: relative;
+      box-shadow: inset 0 -2px 6px rgba(0, 0, 0, 0.15);
+    }
+
+    .card-photo .face-ph::before,
+    .card-photo .face-ph::after {
+      content: "";
+      position: absolute;
+      width: 5px;
+      height: 5px;
+      background: #2d1f5c;
+      border-radius: 50%;
+      top: 36%;
+    }
+
+    .card-photo .face-ph::before { left: 28%; }
+    .card-photo .face-ph::after { right: 28%; }
+
+    .card-name {
+      flex-shrink: 0;
+      padding: 3px 2px;
+      text-align: center;
+      font-size: clamp(0.45rem, 1.4vw, 0.62rem);
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      color: #1a1a2e;
+      background: #fff;
+      border-top: 1px solid #ddd;
+      line-height: 1.1;
+    }
+
+    .card-back-face {
+      background: linear-gradient(165deg, #60a5fa 0%, #2563eb 45%, #1d4ed8 100%);
+      border-color: rgba(255, 255, 255, 0.5);
+      position: relative;
+    }
+
+    .card-back-face::before {
+      content: "";
+      position: absolute;
+      inset: 8%;
+      border-radius: 4px;
+      background:
+        repeating-linear-gradient(
+          -45deg,
+          rgba(255, 255, 255, 0.08) 0,
+          rgba(255, 255, 255, 0.08) 3px,
+          transparent 3px,
+          transparent 8px
+        );
+      pointer-events: none;
+    }
+
+    .player-zone {
+      position: absolute;
+      left: 50%;
+      bottom: 2.5%;
+      transform: translateX(-50%);
+      width: var(--game-board-width);
+      max-width: var(--game-board-width);
+      z-index: 8;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .player-zone .board-stand--player {
+      order: 1;
+    }
+
+    .player-zone .player-figure {
+      order: 2;
+      pointer-events: none;
+    }
+
+    .player-figure {
+      position: relative;
+      width: 100%;
+      margin: 0;
+      z-index: 7;
+      display: flex;
+      justify-content: center;
+    }
+
+    .player-character-wrap {
+      position: relative;
+      width: min(88vw, 340px);
+      margin: 0 auto;
+      background: transparent;
+      animation: characterSit 5s ease-in-out infinite;
+      transform-origin: center bottom;
+    }
+
+    .player-character {
+      display: block;
+      width: 100%;
+      height: auto;
+      max-height: 30vh;
+      object-fit: contain;
+      object-position: center top;
+      background: transparent;
+      filter: brightness(1.12) contrast(1.06) saturate(1.05)
+        drop-shadow(0 -6px 28px rgba(0, 0, 0, 0.45));
+      animation: characterBreathe 4.2s ease-in-out infinite;
+    }
+
+    .btn-give-up {
+      position: fixed;
+      top: max(14px, env(safe-area-inset-top));
+      left: max(14px, env(safe-area-inset-left));
+      z-index: 35;
+      background: #dc2626;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 0.6rem 1.15rem;
+      font-size: 0.95rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      box-shadow: 0 6px 22px rgba(220, 38, 38, 0.45);
+      pointer-events: auto;
+    }
+
+    .btn-give-up:hover {
+      background: #b91c1c;
+      transform: scale(1.03);
+    }
+
+    .lang-picker {
+      position: fixed;
+      top: max(14px, env(safe-area-inset-top));
+      right: max(14px, env(safe-area-inset-right));
+      z-index: 400;
+    }
+
+    .lang-globe {
+      width: 42px;
+      height: 42px;
+      border: none;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.95);
+      box-shadow: 0 4px 18px rgba(30, 20, 60, 0.18);
+      font-size: 1.35rem;
+      line-height: 1;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .lang-globe:hover {
+      transform: scale(1.06);
+      box-shadow: 0 6px 22px rgba(30, 20, 60, 0.22);
+    }
+
+    .lang-menu {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      min-width: 150px;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 10px 32px rgba(30, 20, 60, 0.2);
+      overflow: hidden;
+      border: 1px solid rgba(139, 92, 246, 0.12);
+    }
+
+    .lang-menu.hidden { display: none; }
+
+    .lang-option {
+      display: block;
+      width: 100%;
+      padding: 0.7rem 1rem;
+      border: none;
+      background: #fff;
+      color: #3d2d5c;
+      font-size: 0.95rem;
+      font-weight: 600;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .lang-option:hover { background: #f5f0ff; }
+
+    .lang-option.active {
+      background: #ede9fe;
+      color: #6b4ed4;
+    }
+
+    /* Beginscherm met promo-foto */
+    .screen-start {
+      background: #1a0f2e;
+    }
+
+    .start-bg {
+      position: absolute;
+      left: 0;
+      width: 100%;
+      height: 112%;
+      top: -10vh;
+      object-fit: cover;
+      object-position: center 22%;
+      pointer-events: none;
+    }
+
+    .start-shade {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        180deg,
+        rgba(26, 15, 46, 0.1) 0%,
+        rgba(26, 15, 46, 0) 30%,
+        rgba(26, 15, 46, 0) 55%,
+        rgba(18, 12, 35, 0.5) 78%,
+        rgba(12, 8, 28, 0.92) 100%
+      );
+      pointer-events: none;
+    }
+
+    .screen-start .cards,
+    .screen-start .glow { display: none; }
+
+    /* Knop + tagline vast onderaan — titel op foto blijft vrij */
+    .screen-start .content {
+      inset: auto 0 0 0;
+      top: auto;
+      height: auto;
+      justify-content: flex-end;
+      flex-direction: column;
+      gap: 0.75rem;
+      padding: 0 24px clamp(52px, 8vh, 88px);
+      pointer-events: none;
+    }
+
+    .screen-start .content .btn,
+    .screen-start .content .start-tagline {
+      pointer-events: auto;
+    }
+
+    .screen-start h1 {
+      display: none;
+    }
+
+    .screen-start .btn {
+      font-size: clamp(1.15rem, 2.5vw, 1.65rem);
+      padding: 1rem 3.5rem;
+      box-shadow: 0 12px 48px rgba(0, 0, 0, 0.45);
+    }
+
+    .screen-start .start-tagline {
+      position: relative;
+      bottom: auto;
+      left: auto;
+      right: auto;
+      font-size: clamp(0.85rem, 1.6vw, 1.05rem);
+      color: rgba(126, 200, 232, 0.9);
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+      z-index: 12;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="lang-picker">
+    <button id="btn-lang" class="lang-globe" type="button" aria-label="Taal kiezen" aria-expanded="false" aria-haspopup="true">🌍</button>
+    <div id="lang-menu" class="lang-menu hidden" role="menu">
+      <button type="button" class="lang-option" data-lang="nl" role="menuitem">Nederlands</button>
+      <button type="button" class="lang-option" data-lang="en" role="menuitem">English</button>
+    </div>
+  </div>
+
+  <!-- Scherm 1: beginscherm (promo-foto) -->
+  <main id="screen-start" class="screen screen-start">
+    <img class="start-bg" src="og-image.png" alt="Wie Is Het? Online" />
+    <span class="start-shade" aria-hidden="true"></span>
+    <section class="content">
+      <button id="btn-begin" class="btn" type="button" data-i18n="btnBegin">LET'S BEGIN</button>
+      <p class="start-tagline" data-i18n="startTagline">Raad het personage · Speel met vrienden online</p>
+    </section>
+  </main>
+
+  <!-- Spelmodus: online of bot -->
+  <main id="screen-mode" class="screen screen-light screen-mode-pick hidden">
+    <span class="glow" aria-hidden="true"></span>
+    <section class="content">
+      <h2 data-i18n-html="modeTitle">Kies je<span class="accent">spelmodus</span></h2>
+      <button id="btn-play-online" class="btn" type="button" data-i18n="btnPlayOnline">Online spelen</button>
+      <button id="btn-play-bot" class="btn secondary" type="button" data-i18n="btnPlayBot">Tegen bot spelen</button>
+      <button id="btn-mode-back" class="btn back" type="button" data-i18n="btnBack">TERUG</button>
+    </section>
+  </main>
+
+  <!-- Bot-moeilijkheid -->
+  <main id="screen-bot-diff" class="screen screen-light screen-mode-pick hidden">
+    <span class="glow" aria-hidden="true"></span>
+    <section class="content">
+      <h2 data-i18n-html="botDiffTitle">Kies<span class="accent">moeilijkheid</span></h2>
+      <button id="btn-bot-easy" class="btn btn-diff btn-diff--easy" type="button" data-i18n="btnEasy">Makkelijk</button>
+      <button id="btn-bot-medium" class="btn btn-diff btn-diff--medium" type="button" data-i18n="btnMedium">Gemiddeld</button>
+      <button id="btn-bot-hard" class="btn btn-diff btn-diff--hard" type="button" data-i18n="btnHard">Moeilijk</button>
+      <button id="btn-bot-back" class="btn back" type="button" data-i18n="btnBack">TERUG</button>
+    </section>
+  </main>
+
+  <!-- Scherm 2: licht menu (online) -->
+  <main id="screen-menu" class="screen screen-menu hidden">
+    <span class="glow" aria-hidden="true"></span>
+    <section class="decor" aria-hidden="true">
+      <span class="bubble b1"></span>
+      <span class="bubble b2"></span>
+      <span class="bubble b3"></span>
+      <span class="bubble b4"></span>
+      <span class="bubble b5"></span>
+      <span class="bubble b6"></span>
+      <article class="polaroid p1"><span class="face"></span></article>
+      <article class="polaroid p2"><span class="face"></span></article>
+      <article class="polaroid p3"><span class="face"></span></article>
+      <article class="polaroid p4"><span class="face"></span></article>
+      <span class="qm q1">?</span>
+      <span class="qm q2">?</span>
+      <span class="qm q3">?</span>
+      <span class="menu-spark s1" aria-hidden="true"></span>
+      <span class="menu-spark s2" aria-hidden="true"></span>
+      <span class="menu-spark s3" aria-hidden="true"></span>
+      <span class="menu-spark s4" aria-hidden="true"></span>
+      <span class="menu-spark s5" aria-hidden="true"></span>
+    </section>
+    <section class="content menu-content">
+      <h2 data-i18n-html="menuTitle">Kies hoe je<span class="accent">wilt spelen</span></h2>
+      <button id="btn-host" class="btn" type="button" data-i18n="btnHost">HOST GAME</button>
+      <button id="btn-join-menu" class="btn secondary" type="button" data-i18n="btnJoinMenu">JOIN MET CODE</button>
+      <button id="btn-back" class="btn back" type="button" data-i18n="btnBack">TERUG</button>
+    </section>
+  </main>
+
+  <!-- Scherm 3: host code -->
+  <main id="screen-host" class="screen screen-light hidden">
+    <span class="glow" aria-hidden="true"></span>
+    <section class="decor" aria-hidden="true">
+      <span class="bubble b1"></span><span class="bubble b2"></span><span class="bubble b3"></span>
+      <article class="polaroid p1"><span class="face"></span></article>
+      <article class="polaroid p2"><span class="face"></span></article>
+    </section>
+    <section class="content">
+      <h2 data-i18n-html="hostTitle">Kies je<span class="accent">potcode</span></h2>
+      <p class="hint" data-i18n="hostHint">Max 5 letters of cijfers</p>
+      <input id="pot-code" class="code-input" type="text" maxlength="5" placeholder="FUN42" autocomplete="off" />
+      <p id="host-error" class="error"></p>
+      <button id="btn-make-pot" class="btn" type="button" data-i18n="btnMakePot">MAAK POTJE</button>
+      <button id="btn-host-back" class="btn back" type="button" data-i18n="btnBack">TERUG</button>
+    </section>
+  </main>
+
+  <!-- Foto loading -->
+  <main id="screen-photo-load" class="screen screen-loading-photos hidden">
+    <section class="loading-photos" aria-hidden="true">
+      <article class="polaroid lp1"><span class="face"></span></article>
+      <article class="polaroid lp2"><span class="face"></span></article>
+      <article class="polaroid lp3"><span class="face"></span></article>
+      <article class="polaroid lp4"><span class="face"></span></article>
+      <article class="polaroid lp5"><span class="face"></span></article>
+    </section>
+    <section class="content loading-text">
+      <h2 data-i18n="loadingTitle">Potje wordt gemaakt…</h2>
+      <p data-i18n="loadingSub">Foto's worden geladen</p>
+    </section>
+  </main>
+
+  <!-- Join handmatig -->
+  <main id="screen-join" class="screen screen-light hidden">
+    <span class="glow" aria-hidden="true"></span>
+    <section class="content">
+      <h2 data-i18n-html="joinTitle">Join een<span class="accent">potje</span></h2>
+      <p class="hint" data-i18n="joinHint">Vul de code in</p>
+      <input id="join-code" class="code-input" type="text" maxlength="5" placeholder="FUN42" autocomplete="off" />
+      <p id="join-error" class="error"></p>
+      <button id="btn-join-game" class="btn" type="button" data-i18n="btnJoinGame">JOIN GAME</button>
+      <button id="btn-join-back" class="btn back" type="button" data-i18n="btnBack">TERUG</button>
+    </section>
+  </main>
+
+  <!-- Join gelukt -->
+  <main id="screen-joined" class="screen screen-light hidden">
+    <span class="glow" aria-hidden="true"></span>
+    <section class="content">
+      <h2 data-i18n-html="joinedTitle">Je zit in<span class="accent">het potje!</span></h2>
+      <p id="joined-code" class="pot-code">-----</p>
+      <p class="hint" data-i18n="joinedHint">Wacht tot de host het spel start</p>
+      <button id="btn-joined-back" class="btn back" type="button" data-i18n="btnBack">TERUG</button>
+    </section>
+  </main>
+
+  <!-- Scherm 4: potje klaar -->
+  <main id="screen-lobby" class="screen screen-light hidden">
+    <span class="glow" aria-hidden="true"></span>
+    <section class="content">
+      <h2 data-i18n-html="lobbyTitle">Je potje is<span class="accent">klaar!</span></h2>
+      <p id="lobby-code" class="pot-code">-----</p>
+      <p class="hint" data-i18n="lobbyHint">Deel deze code met je vrienden</p>
+      <button id="btn-copy-code" class="btn btn-copy-code" type="button" data-i18n="btnCopyCode">KOPIEER DE CODE</button>
+      <button id="btn-start-game" class="btn btn-start-game" type="button" data-i18n="btnStartGame">START GAME</button>
+      <button id="btn-lobby-back" class="btn back" type="button" data-i18n="btnBack">TERUG</button>
+    </section>
+  </main>
+
+  <!-- Scherm 5: countdown + speeltafel -->
+  <main id="screen-game" class="screen screen-game-view hidden">
+    <div class="game-ambient" aria-hidden="true"></div>
+    <div class="game-vignette" aria-hidden="true"></div>
+    <span class="glow" aria-hidden="true"></span>
+
+    <section id="game-countdown" class="game-countdown hidden" aria-live="polite">
+      <div class="countdown-photos" id="countdown-photos" aria-hidden="true"></div>
+      <div class="countdown-center">
+        <p class="countdown-label" data-i18n="countdownLabel">Potje start over</p>
+        <p id="countdown-num" class="countdown-num">3</p>
+      </div>
+    </section>
+
+    <section id="game-table" class="game-table hidden" aria-label="Speeltafel">
+      <div class="game-scene">
+        <div class="opponent-zone">
+          <div class="opponent-figure">
+            <div class="opponent-character-wrap" id="opponent-character-wrap">
+              <img class="opponent-character" src="assets/game/opponent-character.png?v=3" alt="Tegenstander"
+                onerror="document.getElementById('opponent-head').classList.add('fallback-show')" />
+            </div>
+            <div class="opponent-head" id="opponent-head">
+              <img class="opponent-face-img" src="assets/game/opponent-face.png" alt=""
+                onload="document.getElementById('opponent-head').classList.add('has-face')"
+                onerror="this.remove()" />
+            </div>
+          </div>
+          <div class="board-stack">
+            <div class="board-stand board-stand--opponent board-stand--rear" aria-hidden="true">
+              <div class="board-tray board-tray--opponent">
+                <div class="opponent-board-back" id="opponent-board" aria-label="Bord tegenstander"></div>
+              </div>
+              <div class="board-base board-base--opponent" aria-hidden="true"></div>
+            </div>
+            <div class="player-play-area">
+              <button type="button" class="opponent-chest" id="opponent-chest" aria-label="Tik om te raden" data-i18n-aria="chestHint">
+                <div class="chest-visual">
+                  <img class="chest-avatar" src="assets/game/opponent-face.png" alt=""
+                    onerror="this.src='https://api.dicebear.com/7.x/lorelei/png?seed=Opponent&size=128'" />
+                </div>
+                <span class="chest-label" data-i18n="chestLabel">Tegenstander</span>
+                <span class="chest-hint" data-i18n="chestHint">Tik om te raden</span>
+                <span id="opponent-answer" class="opponent-answer hidden" aria-live="polite"></span>
+              </button>
+              <div class="board-stand board-stand--player board-stand--front">
+                <div class="board-tray board-tray--player">
+                  <div class="player-board" id="player-board" aria-label="Jouw bord"></div>
+                </div>
+                <div class="board-base board-base--player" aria-hidden="true"></div>
+              </div>
+              <aside id="secret-card-slot" class="secret-card-slot" aria-label="Jouw geheim personage"></aside>
+            </div>
+          </div>
+          <div class="opponent-chair" aria-hidden="true"></div>
+        </div>
+
+        <div class="table-surface table-surface--hidden" aria-hidden="true"></div>
+
+
+            <div id="question-panel" class="question-bar hidden" aria-live="polite">
+        <div class="question-bar-ask">
+          <p class="question-bar-label" data-i18n="askQuestionShort">Stel je vraag (tegenstander antwoordt):</p>
+          <div class="question-input-row">
+            <input type="text" id="question-input" class="question-input" maxlength="100"
+              placeholder="Bijv. Is het een jongen?" autocomplete="off" />
+            <button type="button" id="btn-send-question" class="btn-send-question" data-i18n="btnAsk">Vraag</button>
+          </div>
+        </div>
+        <div class="question-bar-answer">
+          <p class="opponent-question-text"></p>
+          <div class="answer-row">
+            <button type="button" class="answer-chip" data-answer="yes">JA</button>
+            <button type="button" class="answer-chip" data-answer="no">NEE</button>
+          </div>
+        </div>
+              <div class="question-bar-post hidden">
+          <p id="post-answer-label" class="post-answer-label"></p>
+          <p id="post-answer-timer" class="post-answer-timer" aria-live="polite">10</p>
+          <div class="post-answer-actions">
+            <button type="button" id="btn-switch-turn" class="btn-switch-turn" data-i18n="btnSwitch">SWITCH</button>
+            <button type="button" id="btn-end-flip-phase" class="btn-end-flip-phase hidden" data-i18n="btnEndTurn">Volgende beurt</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="win-overlay" class="win-overlay hidden" role="dialog" aria-modal="true">
+        <div class="win-confetti" aria-hidden="true"></div>
+        <div class="win-card">
+          <p class="win-title">YOU WON!</p>
+          <p class="win-sub" data-i18n="winSub">Je raadde het personage!</p>
+          <div class="lose-opponent-reveal hidden" aria-hidden="true">
+            <p class="lose-reveal-label" data-i18n="opponentWas">Het was:</p>
+            <div class="lose-reveal-face"></div>
+            <p class="lose-reveal-name"></p>
+          </div>
+          <div class="win-end-actions hidden">
+            <button type="button" id="btn-play-again" class="btn-win-action btn-win-action--primary" data-i18n="btnPlayAgain">Opnieuw spelen</button>
+            <button type="button" id="btn-go-menu" class="btn-win-action btn-win-action--secondary" data-i18n="btnGoToMenu">Naar menu</button>
+          </div>
+        </div>
+      </div>
+
+        <p id="game-turn-banner" class="game-turn-banner hidden" aria-live="polite"></p>
+
+        <div class="player-zone">
+          <div class="player-figure" aria-hidden="true">
+            <div class="player-character-wrap">
+              <img class="player-character" src="assets/game/player-character.png?v=2" alt="" />
+            </div>
+          </div>
+        </div>
+      </div>
+      <button id="btn-give-up" class="btn-give-up" type="button" data-i18n="btnGiveUp">OPGEVEN</button>
+    </section>
+  </main>
+
+  <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+  <script src="assets/game/online-room.js"></script>
+  <script src="assets/game/character-traits.js"></script>
+  <script src="assets/game/game-play.js"></script>
+
+  <script>
+    const I18N = {
+      nl: {
+        startTagline: "Raad het personage · Speel met vrienden online",
+        btnBegin: "LATEN WE BEGINNEN",
+        modeTitle: 'Kies je<span class="accent">spelmodus</span>',
+        btnPlayOnline: "Online spelen",
+        btnPlayBot: "Tegen bot spelen",
+        botDiffTitle: 'Kies<span class="accent">moeilijkheid</span>',
+        btnEasy: "Makkelijk",
+        btnMedium: "Gemiddeld",
+        btnHard: "Moeilijk",
+        menuTitle: 'Kies hoe je<span class="accent">wilt spelen</span>',
+        btnHost: "HOST GAME",
+        btnJoinMenu: "JOIN MET CODE",
+        btnBack: "TERUG",
+        hostTitle: 'Kies je<span class="accent">potcode</span>',
+        hostHint: "Max 5 letters of cijfers",
+        btnMakePot: "MAAK POTJE",
+        loadingTitle: "Potje wordt gemaakt…",
+        loadingSub: "Foto's worden geladen",
+        joinTitle: 'Join een<span class="accent">potje</span>',
+        joinHint: "Vul de code in",
+        btnJoinGame: "JOIN GAME",
+        joinedTitle: 'Je zit in<span class="accent">het potje!</span>',
+        joinedHint: "Wacht tot de host het spel start",
+        lobbyTitle: 'Je potje is<span class="accent">klaar!</span>',
+        lobbyHint: "Deel deze code met je vrienden",
+        btnCopyCode: "KOPIEER DE CODE",
+        btnCopyDone: "✓ Gekopieerd!",
+        btnStartGame: "START GAME",
+        countdownLabel: "Potje start over",
+        countdownGo: "START!",
+        btnGiveUp: "OPGEVEN",
+        phasePickSecret: "Kies jouw geheime personage",
+        phaseOpponentPick: "Tegenstander kiest…",
+        phaseWaitOpponent: "Wachten op tegenstander…",
+        turnPlayer: "Jouw beurt — stel één vraag, haal één kaart weg, of raad via de kist",
+        duplicateQuestion: "Die vraag heb je al gesteld — probeer iets anders",
+        switchPrompt: "Druk SWITCH om de beurt te geven (10 sec)",
+        flipRushPrompt: "Haal kaarten weg! (10 sec)",
+        flipFreePrompt: "Je mag nog steeds kaarten wegdraaien — klik Volgende beurt als je klaar bent",
+        btnSwitch: "SWITCH",
+        btnEndTurn: "Volgende beurt",
+        waitOpponentTurn: "Tegenstander speelt…",
+        turnOpponent: "Beurt van de tegenstander",
+        askQuestion: "Stel 1 vraag — tegenstander moet antwoorden",
+        askQuestionShort: "Stel je vraag (tegenstander antwoordt):",
+        btnAsk: "Vraag",
+        questionPlaceholder: "Bijv. Is het een jongen?",
+        waitAnswer: "wacht op antwoord",
+        answerOpponentQuestion: "Tegenstander vraagt — jij antwoordt:",
+        answerYes: "JA",
+        answerNo: "NEE",
+        opponentAnswered: "Antwoord:",
+        guessPrompt: "Wie is het? Klik op een personage",
+        guessWrong: "Fout! Dat was het niet…",
+        youWon: "YOU WON!",
+        youLost: "Helaas…",
+        loseRevealSub: "Dit was het personage van je tegenstander",
+        opponentWas: "Het was:",
+        winSub: "Je raadde het personage!",
+        chestLabel: "Tegenstander",
+        chestHint: "Tik om te raden",
+        btnPlayAgain: "Opnieuw spelen",
+        btnGoToMenu: "Naar menu",
+        errHostEmpty: "Kies een code (max 5 tekens)",
+        errJoinEmpty: "Vul een potcode in",
+        langAria: "Taal kiezen"
+      },
+      en: {
+        startTagline: "Guess the character · Play with friends online",
+        btnBegin: "LET'S BEGIN",
+        modeTitle: 'Choose your<span class="accent">game mode</span>',
+        btnPlayOnline: "Play online",
+        btnPlayBot: "Play against bot",
+        botDiffTitle: 'Choose<span class="accent">difficulty</span>',
+        btnEasy: "Easy",
+        btnMedium: "Medium",
+        btnHard: "Hard",
+        menuTitle: 'Choose how you<span class="accent">want to play</span>',
+        btnHost: "HOST GAME",
+        btnJoinMenu: "JOIN WITH CODE",
+        btnBack: "BACK",
+        hostTitle: 'Choose your<span class="accent">game code</span>',
+        hostHint: "Max 5 letters or numbers",
+        btnMakePot: "CREATE GAME",
+        loadingTitle: "Creating your game…",
+        loadingSub: "Loading photos",
+        joinTitle: 'Join a<span class="accent">game</span>',
+        joinHint: "Enter the game code",
+        btnJoinGame: "JOIN GAME",
+        joinedTitle: 'You\'re in<span class="accent">the game!</span>',
+        joinedHint: "Wait for the host to start the game",
+        lobbyTitle: 'Your game is<span class="accent">ready!</span>',
+        lobbyHint: "Share this code with your friends",
+        btnCopyCode: "COPY THE CODE",
+        btnCopyDone: "✓ Copied!",
+        btnStartGame: "START GAME",
+        countdownLabel: "Game starts in",
+        countdownGo: "GO!",
+        btnGiveUp: "GIVE UP",
+        phasePickSecret: "Pick your secret character",
+        phaseOpponentPick: "Opponent is choosing…",
+        phaseWaitOpponent: "Waiting for opponent…",
+        turnPlayer: "Your turn — ask one question, flip one card, or guess via the chest",
+        duplicateQuestion: "You already asked that — try something else",
+        switchPrompt: "Press SWITCH to pass the turn (10 sec)",
+        flipRushPrompt: "Flip cards down! (10 sec)",
+        flipFreePrompt: "You can still flip cards — press Next turn when done",
+        btnSwitch: "SWITCH",
+        btnEndTurn: "Next turn",
+        waitOpponentTurn: "Opponent is playing…",
+        turnOpponent: "Opponent's turn",
+        askQuestion: "Ask 1 question — opponent must answer",
+        askQuestionShort: "Ask your question (opponent answers):",
+        btnAsk: "Ask",
+        questionPlaceholder: "e.g. Is it a boy?",
+        waitAnswer: "waiting for answer",
+        answerOpponentQuestion: "Opponent asks — you answer:",
+        answerYes: "YES",
+        answerNo: "NO",
+        opponentAnswered: "Answer:",
+        guessPrompt: "Who is it? Tap a character",
+        guessWrong: "Wrong! That wasn't it…",
+        youWon: "YOU WON!",
+        youLost: "Game over",
+        loseRevealSub: "This was your opponent's character",
+        opponentWas: "It was:",
+        winSub: "You guessed the character!",
+        chestLabel: "Opponent",
+        chestHint: "Tap to guess",
+        btnPlayAgain: "Play again",
+        btnGoToMenu: "Go to menu",
+        errHostEmpty: "Pick a code (max 5 characters)",
+        errJoinEmpty: "Enter a game code",
+        langAria: "Choose language"
+      }
+    };
+
+    let lang = localStorage.getItem("wieIsHetLang") || "nl";
+    if (lang !== "nl" && lang !== "en") lang = "nl";
+
+    function t(key) {
+      return (I18N[lang] && I18N[lang][key]) || I18N.nl[key] || key;
+    }
+
+    function applyLanguage() {
+      document.documentElement.lang = lang === "en" ? "en" : "nl";
+      const copyBtn = document.getElementById("btn-copy-code");
+      document.querySelectorAll("[data-i18n]").forEach((el) => {
+        if (copyBtn && el === copyBtn && copyBtn.classList.contains("copied")) return;
+        el.textContent = t(el.dataset.i18n);
+      });
+      document.querySelectorAll("[data-i18n-html]").forEach((el) => {
+        el.innerHTML = t(el.dataset.i18nHtml);
+      });
+      const qInput = document.getElementById("question-input");
+      if (qInput) qInput.placeholder = t("questionPlaceholder");
+      document.querySelectorAll(".lang-option").forEach((btn) => {
+        btn.classList.toggle("active", btn.dataset.lang === lang);
+      });
+      const globe = document.getElementById("btn-lang");
+      if (globe) globe.setAttribute("aria-label", t("langAria"));
+      document.querySelectorAll("[data-i18n-aria]").forEach((el) => {
+        el.setAttribute("aria-label", t(el.dataset.i18nAria));
+      });
+    }
+
+    function setLanguage(next) {
+      lang = next;
+      localStorage.setItem("wieIsHetLang", next);
+      applyLanguage();
+      document.getElementById("lang-menu").classList.add("hidden");
+      document.getElementById("btn-lang").setAttribute("aria-expanded", "false");
+    }
+
+    const langBtn = document.getElementById("btn-lang");
+    const langMenu = document.getElementById("lang-menu");
+
+    langBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const open = langMenu.classList.toggle("hidden");
+      langBtn.setAttribute("aria-expanded", open ? "false" : "true");
+    });
+
+    document.querySelectorAll(".lang-option").forEach((btn) => {
+      btn.addEventListener("click", () => setLanguage(btn.dataset.lang));
+    });
+
+    document.addEventListener("click", () => {
+      langMenu.classList.add("hidden");
+      langBtn.setAttribute("aria-expanded", "false");
+    });
+
+    langMenu.addEventListener("click", (e) => e.stopPropagation());
+
+    applyLanguage();
+
+    const screenStart = document.getElementById("screen-start");
+    const screenMode = document.getElementById("screen-mode");
+    const screenBotDiff = document.getElementById("screen-bot-diff");
+    const screenMenu = document.getElementById("screen-menu");
+    const screenHost = document.getElementById("screen-host");
+    const screenPhotoLoad = document.getElementById("screen-photo-load");
+    const screenLobby = document.getElementById("screen-lobby");
+    const screenJoin = document.getElementById("screen-join");
+    const screenJoined = document.getElementById("screen-joined");
+    const screenGame = document.getElementById("screen-game");
+    const gameCountdown = document.getElementById("game-countdown");
+    const gameTable = document.getElementById("game-table");
+    const countdownNum = document.getElementById("countdown-num");
+    const potCodeInput = document.getElementById("pot-code");
+    const joinCodeInput = document.getElementById("join-code");
+    const hostError = document.getElementById("host-error");
+    const joinError = document.getElementById("join-error");
+    const lobbyCode = document.getElementById("lobby-code");
+    const joinedCode = document.getElementById("joined-code");
+
+    const TRANSITION_MS = 300;
+    const PHOTO_LOAD_MS = 1200;
+    const COUNTDOWN_SEC = 3;
+    let busy = false;
+    let countdownTimeout = null;
+
+    let copyFeedbackTimer = null;
+
+    function clearCountdown() {
+      if (countdownTimeout) {
+        clearTimeout(countdownTimeout);
+        countdownTimeout = null;
+      }
+    }
+
+    let sessionMode = "solo";
+    let sessionCode = "";
+    let botDifficulty = "medium";
+    let onlineGameUnsub = null;
+
+    const CARD_NAMES = [
+      "Anne", "Max", "Tom", "Lisa", "Ben", "Sara", "Noah", "Emma",
+      "Jack", "Mila", "Lucas", "Fleur", "Daan", "Evi", "Sam", "Nina",
+      "Finn", "Lynn", "Tim", "Zoe", "Ole", "Ivy", "Raj", "Amy",
+      "Erik", "Kim", "Jay", "Lea", "Fox", "Joy", "Ian", "Rio"
+    ];
+
+    function cardAvatarUrl(name) {
+      if (window.WieCharacterArt) return WieCharacterArt.cardAvatarUrl(name);
+      return (
+        "https://api.dicebear.com/7.x/lorelei/png?seed=" +
+        encodeURIComponent(name) +
+        "&size=128&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf"
+      );
+    }
+
+    function buildGameBoards() {
+      const player = document.getElementById("player-board");
+      const opponent = document.getElementById("opponent-board");
+      if (!player || !opponent) return;
+      player.innerHTML = "";
+      opponent.innerHTML = "";
+      delete player.dataset.playWired;
+      for (let i = 0; i < CARD_NAMES.length; i++) {
+        const name = CARD_NAMES[i];
+
+        const well = document.createElement("div");
+        well.className = "card-well";
+        const tile = document.createElement("div");
+        tile.className = "card-tile";
+        const face = document.createElement("div");
+        face.className = "card-face";
+        const photoWrap = document.createElement("div");
+        photoWrap.className = "card-photo";
+        const img = document.createElement("img");
+        img.className = "card-img";
+        img.src = cardAvatarUrl(name);
+        img.alt = name;
+        img.loading = "lazy";
+        img.onerror = function () {
+          if (window.WieCharacterArt) {
+            WieCharacterArt.onImageError(this, name, photoWrap);
+          }
+        };
+        photoWrap.appendChild(img);
+        if (window.WieCharacterArt) {
+          WieCharacterArt.applyImgFilter(img, name);
+          WieCharacterArt.decoratePhotoWrap(photoWrap, name);
+        }
+        const label = document.createElement("span");
+        label.className = "card-name";
+        label.textContent = name;
+        face.append(photoWrap, label);
+        tile.appendChild(face);
+        well.appendChild(tile);
+        player.appendChild(well);
+
+        const oppWell = document.createElement("div");
+        oppWell.className = "card-well";
+        const oppTile = document.createElement("div");
+        oppTile.className = "card-tile card-tile--opp";
+        const back = document.createElement("div");
+        back.className = "card-back-face";
+        back.setAttribute("aria-hidden", "true");
+        oppTile.appendChild(back);
+        oppWell.appendChild(oppTile);
+        opponent.appendChild(oppWell);
+      }
+    }
+
+    function buildCountdownPhotos() {
+      const container = document.getElementById("countdown-photos");
+      if (!container) return;
+      container.innerHTML = "";
+      const slots = [0, 3, 7, 11, 15, 19, 23, 27];
+      slots.forEach((idx, i) => {
+        const name = CARD_NAMES[idx % CARD_NAMES.length];
+        const art = document.createElement("article");
+        art.className = "countdown-polaroid cp" + (i + 1);
+        const img = document.createElement("img");
+        img.src = cardAvatarUrl(name);
+        img.alt = name;
+        img.loading = "eager";
+        art.appendChild(img);
+        container.appendChild(art);
+      });
+    }
+
+    function runCountdownThenTable() {
+      buildCountdownPhotos();
+      gameCountdown.classList.remove("hidden");
+      gameTable.classList.add("hidden");
+      let n = COUNTDOWN_SEC;
+      function tick() {
+        countdownNum.textContent = n > 0 ? String(n) : t("countdownGo");
+        countdownNum.classList.remove("pop");
+        void countdownNum.offsetWidth;
+        countdownNum.classList.add("pop");
+        if (n > 0) {
+          n--;
+          countdownTimeout = setTimeout(tick, 1000);
+        } else {
+          countdownTimeout = setTimeout(() => {
+            gameCountdown.classList.add("hidden");
+            gameTable.classList.remove("hidden");
+            countdownTimeout = null;
+            initGamePlay();
+            if (window.WieIsHetPlay) WieIsHetPlay.beginPickSecretPhase();
+          }, 700);
+        }
+      }
+      tick();
+    }
+
+    function initGamePlay() {
+      if (!window.WieIsHetPlay) return;
+      WieIsHetPlay.init({
+        t,
+        cardNames: CARD_NAMES,
+        screenGame,
+        turnBanner: document.getElementById("game-turn-banner"),
+        secretSlot: document.getElementById("secret-card-slot"),
+        opponentZone: document.querySelector(".opponent-zone"),
+        opponentChest: document.getElementById("opponent-chest"),
+        opponentAnswerEl: document.getElementById("opponent-answer"),
+        questionPanel: document.getElementById("question-panel"),
+        winOverlay: document.getElementById("win-overlay"),
+        online: sessionMode !== "solo" && window.WieIsHetOnline && WieIsHetOnline.isConnected(),
+        isHost: sessionMode === "host",
+        botDifficulty: sessionMode === "solo" ? botDifficulty : null,
+      });
+    }
+
+    function startBotGame(difficulty) {
+      botDifficulty = difficulty;
+      sessionMode = "solo";
+      sessionCode = "";
+      leaveOnlineSession();
+      transition(screenBotDiff, screenGame, "transition-in-from-right");
+      setTimeout(startGameSession, TRANSITION_MS + 50);
+    }
+
+    function wireGuestOnline() {
+      if (onlineGameUnsub) onlineGameUnsub();
+      if (!window.WieIsHetOnline) return;
+      onlineGameUnsub = WieIsHetOnline.onMessage((msg) => {
+        if (msg.type === "gameStart") {
+          if (window.WieIsHetPlay) WieIsHetPlay.hideEndOverlay();
+          resetGameScreen();
+          [screenStart, screenMode, screenBotDiff, screenMenu, screenHost, screenLobby, screenJoin, screenJoined].forEach((s) =>
+            s.classList.add("hidden")
+          );
+          screenGame.classList.remove("hidden");
+          startGameSession();
+        }
+      });
+    }
+
+    function startGameSession() {
+      buildGameBoards();
+      if (window.WieIsHetPlay) WieIsHetPlay.wireBoards();
+      runCountdownThenTable();
+    }
+
+    function resetGameScreen() {
+      clearCountdown();
+      gameCountdown.classList.add("hidden");
+      gameTable.classList.add("hidden");
+      if (window.WieIsHetPlay) WieIsHetPlay.reset();
+    }
+
+    function playAgainFromEnd() {
+      if (window.WieIsHetPlay) WieIsHetPlay.hideEndOverlay();
+      resetGameScreen();
+      if (window.WieIsHetOnline && WieIsHetOnline.isConnected()) {
+        if (WieIsHetOnline.isHost()) {
+          WieIsHetOnline.broadcastGameStart();
+          startGameSession();
+        } else {
+          WieIsHetOnline.send({ type: "playAgain" });
+        }
+        return;
+      }
+      startGameSession();
+    }
+
+    function goToMenuFromEnd() {
+      if (window.WieIsHetPlay) WieIsHetPlay.hideEndOverlay();
+      resetGameScreen();
+      leaveOnlineSession();
+      transition(screenGame, screenMode, "transition-in-from-left");
+    }
+
+    function leaveOnlineSession() {
+      if (onlineGameUnsub) {
+        onlineGameUnsub();
+        onlineGameUnsub = null;
+      }
+      if (window.WieIsHetOnline) WieIsHetOnline.reset();
+      sessionMode = "solo";
+      sessionCode = "";
+    }
+
+    async function copyPotCode(code, btn) {
+      const c = code.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 5);
+      if (!c) return false;
+      try {
+        await navigator.clipboard.writeText(c);
+      } catch {
+        const ta = document.createElement("textarea");
+        ta.value = c;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+      }
+      showCopyFeedback(btn, lobbyCode);
+      return true;
+    }
+
+    function showCopyFeedback(btn, codeEl) {
+      if (!btn) return;
+      btn.classList.add("copied");
+      btn.textContent = t("btnCopyDone");
+      if (codeEl) {
+        codeEl.classList.remove("copy-flash");
+        void codeEl.offsetWidth;
+        codeEl.classList.add("copy-flash");
+      }
+      clearTimeout(copyFeedbackTimer);
+      copyFeedbackTimer = setTimeout(() => {
+        btn.classList.remove("copied");
+        if (btn.dataset.i18n) btn.textContent = t(btn.dataset.i18n);
+        if (codeEl) codeEl.classList.remove("copy-flash");
+      }, 2200);
+    }
+
+    function filterCode(input) {
+      input.value = input.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 5);
+    }
+
+    potCodeInput.addEventListener("input", () => {
+      filterCode(potCodeInput);
+      hostError.textContent = "";
+    });
+
+    joinCodeInput.addEventListener("input", () => {
+      filterCode(joinCodeInput);
+      joinError.textContent = "";
+    });
+
+    function runJoinLoading(code, onDone) {
+      screenPhotoLoad.classList.remove("hidden");
+      requestAnimationFrame(() => screenPhotoLoad.classList.add("active"));
+      setTimeout(() => {
+        screenPhotoLoad.classList.remove("active");
+        setTimeout(() => {
+          screenPhotoLoad.classList.add("hidden");
+          joinedCode.textContent = code.toUpperCase();
+          onDone();
+        }, 250);
+      }, PHOTO_LOAD_MS);
+    }
+
+    function joinViaLink(code) {
+      const c = code.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 5);
+      if (!c) return;
+      [screenStart, screenMode, screenBotDiff, screenMenu, screenHost, screenLobby, screenJoin].forEach(s => s.classList.add("hidden"));
+      runJoinLoading(c, () => {
+        sessionMode = "guest";
+        sessionCode = c;
+        if (window.WieIsHetOnline) {
+          WieIsHetOnline.setupGuest(sessionCode).catch(() => {
+            sessionMode = "solo";
+          });
+        }
+        screenJoined.classList.remove("hidden");
+        screenJoined.classList.add("transition-active");
+        wireGuestOnline();
+      });
+    }
+
+    function transition(from, to, enterClass) {
+      if (busy) return;
+      busy = true;
+
+      to.classList.remove("hidden");
+      to.classList.add(enterClass);
+      from.classList.add("transition-out");
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          to.classList.add("transition-active");
+          to.classList.remove(enterClass);
+        });
+      });
+
+      setTimeout(() => {
+        from.classList.add("hidden");
+        from.classList.remove("transition-out");
+        to.classList.remove("transition-active");
+        busy = false;
+        if (to === screenMenu) replayMenuAnimations();
+      }, TRANSITION_MS);
+    }
+
+    function replayMenuAnimations() {
+      screenMenu.querySelectorAll(".menu-content h2, #screen-menu .btn").forEach((el) => {
+        el.style.animation = "none";
+        void el.offsetHeight;
+        el.style.animation = "";
+      });
+    }
+
+    document.getElementById("btn-begin").addEventListener("click", () => {
+      transition(screenStart, screenMode, "transition-in-from-right");
+    });
+
+    document.getElementById("btn-mode-back").addEventListener("click", () => {
+      transition(screenMode, screenStart, "transition-in-from-left");
+    });
+
+    document.getElementById("btn-play-online").addEventListener("click", () => {
+      transition(screenMode, screenMenu, "transition-in-from-right");
+    });
+
+    document.getElementById("btn-play-bot").addEventListener("click", () => {
+      transition(screenMode, screenBotDiff, "transition-in-from-right");
+    });
+
+    document.getElementById("btn-bot-back").addEventListener("click", () => {
+      transition(screenBotDiff, screenMode, "transition-in-from-left");
+    });
+
+    document.getElementById("btn-bot-easy").addEventListener("click", () => startBotGame("easy"));
+    document.getElementById("btn-bot-medium").addEventListener("click", () => startBotGame("medium"));
+    document.getElementById("btn-bot-hard").addEventListener("click", () => startBotGame("hard"));
+
+    document.getElementById("btn-back").addEventListener("click", () => {
+      transition(screenMenu, screenMode, "transition-in-from-left");
+    });
+
+    document.getElementById("btn-host").addEventListener("click", () => {
+      hostError.textContent = "";
+      transition(screenMenu, screenHost, "transition-in-from-right");
+    });
+
+    document.getElementById("btn-host-back").addEventListener("click", () => {
+      transition(screenHost, screenMenu, "transition-in-from-left");
+    });
+
+    document.getElementById("btn-lobby-back").addEventListener("click", () => {
+      transition(screenLobby, screenMenu, "transition-in-from-left");
+    });
+
+    document.getElementById("btn-copy-code").addEventListener("click", () => {
+      const btn = document.getElementById("btn-copy-code");
+      copyPotCode(lobbyCode.textContent.trim(), btn);
+    });
+
+    document.getElementById("btn-start-game").addEventListener("click", () => {
+      const c = lobbyCode.textContent.trim();
+      if (!c || c === "-----") return;
+      if (window.WieIsHetOnline && sessionMode === "host") {
+        WieIsHetOnline.broadcastGameStart();
+      }
+      transition(screenLobby, screenGame, "transition-in-from-right");
+      setTimeout(startGameSession, TRANSITION_MS + 50);
+    });
+
+    document.getElementById("btn-give-up").addEventListener("click", () => {
+      resetGameScreen();
+      leaveOnlineSession();
+      transition(screenGame, screenLobby, "transition-in-from-left");
+    });
+
+    document.getElementById("btn-play-again").addEventListener("click", playAgainFromEnd);
+    document.getElementById("btn-go-menu").addEventListener("click", goToMenuFromEnd);
+    document.addEventListener("wieishet-play-again", playAgainFromEnd);
+
+    document.getElementById("btn-join-menu").addEventListener("click", () => {
+      joinError.textContent = "";
+      transition(screenMenu, screenJoin, "transition-in-from-right");
+    });
+
+    document.getElementById("btn-join-back").addEventListener("click", () => {
+      transition(screenJoin, screenMenu, "transition-in-from-left");
+    });
+
+    document.getElementById("btn-joined-back").addEventListener("click", () => {
+      transition(screenJoined, screenMenu, "transition-in-from-left");
+    });
+
+    document.getElementById("btn-join-game").addEventListener("click", () => {
+      const code = joinCodeInput.value.trim();
+      if (!code) {
+        joinError.textContent = t("errJoinEmpty");
+        return;
+      }
+      screenJoin.classList.add("hidden");
+      runJoinLoading(code, () => {
+        sessionMode = "guest";
+        sessionCode = code.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 5);
+        joinedCode.textContent = sessionCode;
+        if (window.WieIsHetOnline) {
+          WieIsHetOnline.setupGuest(sessionCode).catch(() => {
+            sessionMode = "solo";
+          });
+        }
+        screenJoined.classList.remove("hidden");
+        wireGuestOnline();
+      });
+    });
+
+    const linkCode = new URLSearchParams(window.location.search).get("join");
+    if (linkCode) {
+      joinViaLink(linkCode);
+    }
+
+    document.getElementById("btn-make-pot").addEventListener("click", () => {
+      const code = potCodeInput.value.trim();
+      if (!code) {
+        hostError.textContent = t("errHostEmpty");
+        return;
+      }
+
+      screenPhotoLoad.classList.remove("hidden");
+      requestAnimationFrame(() => screenPhotoLoad.classList.add("active"));
+
+      setTimeout(() => {
+        screenPhotoLoad.classList.remove("active");
+        setTimeout(() => {
+          screenPhotoLoad.classList.add("hidden");
+          lobbyCode.textContent = code.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 5);
+          sessionMode = "host";
+          sessionCode = lobbyCode.textContent;
+          if (window.WieIsHetOnline) {
+            WieIsHetOnline.setupHost(sessionCode).catch(() => {
+              sessionMode = "solo";
+            });
+          }
+          screenHost.classList.add("hidden");
+          screenHost.classList.remove("transition-out", "transition-active");
+          screenLobby.classList.remove("hidden");
+          screenLobby.classList.add("transition-active");
+          setTimeout(() => screenLobby.classList.remove("transition-active"), 50);
+        }, 250);
+      }, PHOTO_LOAD_MS);
+    });
+  </script>
+</body>
+</html>

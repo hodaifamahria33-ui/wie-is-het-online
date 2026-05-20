@@ -1,0 +1,12 @@
+WhatsApp link + foto werkt ALLEEN als het spel ONLINE staat (niet file:// op je pc).
+
+Snelste manier (gratis):
+1. Ga naar https://app.netlify.com/drop
+2. Sleep de map WieIsHetOnline erop (met preview.html + og-image.png)
+3. Je krijgt een link zoals https://random-name.netlify.app
+4. Open preview.html op die site en test DEEL VIA WHATSAPP
+
+In Unity zet je daarna:
+JoinLink.ShareBaseUrl = "https://jouw-netlify-link.netlify.app/preview.html";
+
+WhatsApp toont dan alleen de link + een foto-voorbeeld van het spel.

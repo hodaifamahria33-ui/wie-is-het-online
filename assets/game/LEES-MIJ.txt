@@ -1,0 +1,10 @@
+Foto's voor het spelscherm (preview.html)
+
+Plaats je afbeeldingen in deze map met deze namen:
+
+  player-character.png — jouw personage (rug-aanzicht, onderaan, transparant)
+  player-back.png   — oude naam; gebruik player-character.png
+  opponent-face.png — gezicht tegenstander (boven) — standaard AI-personage zit er al in
+  card-01.png …     — optioneel: losse personage-foto's voor op de kaarten
+
+Stuur de foto's in de chat of zet ze hier; dan koppelen we ze in het spel.

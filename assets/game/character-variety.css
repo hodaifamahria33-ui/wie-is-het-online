@@ -1,0 +1,25 @@
+/* Avataaars-gezichten + geslacht-achtergrond (jongen=blauw, meisje=roze) */
+
+.card-photo.card-photo--boy {
+  background: linear-gradient(165deg, #dbeafe 0%, #93c5fd 50%, #60a5fa 100%) !important;
+}
+
+.card-photo.card-photo--girl {
+  background: linear-gradient(165deg, #fce7f3 0%, #f9a8d4 50%, #f472b6 100%) !important;
+}
+
+.card-photo--styled .card-img,
+.card-photo .card-img {
+  object-fit: cover;
+  object-position: center 18%;
+}
+
+.card-photo .card-face-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.card-photo .face-ph {
+  display: none;
+}

@@ -1,0 +1,26 @@
+{
+  "name": "Wie Is Het? Online",
+  "short_name": "Wie Is Het?",
+  "description": "Raad het personage — speel online met vrienden of tegen de bot.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#1c1036",
+  "theme_color": "#1c1036",
+  "orientation": "any",
+  "lang": "nl",
+  "icons": [
+    {
+      "src": "og-image.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "og-image.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+node_modules/
+Library/
+Temp/
+Logs/
+obj/
+UserSettings/
+*.csproj
+*.sln
+.vs/
