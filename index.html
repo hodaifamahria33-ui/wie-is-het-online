@@ -96,6 +96,21 @@
       var err = document.getElementById("join-error");
       if (err) err.textContent = "";
     };
+    window.wieStartBotGame = function (difficulty) {
+      var d = difficulty || "medium";
+      if (window.wieApp && window.wieApp.startBotGame) return window.wieApp.startBotGame(d);
+      if (window.wieApp && window.wieApp.startSoloGame) return window.wieApp.startSoloGame(d);
+      localStorage.setItem("wieBotDifficulty", d);
+      localStorage.setItem("wieSessionMode", "solo");
+      window.wieShowOnly("screen-game");
+      var countdown = document.getElementById("game-countdown");
+      var table = document.getElementById("game-table");
+      if (countdown) countdown.classList.remove("hidden");
+      if (table) table.classList.add("hidden");
+      setTimeout(function () {
+        if (window.wieApp && window.wieApp.startGameSession) window.wieApp.startGameSession();
+      }, 80);
+    };
     window.wieMakePot = function () {
       if (window.wieApp && window.wieApp.makePot) return window.wieApp.makePot();
       var input = document.getElementById("pot-code");
@@ -1833,9 +1848,9 @@
     <span class="glow" aria-hidden="true"></span>
     <section class="content">
       <h2 data-i18n-html="botDiffTitle">Kies<span class="accent">moeilijkheid</span></h2>
-      <button id="btn-bot-easy" class="btn btn-diff btn-diff--easy" type="button" data-i18n="btnEasy">Makkelijk</button>
-      <button id="btn-bot-medium" class="btn btn-diff btn-diff--medium" type="button" data-i18n="btnMedium">Gemiddeld</button>
-      <button id="btn-bot-hard" class="btn btn-diff btn-diff--hard" type="button" data-i18n="btnHard">Moeilijk</button>
+      <button id="btn-bot-easy" class="btn btn-diff btn-diff--easy" type="button" data-i18n="btnEasy" onclick="window.wieStartBotGame('easy')">Makkelijk</button>
+      <button id="btn-bot-medium" class="btn btn-diff btn-diff--medium" type="button" data-i18n="btnMedium" onclick="window.wieStartBotGame('medium')">Gemiddeld</button>
+      <button id="btn-bot-hard" class="btn btn-diff btn-diff--hard" type="button" data-i18n="btnHard" onclick="window.wieStartBotGame('hard')">Moeilijk</button>
       <button id="btn-bot-back" class="btn back" type="button" data-i18n="btnBack" onclick="window.wieShowScreen('screen-bot-diff','screen-mode')">TERUG</button>
     </section>
   </main>
@@ -2535,10 +2550,18 @@
     }
 
     function startBotGame(difficulty) {
-      botDifficulty = difficulty;
+      botDifficulty = difficulty || "medium";
       sessionMode = "solo";
       sessionCode = "";
-      leaveOnlineSession();
+      try {
+        leaveOnlineSession();
+      } catch (err) {
+        console.warn("leave online", err);
+      }
+      if (busy) {
+        startSoloGame(botDifficulty);
+        return;
+      }
       transition(screenBotDiff, screenGame, "transition-in-from-right");
       setTimeout(startGameSession, TRANSITION_MS + 50);
     }
@@ -3060,6 +3083,9 @@
       },
       makePot: doMakePot,
       joinWithCode: doJoinWithCode,
+      startBotGame,
+      startSoloGame,
+      startGameSession,
     };
   </script>
 </body>
