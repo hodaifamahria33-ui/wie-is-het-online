@@ -5,6 +5,11 @@ OFFICIËLE NAAM:  wiehasit.com
 SPEELLINK (GitHub, werkt nu):
   https://hodaifamahria33-ui.github.io/wie-is-het-online/
 
+DEEL MET VRIENDEN (iedereen speelt zelf, geen host):
+  https://hodaifamahria33-ui.github.io/wie-is-het-online/?speel=1
+
+  Of op het beginscherm: knop DEEL MET VRIENDEN
+
 EIGEN DOMEIN (na kopen + DNS):
   https://wiehasit.com
 

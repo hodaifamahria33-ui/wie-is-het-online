@@ -1412,6 +1412,27 @@
       z-index: 12;
     }
 
+    .screen-start .btn-share-play {
+      background: rgba(255, 255, 255, 0.1);
+      color: #bae6fd;
+      border: 2px solid rgba(126, 200, 232, 0.55);
+      font-size: clamp(0.85rem, 2.4vw, 1rem);
+      padding: 0.7rem 1.6rem;
+      min-width: auto;
+      box-shadow: none;
+      letter-spacing: 0.1em;
+    }
+
+    .screen-start .btn-share-play:hover {
+      background: rgba(255, 255, 255, 0.18);
+      transform: scale(1.03);
+    }
+
+    .screen-start .btn-share-play.copied {
+      border-color: rgba(74, 222, 128, 0.7);
+      color: #bbf7d0;
+    }
+
   </style>
 </head>
 <body>
@@ -1430,7 +1451,8 @@
     <h1 class="seo-brand">wiehasit.com</h1>
     <section class="content">
       <button id="btn-begin" class="btn" type="button" data-i18n="btnBegin" onclick="window.wieShowMode()">LATEN WE BEGINNEN</button>
-      <p class="start-tagline" data-i18n="startTagline">Raad het personage · Speel met vrienden online</p>
+      <button id="btn-share-play" class="btn btn-share-play" type="button" data-i18n="btnSharePlayLink">DEEL MET VRIENDEN</button>
+      <p class="start-tagline" data-i18n="startTagline">Stuur de link — iedereen speelt zelf, geen host nodig</p>
     </section>
   </main>
 
@@ -1679,7 +1701,7 @@
   </main>
 
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
-  <script src="assets/game/online-room.js?v=11"></script>
+  <script src="assets/game/online-room.js?v=12"></script>
   <script src="assets/game/character-traits.js?v=11"></script>
   <script src="assets/game/game-play.js?v=11"></script>
 
@@ -1688,8 +1710,11 @@
       nl: {
         startTitleHtml: 'Wie <span class="start-title-accent">Is</span> Het?',
         startOnlineBadge: "ONLINE",
-        startTagline: "wiehasit.com · Raad het personage online",
+        startTagline: "Stuur de link — iedereen speelt zelf, geen host nodig",
         btnBegin: "LATEN WE BEGINNEN",
+        btnSharePlayLink: "DEEL MET VRIENDEN",
+        btnSharePlayDone: "✓ Link gekopieerd!",
+        sharePlayWaText: "Speel Wie Is Het gratis — open de link en meteen spelen:\n",
         modeTitle: 'Kies je<span class="accent">spelmodus</span>',
         btnPlayOnline: "Online spelen",
         btnPlayBot: "Tegen bot spelen",
@@ -1765,8 +1790,11 @@
       en: {
         startTitleHtml: 'Who <span class="start-title-accent">Is</span> It?',
         startOnlineBadge: "ONLINE",
-        startTagline: "wiehasit.com · Guess the character online",
+        startTagline: "Send the link — everyone plays solo, no host needed",
         btnBegin: "LET'S BEGIN",
+        btnSharePlayLink: "SHARE WITH FRIENDS",
+        btnSharePlayDone: "✓ Link copied!",
+        sharePlayWaText: "Play Who Is It free — open the link and play right away:\n",
         modeTitle: 'Choose your<span class="accent">game mode</span>',
         btnPlayOnline: "Play online",
         btnPlayBot: "Play against bot",
@@ -2095,6 +2123,24 @@
       setTimeout(startGameSession, TRANSITION_MS + 50);
     }
 
+    function buildSharePlayUrl() {
+      const base = window.location.href.split("?")[0].split("#")[0];
+      return base + "?speel=1";
+    }
+
+    function startSoloGame(difficulty) {
+      botDifficulty = difficulty || "medium";
+      sessionMode = "solo";
+      sessionCode = "";
+      leaveOnlineSession();
+      [screenStart, screenMode, screenBotDiff, screenMenu, screenHost, screenLobby, screenJoin, screenJoined].forEach((s) =>
+        s.classList.add("hidden")
+      );
+      screenGame.classList.remove("hidden");
+      screenGame.classList.remove("transition-out", "transition-in-from-right", "transition-in-from-left", "transition-active");
+      startGameSession();
+    }
+
     function wireGuestOnline() {
       if (onlineGameUnsub) onlineGameUnsub();
       if (!window.WieIsHetOnline) return;
@@ -2185,8 +2231,9 @@
 
     function showCopyFeedback(btn, codeEl) {
       if (!btn) return;
+      const doneKey = btn.id === "btn-share-play" ? "btnSharePlayDone" : "btnCopyDone";
       btn.classList.add("copied");
-      btn.textContent = t("btnCopyDone");
+      btn.textContent = t(doneKey);
       if (codeEl) {
         codeEl.classList.remove("copy-flash");
         void codeEl.offsetWidth;
@@ -2426,9 +2473,21 @@
       });
     });
 
-    const linkCode = new URLSearchParams(window.location.search).get("join");
+    const urlParams = new URLSearchParams(window.location.search);
+    const linkCode = urlParams.get("join");
+    const autoSolo = urlParams.get("speel") === "1" || urlParams.get("play") === "1";
+
     if (linkCode) {
       joinViaLink(linkCode);
+    } else if (autoSolo) {
+      startSoloGame("medium");
+    }
+
+    const btnSharePlay = document.getElementById("btn-share-play");
+    if (btnSharePlay) {
+      btnSharePlay.addEventListener("click", () => {
+        copyText(buildSharePlayUrl(), btnSharePlay);
+      });
     }
 
     document.getElementById("btn-make-pot").addEventListener("click", () => {
