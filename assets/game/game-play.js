@@ -51,6 +51,16 @@
   let gameActionsAnswer = null;
   let gameActionsPost = null;
   let gameActionsQuestionText = null;
+  let questionDrawer = null;
+  let answerDrawer = null;
+  let answerDrawerQuestion = null;
+  let flipPhaseBar = null;
+  let flipPhaseTimerEl = null;
+  let answerRevealOverlay = null;
+  let answerRevealText = null;
+  let questionInput = null;
+  let btnSendQuestion = null;
+  let answerRevealTimeoutId = null;
   let btnSwitchTurn = null;
   let btnEndFlipPhase = null;
   let postAnswerTimerEl = null;
@@ -399,21 +409,108 @@
     hidePostAnswerPanel();
   }
 
+  function triggerDrawerPop(el) {
+    if (!el) return;
+    el.classList.remove("is-popping");
+    void el.offsetWidth;
+    el.classList.add("is-popping");
+    window.setTimeout(() => el.classList.remove("is-popping"), 520);
+  }
+
+  function hideQuestionDrawer() {
+    if (questionDrawer) questionDrawer.classList.add("hidden");
+    setQuestionInputEnabled(false);
+  }
+
+  function showQuestionDrawer() {
+    if (!questionDrawer) return;
+    hideAnswerDrawer();
+    hideFlipPhaseBar();
+    hideAnswerReveal();
+    hideGameActions();
+    hideBanner();
+    questionDrawer.classList.remove("hidden");
+    triggerDrawerPop(questionDrawer);
+    const canAsk = state.phase === PHASE.MY_TURN && !state.askedThisTurn;
+    setQuestionInputEnabled(canAsk);
+    if (questionInput && canAsk) {
+      questionInput.value = "";
+      window.setTimeout(() => questionInput.focus(), 180);
+    }
+  }
+
+  function hideAnswerDrawer() {
+    if (answerDrawer) answerDrawer.classList.add("hidden");
+  }
+
+  function showAnswerDrawer(questionText) {
+    if (!answerDrawer) return;
+    hideQuestionDrawer();
+    hideFlipPhaseBar();
+    hideGameActions();
+    if (answerDrawerQuestion) {
+      answerDrawerQuestion.textContent = questionText;
+    }
+    answerDrawer.classList.remove("hidden");
+    triggerDrawerPop(answerDrawer);
+  }
+
+  function hideFlipPhaseBar() {
+    if (flipPhaseBar) flipPhaseBar.classList.add("hidden");
+  }
+
+  function showFlipPhaseBar() {
+    if (flipPhaseBar) flipPhaseBar.classList.remove("hidden");
+  }
+
+  function setFlipPhaseTimerDisplay(seconds) {
+    if (flipPhaseTimerEl) {
+      flipPhaseTimerEl.textContent = String(Math.max(0, seconds));
+    }
+  }
+
+  function hideAnswerReveal() {
+    if (answerRevealTimeoutId) {
+      clearTimeout(answerRevealTimeoutId);
+      answerRevealTimeoutId = null;
+    }
+    if (answerRevealOverlay) {
+      answerRevealOverlay.classList.add("hidden");
+      answerRevealOverlay.classList.remove("answer-reveal--yes", "answer-reveal--no");
+    }
+  }
+
+  function showAnswerReveal(yes) {
+    if (!answerRevealOverlay || !answerRevealText) return;
+    hideAnswerReveal();
+    answerRevealOverlay.classList.remove("hidden", "answer-reveal--yes", "answer-reveal--no");
+    answerRevealOverlay.classList.add(yes ? "answer-reveal--yes" : "answer-reveal--no");
+    answerRevealText.textContent = yes ? tFn("answerYes") : tFn("answerNo");
+  }
+
+  function setQuestionInputEnabled(enabled) {
+    if (questionInput) questionInput.disabled = !enabled;
+    if (btnSendQuestion) btnSendQuestion.disabled = !enabled;
+  }
+
   function showQuestionPanel(mode) {
     if (mode === "ask") {
-      hideGameActions();
-      setBanner(tFn("turnPlayer"));
+      clearInteractivity();
+      if (opponentChest) opponentChest.classList.add("chest-guess-ready");
+      showQuestionDrawer();
       return;
     }
     if (mode === "answer") {
-      setBanner(tFn("answerOpponentQuestion"));
-      if (gameQuickActions) gameQuickActions.classList.remove("hidden");
-      if (gameActionsPost) gameActionsPost.classList.add("hidden");
-      if (gameActionsAnswer) gameActionsAnswer.classList.remove("hidden");
+      hideQuestionDrawer();
+      const qText = state.pendingQuestion?.text || "";
+      showAnswerDrawer(qText);
     }
   }
 
   function hideQuestionPanel() {
+    hideQuestionDrawer();
+    hideAnswerDrawer();
+    hideFlipPhaseBar();
     hideGameActions();
   }
 
@@ -451,6 +548,7 @@
     if (postAnswerTimerEl) {
       postAnswerTimerEl.textContent = String(Math.max(0, seconds));
     }
+    setFlipPhaseTimerDisplay(seconds);
   }
 
   function runCountdownTimer(seconds, onTick, onDone) {
@@ -471,6 +569,33 @@
       clearPostAnswerTimers();
       onDone();
     }, seconds * 1000);
+  }
+
+  function beginFlipPhaseAfterQuestion() {
+    state.phase = PHASE.POST_ANSWER_FLIP_RUSH;
+    setScreenTurn("my");
+    hideQuestionDrawer();
+    hideAnswerDrawer();
+    hideAnswerReveal();
+    hideGameActions();
+    showFlipPhaseBar();
+    enableMyFlips();
+    setBanner(tFn("flipRushPrompt"));
+    runCountdownTimer(
+      POST_ANSWER_FLIP_SEC,
+      () => {},
+      () => {
+        if (state.phase === PHASE.POST_ANSWER_FLIP_RUSH) {
+          hideFlipPhaseBar();
+          setPostAnswerBoardMode(false);
+          clearInteractivity();
+          if (state.online && window.WieIsHetOnline) {
+            window.WieIsHetOnline.sendTurnHandoff();
+          }
+          beginTheirTurn();
+        }
+      }
+    );
   }
 
   function hidePostAnswerPanel() {
@@ -581,29 +706,50 @@
     state.phase = PHASE.ANSWER_QUESTION;
     state.pendingQuestion = { text: questionText, id: questionId };
     setScreenTurn("question");
-    enableCardFlips();
-    setBanner(questionText);
-    if (gameActionsQuestionText) {
-      gameActionsQuestionText.textContent = questionText;
-      gameActionsQuestionText.classList.remove("hidden");
-    }
+    clearInteractivity();
+    hideBanner();
     showQuestionPanel("answer");
   }
 
   function finishQuestionAsAsker(yes, questionText) {
-    setBanner('"' + questionText + '"');
-    showOpponentAnswer(answerText(yes), yes);
-    setTimeout(() => {
-      setBanner(tFn("opponentAnswered") + " " + answerText(yes));
-    }, 400);
-    setTimeout(() => {
-      hideOpponentAnswer();
-      beginPostAnswerSwitchPhase();
-    }, 1200);
+    hideQuestionDrawer();
+    hideOpponentAnswer();
+    hideBanner();
+    showAnswerReveal(yes);
+    answerRevealTimeoutId = window.setTimeout(() => {
+      hideAnswerReveal();
+      beginFlipPhaseAfterQuestion();
+    }, 1600);
   }
 
   function submitPlayerQuestion() {
-    /* Vraag-popup verwijderd — alleen bot stelt vragen, speler antwoordt met JA/NEE */
+    if (state.phase !== PHASE.MY_TURN || !questionInput || state.askedThisTurn) return;
+    const questionText = questionInput.value.trim();
+    if (!questionText) {
+      questionInput.focus();
+      return;
+    }
+    if (isDuplicateQuestion(questionText)) {
+      setBanner(tFn("duplicateQuestion"));
+      questionInput.focus();
+      return;
+    }
+    recordQuestion(questionText);
+    state.askedThisTurn = true;
+    hideQuestionDrawer();
+    clearInteractivity();
+    if (state.online && window.WieIsHetOnline) {
+      state.phase = PHASE.WAIT_ANSWER;
+      state.pendingQuestionText = questionText;
+      window.WieIsHetOnline.send({ type: "question", questionId: "custom", questionText });
+      setBanner('"' + questionText + '" — ' + tFn("waitAnswer"));
+      questionInput.value = "";
+      return;
+    }
+    const secretName = getSecretName(state.opponentSecretIndex);
+    const yes = evaluateCustomQuestion(questionText, secretName);
+    questionInput.value = "";
+    finishQuestionAsAsker(yes, questionText);
   }
 
   function onAnswerChipClick(btn) {
@@ -724,17 +870,20 @@
     clearPostAnswerTimers();
     hidePostAnswerPanel();
     hideOpponentAnswer();
+    hideAnswerReveal();
+    hideFlipPhaseBar();
     state.phase = PHASE.MY_TURN;
     state.flippedThisTurn = false;
     state.askedThisTurn = false;
     setScreenTurn("my");
-    enableMyFlips();
     showQuestionPanel("ask");
   }
 
   function beginTheirTurn() {
     clearPostAnswerTimers();
     hideQuestionPanel();
+    hideAnswerReveal();
+    hideFlipPhaseBar();
     state.phase = PHASE.THEIR_TURN;
     state.askedThisTurn = false;
     setScreenTurn("their");
@@ -967,6 +1116,8 @@
       w.classList.remove("picked-secret", "interactive", "guess-mode");
     });
     hideQuestionPanel();
+    hideAnswerReveal();
+    hideFlipPhaseBar();
     hideOpponentAnswer();
     clearOpponentReveal();
     setScreenTurn("pick");
@@ -1022,20 +1173,47 @@
   }
 
   function wireGameQuickActions() {
-    if (!gameQuickActions || gameQuickActions.dataset.wired === "1") return;
-    gameQuickActions.dataset.wired = "1";
-    gameQuickActions.querySelectorAll(".answer-chip").forEach((btn) => {
-      btn.addEventListener("click", () => onAnswerChipClick(btn));
-    });
+    if (gameQuickActions && gameQuickActions.dataset.wired !== "1") {
+      gameQuickActions.dataset.wired = "1";
+      gameQuickActions.querySelectorAll(".answer-chip").forEach((btn) => {
+        btn.addEventListener("click", () => onAnswerChipClick(btn));
+      });
+    }
     btnSwitchTurn = document.getElementById("btn-switch-turn");
     btnEndFlipPhase = document.getElementById("btn-end-flip-phase");
     postAnswerTimerEl = document.getElementById("post-answer-timer");
     postAnswerLabelEl = document.getElementById("post-answer-label");
-    if (btnSwitchTurn) {
+    if (btnSwitchTurn && btnSwitchTurn.dataset.wired !== "1") {
+      btnSwitchTurn.dataset.wired = "1";
       btnSwitchTurn.addEventListener("click", onSwitchTurnClick);
     }
-    if (btnEndFlipPhase) {
+    if (btnEndFlipPhase && btnEndFlipPhase.dataset.wired !== "1") {
+      btnEndFlipPhase.dataset.wired = "1";
       btnEndFlipPhase.addEventListener("click", endPostAnswerPhase);
+    }
+  }
+
+  function wireQuestionDrawer() {
+    questionInput = document.getElementById("question-input");
+    btnSendQuestion = document.getElementById("btn-send-question");
+    if (btnSendQuestion && btnSendQuestion.dataset.wired !== "1") {
+      btnSendQuestion.dataset.wired = "1";
+      btnSendQuestion.addEventListener("click", submitPlayerQuestion);
+    }
+    if (questionInput && questionInput.dataset.wired !== "1") {
+      questionInput.dataset.wired = "1";
+      questionInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          submitPlayerQuestion();
+        }
+      });
+    }
+    if (answerDrawer && answerDrawer.dataset.wired !== "1") {
+      answerDrawer.dataset.wired = "1";
+      answerDrawer.querySelectorAll(".answer-chip").forEach((btn) => {
+        btn.addEventListener("click", () => onAnswerChipClick(btn));
+      });
     }
   }
 
@@ -1064,6 +1242,8 @@
     setScreenTurn(null);
     hideBanner();
     hideQuestionPanel();
+    hideAnswerReveal();
+    hideFlipPhaseBar();
     hideOpponentAnswer();
     if (secretSlot) {
       Array.from(secretSlot.children).forEach((child) => {
@@ -1093,6 +1273,13 @@
       gameActionsAnswer = document.getElementById("game-actions-answer");
       gameActionsPost = document.getElementById("game-actions-post");
       gameActionsQuestionText = document.getElementById("game-actions-question-text");
+      questionDrawer = document.getElementById("question-drawer");
+      answerDrawer = document.getElementById("answer-drawer");
+      answerDrawerQuestion = document.getElementById("answer-drawer-question");
+      flipPhaseBar = document.getElementById("flip-phase-bar");
+      flipPhaseTimerEl = document.getElementById("flip-phase-timer");
+      answerRevealOverlay = document.getElementById("answer-reveal-overlay");
+      answerRevealText = document.getElementById("answer-reveal-text");
       winOverlay = opts.winOverlay;
       state.online = Boolean(opts.online);
       state.isHost = opts.isHost !== false;
@@ -1103,6 +1290,7 @@
       }
       wireBoards();
       wireGameQuickActions();
+      wireQuestionDrawer();
       wireChest();
       saveChestDefault();
       if (unsubOnline) unsubOnline();

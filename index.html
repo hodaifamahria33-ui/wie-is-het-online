@@ -17,11 +17,12 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/game/premium-game.css?v=37" />
-  <link rel="stylesheet" href="assets/game/game-play.css?v=37" />
-  <link rel="stylesheet" href="assets/game/game-extras.css?v=37" />
-  <link rel="stylesheet" href="assets/game/game-layout.css?v=37" />
-  <link rel="stylesheet" href="assets/game/character-variety.css?v=37" />
+  <link rel="stylesheet" href="assets/game/premium-game.css?v=38" />
+  <link rel="stylesheet" href="assets/game/game-play.css?v=38" />
+  <link rel="stylesheet" href="assets/game/game-extras.css?v=38" />
+  <link rel="stylesheet" href="assets/game/game-drawers.css?v=38" />
+  <link rel="stylesheet" href="assets/game/game-layout.css?v=38" />
+  <link rel="stylesheet" href="assets/game/character-variety.css?v=38" />
   <meta name="description" content="wiehasit.com — gratis online Wie-is-het spel. Maak een potje, deel de code, raad het personage met vrienden of tegen de bot." />
   <meta name="keywords" content="wiehasit.com, wie has it, wie is het online, raadspel, gratis spel" />
   <meta property="og:type" content="website" />
@@ -2179,6 +2180,39 @@
 
         <p id="game-turn-banner" class="game-turn-banner hidden" aria-live="polite"></p>
 
+      <div id="question-drawer" class="question-drawer hidden" aria-live="polite">
+        <div class="question-drawer-sheet">
+          <p class="question-drawer-label" data-i18n="askQuestionShort">Stel je vraag (tegenstander antwoordt):</p>
+          <div class="question-input-row">
+            <input type="text" id="question-input" class="question-input" maxlength="100"
+              placeholder="Bijv. Is het een jongen?" autocomplete="off" data-i18n-placeholder="questionPlaceholder" />
+            <button type="button" id="btn-send-question" class="btn-send-question" data-i18n="btnAsk">Vraag</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="answer-drawer" class="question-drawer question-drawer--answer hidden" aria-live="polite">
+        <div class="question-drawer-sheet">
+          <p id="answer-drawer-question" class="question-drawer-question"></p>
+          <p class="question-drawer-label" data-i18n="answerOpponentQuestion">Tegenstander vraagt — jij antwoordt:</p>
+          <div class="answer-row">
+            <button type="button" class="answer-chip" data-answer="yes" data-i18n="answerYes">JA</button>
+            <button type="button" class="answer-chip" data-answer="no" data-i18n="answerNo">NEE</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="flip-phase-bar" class="flip-phase-bar hidden" aria-live="polite">
+        <p id="flip-phase-label" class="flip-phase-label" data-i18n="flipRushPrompt">Haal kaarten weg! (10 sec)</p>
+        <p id="flip-phase-timer" class="flip-phase-timer">10</p>
+      </div>
+
+      <div id="answer-reveal-overlay" class="answer-reveal-overlay hidden" aria-live="assertive">
+        <div id="answer-reveal-bubble" class="answer-reveal-bubble">
+          <span id="answer-reveal-text">JA</span>
+        </div>
+      </div>
+
         <div id="game-quick-actions" class="game-quick-actions hidden" aria-live="polite">
           <p id="game-actions-question-text" class="game-actions-question hidden"></p>
           <div id="game-actions-answer" class="game-actions-row hidden">
@@ -2206,10 +2240,10 @@
   </main>
 
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
-  <script src="assets/game/online-room.js?v=37"></script>
-  <script src="assets/game/lobby-room.js?v=37"></script>
-  <script src="assets/game/character-traits.js?v=37"></script>
-  <script src="assets/game/game-play.js?v=37"></script>
+  <script src="assets/game/online-room.js?v=38"></script>
+  <script src="assets/game/lobby-room.js?v=38"></script>
+  <script src="assets/game/character-traits.js?v=38"></script>
+  <script src="assets/game/game-play.js?v=38"></script>
 
   <script>
     const I18N = {
