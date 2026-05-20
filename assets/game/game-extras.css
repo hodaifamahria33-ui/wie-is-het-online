@@ -1,13 +1,13 @@
 /* Schatkist, vragen, win-overlay */
 
-/* Bord midden; schatkist zit als vast element in #game-table (zie game-mobile.css) */
+/* Rij: schatkist (raden) links — bord midden/rechts — geheime kaart vast rechts */
 #game-table .player-play-area {
   display: flex !important;
   flex-direction: row !important;
   flex-wrap: nowrap !important;
   align-items: flex-end !important;
   justify-content: center !important;
-  gap: 0 !important;
+  gap: clamp(10px, 2.2vw, 28px) !important;
   width: 100% !important;
   max-width: 100% !important;
   padding-right: 0 !important;
@@ -15,19 +15,11 @@
   margin: 0 auto;
 }
 
-/* Desktop: schatkist linksonder */
-@media (min-width: 721px) {
-  #game-table > .opponent-chest,
-  #opponent-chest.opponent-chest {
-    position: fixed;
-    left: max(14px, env(safe-area-inset-left));
-    right: auto;
-    top: auto;
-    bottom: max(24px, env(safe-area-inset-bottom, 16px));
-    transform: none;
-    z-index: 38;
-    width: clamp(88px, 12vw, 128px);
-  }
+#game-table .opponent-chest {
+  order: 1;
+  flex-shrink: 0;
+  align-self: center;
+  position: relative;
 }
 
 #game-table .board-stand--front {

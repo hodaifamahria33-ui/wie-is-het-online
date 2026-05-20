@@ -24,8 +24,8 @@
   <link rel="stylesheet" href="assets/game/game-hud.css?v=44" />
   <link rel="stylesheet" href="assets/game/game-layout.css?v=44" />
   <link rel="stylesheet" href="assets/game/character-variety.css?v=44" />
-  <link rel="stylesheet" href="assets/game/game-mobile.css?v=50" />
-  <link rel="stylesheet" href="assets/game/game-extras.css?v=50" />
+  <link rel="stylesheet" href="assets/game/game-mobile.css?v=51" />
+  <link rel="stylesheet" href="assets/game/game-extras.css?v=51" />
   <meta name="description" content="wiehasit.com — gratis online Wie-is-het spel. Maak een potje, deel de code, raad het personage met vrienden of tegen de bot." />
   <meta name="keywords" content="wiehasit.com, wie has it, wie is het online, raadspel, gratis spel" />
   <meta property="og:type" content="website" />
@@ -2286,6 +2286,15 @@
               <div class="board-base board-base--opponent" aria-hidden="true"></div>
             </div>
             <div class="player-play-area">
+              <button type="button" class="opponent-chest" id="opponent-chest" aria-label="Tik om te raden" data-i18n-aria="chestHint">
+                <div class="chest-visual">
+                  <img class="chest-avatar" src="assets/game/opponent-face.png" alt=""
+                    onerror="this.src='https://api.dicebear.com/7.x/lorelei/png?seed=Opponent&size=128'" />
+                </div>
+                <span class="chest-label" data-i18n="chestLabel">Tegenstander</span>
+                <span class="chest-hint" data-i18n="chestHint">Tik om te raden</span>
+                <span id="opponent-answer" class="opponent-answer hidden" aria-live="polite"></span>
+              </button>
               <div class="board-stand board-stand--player board-stand--front">
                 <div class="board-tray board-tray--player">
                   <div class="player-board" id="player-board" aria-label="Jouw bord"></div>
@@ -2299,16 +2308,6 @@
 
         <div class="table-surface table-surface--hidden" aria-hidden="true"></div>
       </div>
-
-      <button type="button" class="opponent-chest" id="opponent-chest" aria-label="Tik om te raden" data-i18n-aria="chestHint">
-        <div class="chest-visual">
-          <img class="chest-avatar" src="assets/game/opponent-face.png" alt=""
-            onerror="this.src='https://api.dicebear.com/7.x/lorelei/png?seed=Opponent&size=128'" />
-        </div>
-        <span class="chest-label" data-i18n="chestLabel">Tegenstander</span>
-        <span class="chest-hint" data-i18n="chestHint">Tik om te raden</span>
-        <span id="opponent-answer" class="opponent-answer hidden" aria-live="polite"></span>
-      </button>
 
       <aside id="secret-card-slot" class="secret-card-slot" aria-label="Jouw geheim personage">
         <div class="secret-card-pedestal" aria-hidden="true"></div>

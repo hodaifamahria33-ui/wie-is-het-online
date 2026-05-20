@@ -63,58 +63,52 @@
     box-sizing: border-box !important;
   }
 
-  #game-table .game-scene {
-    perspective: none !important;
-    transform: none !important;
-  }
-
   #game-table .board-stack {
     transform: none !important;
     transform-style: flat !important;
   }
 
-  /* Schatkist = raden → linksonder */
-  #opponent-chest.opponent-chest,
-  #game-table > .opponent-chest,
+  /* Schatkist weer links naast het bord (originele layout) */
+  #game-table .player-play-area {
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: flex-end !important;
+    justify-content: center !important;
+    gap: clamp(6px, 1.8vw, 14px) !important;
+    width: calc(100vw - 6px) !important;
+    max-width: calc(100vw - 6px) !important;
+  }
+
   #game-table .opponent-chest {
-    position: fixed !important;
-    left: max(10px, env(safe-area-inset-left)) !important;
+    position: relative !important;
+    order: 1 !important;
+    left: auto !important;
     right: auto !important;
     top: auto !important;
-    bottom: max(76px, calc(env(safe-area-inset-bottom, 0px) + 68px)) !important;
-    width: clamp(72px, 20vw, 96px) !important;
-    z-index: 46 !important;
+    bottom: auto !important;
+    width: clamp(58px, 16vw, 84px) !important;
+    z-index: 5 !important;
     margin: 0 !important;
     transform: none !important;
     flex-shrink: 0 !important;
     pointer-events: auto !important;
   }
 
-  #opponent-chest .chest-label,
   #game-table .opponent-chest .chest-label {
-    display: block !important;
-    font-size: 0.55rem !important;
-    margin-top: 0.2rem !important;
+    font-size: 0.5rem !important;
   }
 
   #game-table .opponent-chest .chest-hint {
-    display: none !important;
-  }
-
-  #game-table .opponent-chest.chest-guess-ready .chest-hint {
-    display: block !important;
-    font-size: 0.5rem !important;
-    max-width: 72px;
-    line-height: 1.15;
+    font-size: 0.45rem !important;
   }
 
   #game-table .board-stand--front {
-    order: unset !important;
-    width: 100% !important;
-    max-width: calc(100vw - 6px) !important;
+    order: 2 !important;
+    flex: 1 1 auto !important;
+    width: auto !important;
+    max-width: 100% !important;
     min-width: 0 !important;
-    flex: 0 0 auto !important;
-    margin: 0 auto !important;
+    margin: 0 !important;
     transform: perspective(800px) rotateX(calc(var(--board-tilt) * -1)) !important;
   }
 
@@ -193,6 +187,10 @@
     padding-bottom: max(96px, calc(env(safe-area-inset-bottom, 0px) + 88px)) !important;
     padding-left: max(3px, env(safe-area-inset-left)) !important;
     padding-right: max(3px, env(safe-area-inset-right)) !important;
+  }
+
+  #game-table > .opponent-chest {
+    display: none !important;
   }
 
   .game-turn-banner {
@@ -276,12 +274,8 @@
     -webkit-line-clamp: 2;
   }
 
-  #opponent-chest.opponent-chest,
   #game-table .opponent-chest {
-    width: 64px !important;
-    left: max(8px, env(safe-area-inset-left)) !important;
-    right: auto !important;
-    bottom: max(74px, calc(env(safe-area-inset-bottom, 0px) + 66px)) !important;
+    width: 52px !important;
   }
 }
 
