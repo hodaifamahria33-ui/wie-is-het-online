@@ -1538,8 +1538,9 @@
     <section class="content">
       <h2 data-i18n-html="lobbyTitle">Je potje is<span class="accent">klaar!</span></h2>
       <p id="lobby-code" class="pot-code">-----</p>
-      <p class="hint" data-i18n="lobbyHint">Deel deze code met je vrienden</p>
-      <button id="btn-copy-code" class="btn btn-copy-code" type="button" data-i18n="btnCopyCode">KOPIEER DE CODE</button>
+      <p class="hint" data-i18n="lobbyHint">Stuur deze link naar je vrienden — zij joinen automatisch</p>
+      <button id="btn-copy-code" class="btn btn-copy-code" type="button" data-i18n="btnCopyCode">KOPIEER LINK</button>
+      <button id="btn-share-wa" class="btn secondary" type="button" data-i18n="btnShareWa">DEEL VIA WHATSAPP</button>
       <button id="btn-start-game" class="btn btn-start-game" type="button" data-i18n="btnStartGame">START GAME</button>
       <button id="btn-lobby-back" class="btn back" type="button" data-i18n="btnBack">TERUG</button>
     </section>
@@ -1694,9 +1695,10 @@
         joinedTitle: 'Je zit in<span class="accent">het potje!</span>',
         joinedHint: "Wacht tot de host het spel start",
         lobbyTitle: 'Je potje is<span class="accent">klaar!</span>',
-        lobbyHint: "Deel deze code met je vrienden",
-        btnCopyCode: "KOPIEER DE CODE",
-        btnCopyDone: "✓ Gekopieerd!",
+        lobbyHint: "Stuur deze link naar je vrienden — zij joinen automatisch",
+        btnCopyCode: "KOPIEER LINK",
+        btnCopyDone: "✓ Link gekopieerd!",
+        btnShareWa: "DEEL VIA WHATSAPP",
         btnStartGame: "START GAME",
         countdownLabel: "Potje start over",
         countdownGo: "START!",
@@ -1762,9 +1764,10 @@
         joinedTitle: 'You\'re in<span class="accent">the game!</span>',
         joinedHint: "Wait for the host to start the game",
         lobbyTitle: 'Your game is<span class="accent">ready!</span>',
-        lobbyHint: "Share this code with your friends",
-        btnCopyCode: "COPY THE CODE",
-        btnCopyDone: "✓ Copied!",
+        lobbyHint: "Send this link to your friends — they join automatically",
+        btnCopyCode: "COPY LINK",
+        btnCopyDone: "✓ Link copied!",
+        btnShareWa: "SHARE ON WHATSAPP",
         btnStartGame: "START GAME",
         countdownLabel: "Game starts in",
         countdownGo: "GO!",
@@ -2109,21 +2112,31 @@
       sessionCode = "";
     }
 
-    async function copyPotCode(code, btn) {
-      const c = code.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 5);
-      if (!c) return false;
+    function buildJoinUrl(code) {
+      const c = (code || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 5);
+      if (!c) return "";
+      const base = window.location.href.split("?")[0].split("#")[0];
+      return base + "?join=" + encodeURIComponent(c);
+    }
+
+    async function copyText(text, btn, codeEl) {
+      if (!text) return false;
       try {
-        await navigator.clipboard.writeText(c);
+        await navigator.clipboard.writeText(text);
       } catch {
         const ta = document.createElement("textarea");
-        ta.value = c;
+        ta.value = text;
         document.body.appendChild(ta);
         ta.select();
         document.execCommand("copy");
         document.body.removeChild(ta);
       }
-      showCopyFeedback(btn, lobbyCode);
+      showCopyFeedback(btn, codeEl);
       return true;
+    }
+
+    async function copyJoinLink(code, btn) {
+      return copyText(buildJoinUrl(code), btn, lobbyCode);
     }
 
     function showCopyFeedback(btn, codeEl) {
@@ -2262,8 +2275,17 @@
     });
 
     document.getElementById("btn-copy-code").addEventListener("click", () => {
-      const btn = document.getElementById("btn-copy-code");
-      copyPotCode(lobbyCode.textContent.trim(), btn);
+      copyJoinLink(lobbyCode.textContent.trim(), document.getElementById("btn-copy-code"));
+    });
+
+    document.getElementById("btn-share-wa").addEventListener("click", () => {
+      const url = buildJoinUrl(lobbyCode.textContent.trim());
+      if (!url) return;
+      const text =
+        lang === "en"
+          ? "Play Who Is It with me! Tap to join:\n" + url
+          : "Speel Wie Is Het met me! Tik om mee te doen:\n" + url;
+      window.open("https://wa.me/?text=" + encodeURIComponent(text), "_blank", "noopener");
     });
 
     document.getElementById("btn-start-game").addEventListener("click", () => {
