@@ -286,11 +286,19 @@
     return yes ? tFn("answerYes") : tFn("answerNo");
   }
 
+  function setPostAnswerBoardMode(active) {
+    if (screenGame) screenGame.classList.toggle("phase-post-switch", Boolean(active));
+    if (questionPanel) questionPanel.classList.toggle("mode-switch-active", Boolean(active));
+  }
+
   function enableCardFlips() {
+    refreshWells();
     state.playerWells.forEach((w, i) => {
       const tile = w.querySelector(".card-tile");
       if (tile && !tile.classList.contains("is-down") && i !== state.secretIndex) {
         w.classList.add("interactive");
+      } else {
+        w.classList.remove("interactive");
       }
     });
     if (opponentChest) opponentChest.classList.remove("chest-guess-ready");
@@ -474,6 +482,7 @@
     if (state.phase !== PHASE.POST_ANSWER_SWITCH) return;
     clearPostAnswerTimers();
     hidePostAnswerPanel();
+    setPostAnswerBoardMode(false);
     clearInteractivity();
     if (state.online && window.WieIsHetOnline) {
       window.WieIsHetOnline.send({ type: "switchTurn" });
@@ -484,8 +493,10 @@
   function beginPostAnswerSwitchPhase() {
     state.phase = PHASE.POST_ANSWER_SWITCH;
     setScreenTurn("my");
+    setPostAnswerBoardMode(true);
     enableCardFlips();
     showPostAnswerPanel("switch");
+    enableCardFlips();
     setBanner(tFn("switchPrompt"));
     runCountdownTimer(
       POST_ANSWER_SWITCH_SEC,
@@ -996,6 +1007,7 @@
   }
 
   function reset() {
+    setPostAnswerBoardMode(false);
     state.phase = PHASE.IDLE;
     state.secretIndex = null;
     state.opponentSecretIndex = null;
