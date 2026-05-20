@@ -6,7 +6,7 @@
   <title>wiehasit.com — online Wie-is-het spel</title>
   <meta name="application-name" content="wiehasit.com" />
   <meta name="apple-mobile-web-app-title" content="wiehasit" />
-  <link rel="canonical" href="https://wiehasit.com/" />
+  <link rel="canonical" href="https://hodaifamahria33-ui.github.io/wie-is-het-online/" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="theme-color" content="#1c1036" />
@@ -1527,7 +1527,9 @@
     <section class="content">
       <h2 data-i18n-html="joinedTitle">Je zit in<span class="accent">het potje!</span></h2>
       <p id="joined-code" class="pot-code">-----</p>
+      <p id="joined-status" class="hint joined-status">Verbinden met host…</p>
       <p class="hint" data-i18n="joinedHint">Wacht tot de host het spel start</p>
+      <button id="btn-join-retry" class="btn secondary hidden" type="button" data-i18n="btnJoinRetry">OPNIEUW VERBINDEN</button>
       <button id="btn-joined-back" class="btn back" type="button" data-i18n="btnBack">TERUG</button>
     </section>
   </main>
@@ -1694,6 +1696,10 @@
         btnJoinGame: "JOIN GAME",
         joinedTitle: 'Je zit in<span class="accent">het potje!</span>',
         joinedHint: "Wacht tot de host het spel start",
+        joinConnecting: "Verbinden met host…",
+        joinConnected: "Verbonden! Wacht tot de host START GAME drukt.",
+        joinFailed: "Kon host niet bereiken. Vraag een nieuwe link of probeer opnieuw.",
+        btnJoinRetry: "OPNIEUW VERBINDEN",
         lobbyTitle: 'Je potje is<span class="accent">klaar!</span>',
         lobbyHint: "Stuur deze link naar je vrienden — zij joinen automatisch",
         btnCopyCode: "KOPIEER LINK",
@@ -1763,6 +1769,10 @@
         btnJoinGame: "JOIN GAME",
         joinedTitle: 'You\'re in<span class="accent">the game!</span>',
         joinedHint: "Wait for the host to start the game",
+        joinConnecting: "Connecting to host…",
+        joinConnected: "Connected! Wait for the host to press START GAME.",
+        joinFailed: "Could not reach the host. Ask for a new link or try again.",
+        btnJoinRetry: "RECONNECT",
         lobbyTitle: 'Your game is<span class="accent">ready!</span>',
         lobbyHint: "Send this link to your friends — they join automatically",
         btnCopyCode: "COPY LINK",
@@ -2183,21 +2193,65 @@
       }, PHOTO_LOAD_MS);
     }
 
+    const joinedStatus = document.getElementById("joined-status");
+    const btnJoinRetry = document.getElementById("btn-join-retry");
+
+    function setJoinedStatus(key, isError) {
+      if (!joinedStatus) return;
+      joinedStatus.textContent = t(key);
+      joinedStatus.classList.toggle("error", !!isError);
+      if (btnJoinRetry) btnJoinRetry.classList.toggle("hidden", !isError);
+    }
+
+    async function connectGuestWithRetry(code) {
+      const c = code.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 5);
+      if (!c || !window.WieIsHetOnline) throw new Error("no-online");
+      setJoinedStatus("joinConnecting", false);
+      if (btnJoinRetry) btnJoinRetry.classList.add("hidden");
+      const maxAttempts = 15;
+      for (let attempt = 0; attempt < maxAttempts; attempt++) {
+        try {
+          WieIsHetOnline.reset();
+          await WieIsHetOnline.setupGuest(c);
+          sessionMode = "guest";
+          sessionCode = c;
+          setJoinedStatus("joinConnected", false);
+          return true;
+        } catch (e) {
+          if (attempt >= maxAttempts - 1) throw e;
+          await new Promise((r) => setTimeout(r, 2000));
+        }
+      }
+      return false;
+    }
+
+    function showJoinedScreen(code) {
+      joinedCode.textContent = code.toUpperCase();
+      screenJoined.classList.remove("hidden");
+      screenJoined.classList.add("transition-active");
+      wireGuestOnline();
+    }
+
     function joinViaLink(code) {
       const c = code.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 5);
       if (!c) return;
-      [screenStart, screenMode, screenBotDiff, screenMenu, screenHost, screenLobby, screenJoin].forEach(s => s.classList.add("hidden"));
+      [screenStart, screenMode, screenBotDiff, screenMenu, screenHost, screenLobby, screenJoin].forEach((s) =>
+        s.classList.add("hidden")
+      );
       runJoinLoading(c, () => {
-        sessionMode = "guest";
-        sessionCode = c;
-        if (window.WieIsHetOnline) {
-          WieIsHetOnline.setupGuest(sessionCode).catch(() => {
-            sessionMode = "solo";
-          });
-        }
-        screenJoined.classList.remove("hidden");
-        screenJoined.classList.add("transition-active");
-        wireGuestOnline();
+        showJoinedScreen(c);
+        connectGuestWithRetry(c).catch(() => {
+          sessionMode = "solo";
+          setJoinedStatus("joinFailed", true);
+        });
+      });
+    }
+
+    if (btnJoinRetry) {
+      btnJoinRetry.addEventListener("click", () => {
+        const c = joinedCode.textContent.trim();
+        if (!c || c === "-----") return;
+        connectGuestWithRetry(c).catch(() => setJoinedStatus("joinFailed", true));
       });
     }
 
@@ -2329,16 +2383,12 @@
       }
       screenJoin.classList.add("hidden");
       runJoinLoading(code, () => {
-        sessionMode = "guest";
-        sessionCode = code.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 5);
-        joinedCode.textContent = sessionCode;
-        if (window.WieIsHetOnline) {
-          WieIsHetOnline.setupGuest(sessionCode).catch(() => {
-            sessionMode = "solo";
-          });
-        }
-        screenJoined.classList.remove("hidden");
-        wireGuestOnline();
+        const c = code.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 5);
+        showJoinedScreen(c);
+        connectGuestWithRetry(c).catch(() => {
+          sessionMode = "solo";
+          setJoinedStatus("joinFailed", true);
+        });
       });
     });
 
