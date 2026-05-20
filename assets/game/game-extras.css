@@ -30,19 +30,46 @@
   min-width: var(--game-board-width) !important;
 }
 
+/* Geheime kaart: mobiel rechtsonder, desktop rechts midden */
+#secret-card-slot.secret-card-slot,
 #game-table .secret-card-slot {
-  order: unset;
   position: fixed !important;
   left: auto !important;
-  right: clamp(6px, 1.2vw, 18px) !important;
-  top: 50% !important;
-  flex-shrink: 0;
-  z-index: 32;
-  padding-bottom: 20px;
+  right: max(10px, env(safe-area-inset-right)) !important;
+  top: auto !important;
+  bottom: max(72px, calc(env(safe-area-inset-bottom, 0px) + 64px)) !important;
+  width: clamp(76px, 20vw, 132px) !important;
+  margin: 0 !important;
+  padding-bottom: 12px !important;
+  box-sizing: content-box !important;
+  z-index: 40 !important;
+  transform: scale(0.95) !important;
+  opacity: 0;
+  pointer-events: none;
 }
 
+#secret-card-slot.secret-card-slot.visible,
 #game-table .secret-card-slot.visible {
-  transform: translateY(-50%) scale(1) !important;
+  opacity: 1 !important;
+  transform: scale(1) !important;
+  pointer-events: none;
+}
+
+@media (min-width: 721px) {
+  #secret-card-slot.secret-card-slot,
+  #game-table .secret-card-slot {
+    top: 50% !important;
+    bottom: auto !important;
+    right: clamp(6px, 1.2vw, 18px) !important;
+    width: clamp(96px, 10vw, 132px) !important;
+    padding-bottom: 20px !important;
+    transform: translateY(-50%) scale(0.94) !important;
+  }
+
+  #secret-card-slot.secret-card-slot.visible,
+  #game-table .secret-card-slot.visible {
+    transform: translateY(-50%) scale(1) !important;
+  }
 }
 
 #game-table .board-stack {
@@ -792,10 +819,6 @@
   #game-table .board-stack {
     order: 2;
     width: 100%;
-  }
-
-  #game-table .secret-card-slot {
-    order: 3;
   }
 
   .opponent-answer {
