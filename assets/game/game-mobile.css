@@ -137,23 +137,26 @@
   #secret-card-slot.secret-card-slot,
   #game-table .secret-card-slot {
     position: fixed !important;
-    right: max(8px, env(safe-area-inset-right)) !important;
-    left: auto !important;
+    left: max(10px, env(safe-area-inset-left)) !important;
+    right: auto !important;
     top: auto !important;
-    bottom: max(72px, calc(env(safe-area-inset-bottom, 0px) + 64px)) !important;
-    width: clamp(72px, 20vw, 96px) !important;
+    bottom: max(76px, calc(env(safe-area-inset-bottom, 0px) + 68px)) !important;
+    width: clamp(76px, 22vw, 100px) !important;
+    margin: 0 !important;
     transform: scale(0.95) !important;
     z-index: 34 !important;
-    padding-bottom: 12px !important;
+    padding-bottom: 10px !important;
   }
 
   #secret-card-slot.secret-card-slot.visible,
   #game-table .secret-card-slot.visible {
     transform: scale(1) !important;
+    opacity: 1 !important;
   }
 
   .screen-game-view.has-secret-visible #game-table .game-scene {
-    padding-bottom: max(118px, calc(env(safe-area-inset-bottom, 0px) + 108px)) !important;
+    padding-bottom: max(100px, calc(env(safe-area-inset-bottom, 0px) + 92px)) !important;
+    padding-left: max(88px, calc(env(safe-area-inset-left, 0px) + 80px)) !important;
   }
 
   .game-turn-banner {
