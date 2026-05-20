@@ -69,6 +69,104 @@
       if (from) from.classList.add("hidden");
       to.classList.remove("hidden");
     };
+    window.wieShowOnly = function (screenId) {
+      window.wieShowScreen("", screenId);
+    };
+    window.wieLang = function () {
+      var l = localStorage.getItem("wieIsHetLang");
+      return l === "en" ? "en" : "nl";
+    };
+    window.wieMsg = function (key) {
+      var t = {
+        nl: { errHostEmpty: "Kies een code (max 5 tekens)", errJoinEmpty: "Vul een potcode in" },
+        en: { errHostEmpty: "Pick a code (max 5 characters)", errJoinEmpty: "Enter a game code" }
+      };
+      var lang = window.wieLang();
+      return (t[lang] && t[lang][key]) || t.nl[key] || key;
+    };
+    window.wieGoHost = function () {
+      if (window.wieApp && window.wieApp.goHost) return window.wieApp.goHost();
+      window.wieShowScreen("screen-menu", "screen-host");
+      var err = document.getElementById("host-error");
+      if (err) err.textContent = "";
+    };
+    window.wieGoJoin = function () {
+      if (window.wieApp && window.wieApp.goJoin) return window.wieApp.goJoin();
+      window.wieShowScreen("screen-menu", "screen-join");
+      var err = document.getElementById("join-error");
+      if (err) err.textContent = "";
+    };
+    window.wieMakePot = function () {
+      if (window.wieApp && window.wieApp.makePot) return window.wieApp.makePot();
+      var input = document.getElementById("pot-code");
+      var errEl = document.getElementById("host-error");
+      var code = input ? String(input.value).trim() : "";
+      if (!code) {
+        if (errEl) errEl.textContent = window.wieMsg("errHostEmpty");
+        return;
+      }
+      code = code.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 5);
+      var load = document.getElementById("screen-photo-load");
+      var lobbyCode = document.getElementById("lobby-code");
+      function finish() {
+        if (lobbyCode) lobbyCode.textContent = code;
+        window.wieShowOnly("screen-lobby");
+        if (window.WieIsHetOnline && window.WieIsHetOnline.setupHost) {
+          window.WieIsHetOnline.setupHost(code).then(function () {
+            if (window.WieLobby && window.WieLobby.onOpenAsHost) window.WieLobby.onOpenAsHost();
+          }).catch(function () {
+            if (window.WieLobby && window.WieLobby.onOpenAsHost) window.WieLobby.onOpenAsHost();
+          });
+        } else if (window.WieLobby && window.WieLobby.onOpenAsHost) {
+          window.WieLobby.onOpenAsHost();
+        }
+      }
+      if (load) {
+        window.wieShowOnly("screen-photo-load");
+        load.classList.add("active");
+        setTimeout(function () {
+          load.classList.remove("active");
+          load.classList.add("hidden");
+          finish();
+        }, 1200);
+      } else {
+        finish();
+      }
+    };
+    window.wieJoinWithCode = function () {
+      if (window.wieApp && window.wieApp.joinWithCode) return window.wieApp.joinWithCode();
+      var input = document.getElementById("join-code");
+      var errEl = document.getElementById("join-error");
+      var code = input ? String(input.value).trim() : "";
+      if (!code) {
+        if (errEl) errEl.textContent = window.wieMsg("errJoinEmpty");
+        return;
+      }
+      code = code.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 5);
+      var load = document.getElementById("screen-photo-load");
+      var joinedCode = document.getElementById("joined-code");
+      function finish() {
+        if (joinedCode) joinedCode.textContent = code;
+        window.wieShowOnly("screen-joined");
+        if (window.WieIsHetOnline && window.WieIsHetOnline.setupGuest) {
+          if (window.WieIsHetOnline.reset) window.WieIsHetOnline.reset();
+          window.WieIsHetOnline.setupGuest(code).then(function () {
+            if (window.WieLobby && window.WieLobby.onOpenAsGuest) window.WieLobby.onOpenAsGuest();
+          }).catch(function () {});
+        }
+      }
+      if (load) {
+        window.wieShowOnly("screen-photo-load");
+        load.classList.add("active");
+        setTimeout(function () {
+          load.classList.remove("active");
+          load.classList.add("hidden");
+          finish();
+        }, 1200);
+      } else {
+        finish();
+      }
+    };
   </script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -1705,8 +1803,8 @@
     </section>
     <section class="content menu-content">
       <h2 data-i18n-html="menuTitle">Kies hoe je<span class="accent">wilt spelen</span></h2>
-      <button id="btn-host" class="btn" type="button" data-i18n="btnHost">HOST GAME</button>
-      <button id="btn-join-menu" class="btn secondary" type="button" data-i18n="btnJoinMenu">JOIN MET CODE</button>
+      <button id="btn-host" class="btn" type="button" data-i18n="btnHost" onclick="window.wieGoHost()">HOST GAME</button>
+      <button id="btn-join-menu" class="btn secondary" type="button" data-i18n="btnJoinMenu" onclick="window.wieGoJoin()">JOIN MET CODE</button>
       <button id="btn-back" class="btn back" type="button" data-i18n="btnBack" onclick="window.wieShowScreen('screen-menu','screen-mode')">TERUG</button>
     </section>
   </main>
@@ -1724,7 +1822,7 @@
       <p class="hint" data-i18n="hostHint">Max 5 letters of cijfers</p>
       <input id="pot-code" class="code-input" type="text" maxlength="5" placeholder="FUN42" autocomplete="off" />
       <p id="host-error" class="error"></p>
-      <button id="btn-make-pot" class="btn" type="button" data-i18n="btnMakePot">MAAK POTJE</button>
+      <button id="btn-make-pot" class="btn" type="button" data-i18n="btnMakePot" onclick="window.wieMakePot()">MAAK POTJE</button>
       <button id="btn-host-back" class="btn back" type="button" data-i18n="btnBack" onclick="window.wieShowScreen('screen-host','screen-menu')">TERUG</button>
     </section>
   </main>
@@ -1752,7 +1850,7 @@
       <p class="hint" data-i18n="joinHint">Vul de code in</p>
       <input id="join-code" class="code-input" type="text" maxlength="5" placeholder="FUN42" autocomplete="off" />
       <p id="join-error" class="error"></p>
-      <button id="btn-join-game" class="btn" type="button" data-i18n="btnJoinGame">JOIN GAME</button>
+      <button id="btn-join-game" class="btn" type="button" data-i18n="btnJoinGame" onclick="window.wieJoinWithCode()">JOIN GAME</button>
       <button id="btn-join-back" class="btn back" type="button" data-i18n="btnBack" onclick="window.wieShowScreen('screen-join','screen-menu')">TERUG</button>
     </section>
   </main>
@@ -1780,7 +1878,7 @@
           <p id="joined-status" class="hint joined-status">Verbinden met host…</p>
           <p class="hint" data-i18n="joinedHint">Wacht tot de host het spel start</p>
           <button id="btn-join-retry" class="btn secondary hidden" type="button" data-i18n="btnJoinRetry">OPNIEUW VERBINDEN</button>
-          <button id="btn-joined-back" class="btn back" type="button" data-i18n="btnBack">TERUG</button>
+          <button id="btn-joined-back" class="btn back" type="button" data-i18n="btnBack" onclick="window.wieShowScreen('screen-joined','screen-menu')">TERUG</button>
         </section>
       </div>
     </div>
@@ -1934,10 +2032,10 @@
   </main>
 
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
-  <script src="assets/game/online-room.js?v=18"></script>
-  <script src="assets/game/lobby-room.js?v=18"></script>
-  <script src="assets/game/character-traits.js?v=18"></script>
-  <script src="assets/game/game-play.js?v=18"></script>
+  <script src="assets/game/online-room.js?v=19"></script>
+  <script src="assets/game/lobby-room.js?v=19"></script>
+  <script src="assets/game/character-traits.js?v=19"></script>
+  <script src="assets/game/game-play.js?v=19"></script>
 
   <script>
     const I18N = {
@@ -2754,7 +2852,7 @@
     });
 
     onClick("btn-host", () => {
-      hostError.textContent = "";
+      if (hostError) hostError.textContent = "";
       transition(screenMenu, screenHost, "transition-in-from-right");
     });
 
@@ -2801,7 +2899,7 @@
     document.addEventListener("wieishet-play-again", playAgainFromEnd);
 
     onClick("btn-join-menu", () => {
-      joinError.textContent = "";
+      if (joinError) joinError.textContent = "";
       transition(screenMenu, screenJoin, "transition-in-from-right");
     });
 
@@ -2811,23 +2909,6 @@
 
     onClick("btn-joined-back", () => {
       transition(screenJoined, screenMenu, "transition-in-from-left");
-    });
-
-    onClick("btn-join-game", () => {
-      const code = joinCodeInput.value.trim();
-      if (!code) {
-        joinError.textContent = t("errJoinEmpty");
-        return;
-      }
-      screenJoin.classList.add("hidden");
-      runJoinLoading(code, () => {
-        const c = code.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 5);
-        showJoinedScreen(c);
-        connectGuestWithRetry(c).catch(() => {
-          sessionMode = "solo";
-          setJoinedStatus("joinFailed", true);
-        });
-      });
     });
 
     cleanLegacyUrlParams();
@@ -2847,10 +2928,10 @@
       console.warn("wieishet error", event.message || event);
     });
 
-    onClick("btn-make-pot", () => {
-      const code = potCodeInput.value.trim();
+    function doMakePot() {
+      const code = potCodeInput ? potCodeInput.value.trim() : "";
       if (!code) {
-        hostError.textContent = t("errHostEmpty");
+        if (hostError) hostError.textContent = t("errHostEmpty");
         return;
       }
 
@@ -2881,7 +2962,41 @@
           setTimeout(() => screenLobby.classList.remove("transition-active"), 50);
         }, 250);
       }, PHOTO_LOAD_MS);
-    });
+    }
+
+    function doJoinWithCode() {
+      const code = joinCodeInput ? joinCodeInput.value.trim() : "";
+      if (!code) {
+        if (joinError) joinError.textContent = t("errJoinEmpty");
+        return;
+      }
+      screenJoin.classList.add("hidden");
+      runJoinLoading(code, () => {
+        const c = code.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 5);
+        showJoinedScreen(c);
+        connectGuestWithRetry(c).catch(() => {
+          sessionMode = "solo";
+          setJoinedStatus("joinFailed", true);
+        });
+      });
+    }
+
+    onClick("btn-make-pot", doMakePot);
+
+    onClick("btn-join-game", doJoinWithCode);
+
+    window.wieApp = {
+      goHost() {
+        if (hostError) hostError.textContent = "";
+        transition(screenMenu, screenHost, "transition-in-from-right");
+      },
+      goJoin() {
+        if (joinError) joinError.textContent = "";
+        transition(screenMenu, screenJoin, "transition-in-from-right");
+      },
+      makePot: doMakePot,
+      joinWithCode: doJoinWithCode,
+    };
   </script>
 </body>
 </html>
