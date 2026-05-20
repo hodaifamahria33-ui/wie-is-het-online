@@ -5,6 +5,7 @@
   --game-board-width: min(99vw, min(calc(96vh * 2.1), 960px));
   --game-strip-width: min(99vw, calc(var(--game-board-width) + 220px));
   --board-tilt: 8deg;
+  --secret-card-offset-x: 44px;
 }
 
 #game-table .game-scene {
@@ -167,21 +168,21 @@
 #game-table .secret-card-slot {
   position: fixed !important;
   left: auto !important;
-  right: max(10px, env(safe-area-inset-right, 8px)) !important;
+  right: max(0px, env(safe-area-inset-right, 0px)) !important;
   top: 52% !important;
   margin: 0;
   width: clamp(102px, 11.5vw, 142px);
   padding-bottom: 20px;
   box-sizing: content-box;
   z-index: 28;
-  transform: translateY(-54%) scale(0.94);
+  transform: translateY(-54%) translateX(var(--secret-card-offset-x, 44px)) scale(0.94);
   opacity: 0;
   pointer-events: none;
 }
 
 #game-table .secret-card-slot.visible {
   opacity: 1;
-  transform: translateY(-54%) scale(1);
+  transform: translateY(-54%) translateX(var(--secret-card-offset-x, 44px)) scale(1);
   pointer-events: none;
 }
 
