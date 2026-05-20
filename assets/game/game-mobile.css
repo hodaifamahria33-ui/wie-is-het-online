@@ -4,8 +4,8 @@
 @media (max-width: 720px) {
   #game-table,
   .game-table#game-table {
-    --game-board-width: min(calc(100vw - 20px), 100%) !important;
-    --game-strip-width: 100% !important;
+    --game-board-width: calc(100vw - 6px) !important;
+    --game-strip-width: calc(100vw - 6px) !important;
     --board-tilt: 5deg;
     overflow-x: hidden !important;
   }
@@ -20,10 +20,10 @@
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch;
     padding:
-      calc(env(safe-area-inset-top, 0px) + 78px)
-      max(10px, env(safe-area-inset-right))
-      max(100px, calc(env(safe-area-inset-bottom, 0px) + 88px))
-      max(10px, env(safe-area-inset-left)) !important;
+      calc(env(safe-area-inset-top, 0px) + 76px)
+      max(3px, env(safe-area-inset-right))
+      max(96px, calc(env(safe-area-inset-bottom, 0px) + 84px))
+      max(3px, env(safe-area-inset-left)) !important;
     box-sizing: border-box !important;
   }
 
@@ -52,11 +52,11 @@
     display: flex !important;
     flex-direction: column !important;
     flex-wrap: nowrap !important;
-    align-items: center !important;
+    align-items: stretch !important;
     justify-content: center !important;
     gap: 0 !important;
-    width: 100% !important;
-    max-width: var(--game-board-width) !important;
+    width: calc(100vw - 6px) !important;
+    max-width: calc(100vw - 6px) !important;
     min-width: 0 !important;
     padding: 0 !important;
     margin: 0 auto !important;
@@ -97,24 +97,30 @@
   #game-table .board-stand--front {
     order: unset !important;
     width: 100% !important;
-    max-width: var(--game-board-width) !important;
+    max-width: calc(100vw - 6px) !important;
     min-width: 0 !important;
     flex: 0 0 auto !important;
     margin: 0 auto !important;
     transform: perspective(800px) rotateX(calc(var(--board-tilt) * -1)) !important;
   }
 
+  #game-table .board-stand {
+    max-width: calc(100vw - 6px) !important;
+  }
+
   #game-table .board-tray {
-    padding: 8px 8px 10px !important;
-    border-radius: 16px !important;
+    padding: 6px 5px 8px !important;
+    border-radius: 14px !important;
     border-width: 3px !important;
+    width: 100% !important;
   }
 
   #game-table .opponent-board-back,
   #game-table .player-board {
-    gap: 3px !important;
-    padding: 6px 6px 7px !important;
+    gap: 4px !important;
+    padding: 5px 4px 6px !important;
     border-radius: 10px !important;
+    width: 100% !important;
   }
 
   #game-table .card-well {
@@ -134,7 +140,7 @@
   #game-table .card-name,
   #game-table .player-board .card-name,
   #game-table .secret-card-slot .card-name {
-    font-size: clamp(0.28rem, 2.6vw, 0.42rem) !important;
+    font-size: clamp(0.32rem, 2.85vw, 0.48rem) !important;
     font-weight: 700 !important;
     line-height: 1.08 !important;
     padding: 1px 1px 2px !important;
@@ -170,9 +176,9 @@
   }
 
   .screen-game-view.has-secret-visible #game-table .game-scene {
-    padding-bottom: max(100px, calc(env(safe-area-inset-bottom, 0px) + 92px)) !important;
-    padding-left: max(80px, calc(env(safe-area-inset-left, 0px) + 72px)) !important;
-    padding-right: max(80px, calc(env(safe-area-inset-right, 0px) + 72px)) !important;
+    padding-bottom: max(96px, calc(env(safe-area-inset-bottom, 0px) + 88px)) !important;
+    padding-left: max(3px, env(safe-area-inset-left)) !important;
+    padding-right: max(3px, env(safe-area-inset-right)) !important;
   }
 
   .game-turn-banner {
@@ -235,17 +241,24 @@
 @media (max-width: 400px) {
   #game-table,
   .game-table#game-table {
-    --game-board-width: calc(100vw - 16px) !important;
+    --game-board-width: calc(100vw - 4px) !important;
+    --game-strip-width: calc(100vw - 4px) !important;
+  }
+
+  #game-table .player-play-area,
+  #game-table .board-stand--front {
+    width: calc(100vw - 4px) !important;
+    max-width: calc(100vw - 4px) !important;
   }
 
   #game-table .opponent-board-back,
   #game-table .player-board {
-    gap: 2px !important;
-    padding: 5px 4px 6px !important;
+    gap: 3px !important;
+    padding: 4px 3px 5px !important;
   }
 
   #game-table .card-name {
-    font-size: 0.26rem !important;
+    font-size: clamp(0.3rem, 2.7vw, 0.44rem) !important;
     -webkit-line-clamp: 2;
   }
 
