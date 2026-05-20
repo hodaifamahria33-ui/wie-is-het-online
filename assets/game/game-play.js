@@ -183,7 +183,11 @@
     const face = well.querySelector(".card-face");
     if (!face) return;
     secretSlot.appendChild(face.cloneNode(true));
+    secretSlot.classList.remove("is-reveal");
     secretSlot.classList.add("visible");
+    void secretSlot.offsetWidth;
+    secretSlot.classList.add("is-reveal");
+    window.setTimeout(() => secretSlot.classList.remove("is-reveal"), 750);
   }
 
   function showOpponentAnswer(text, isYes) {

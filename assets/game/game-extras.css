@@ -191,11 +191,11 @@
   40% { transform: scale(1.06); }
 }
 
-/* Vraag-popup — animatie, boven het bord */
+/* Vraag-popup — vast bovenaan, bord eronder met ruimte */
 .question-bar {
   position: fixed;
   left: 50%;
-  top: calc(env(safe-area-inset-top, 0px) + 52px);
+  top: var(--wie-ui-top, calc(env(safe-area-inset-top, 0px) + 54px));
   z-index: 55;
   width: min(94vw, 520px);
   box-sizing: border-box;
