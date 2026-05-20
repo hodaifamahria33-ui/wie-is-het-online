@@ -64,6 +64,7 @@
       height: 100%;
       overflow: hidden;
       font-family: "Segoe UI", system-ui, sans-serif;
+      background: #1a0f2e;
     }
 
     .screen {
@@ -2085,10 +2086,6 @@
       setTimeout(startGameSession, TRANSITION_MS + 50);
     }
 
-    function buildSharePlayUrl() {
-      return window.location.href.split("?")[0].split("#")[0];
-    }
-
     function startSoloGame(difficulty) {
       botDifficulty = difficulty || "medium";
       sessionMode = "solo";
@@ -2236,9 +2233,8 @@
 
     function showCopyFeedback(btn, codeEl) {
       if (!btn) return;
-      const doneKey = btn.id === "btn-share-play" ? "btnSharePlayDone" : "btnCopyDone";
       btn.classList.add("copied");
-      btn.textContent = t(doneKey);
+      btn.textContent = t("btnCopyDone");
       if (codeEl) {
         codeEl.classList.remove("copy-flash");
         void codeEl.offsetWidth;
@@ -2436,10 +2432,6 @@
 
     cleanLegacyUrlParams();
 
-    const publicPlayUrl = buildSharePlayUrl();
-    const startPublicUrlEl = document.getElementById("start-public-url");
-    if (startPublicUrlEl) startPublicUrlEl.textContent = publicPlayUrl;
-
     const linkCode = joinCodeFromUrl();
     resetToStartScreen();
 
@@ -2450,13 +2442,6 @@
     window.addEventListener("pageshow", (event) => {
       if (event.persisted) resetToStartScreen();
     });
-
-    const btnSharePlay = document.getElementById("btn-share-play");
-    if (btnSharePlay) {
-      btnSharePlay.addEventListener("click", () => {
-        copyText(publicPlayUrl, btnSharePlay);
-      });
-    }
 
     document.getElementById("btn-make-pot").addEventListener("click", () => {
       const code = potCodeInput.value.trim();
