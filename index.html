@@ -17,7 +17,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Nunito:wght@600;700;800&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/game/start-screen.css?v=47" />
+  <link rel="stylesheet" href="assets/game/start-screen.css?v=48" />
   <link rel="stylesheet" href="assets/game/premium-game.css?v=45" />
   <link rel="stylesheet" href="assets/game/game-drawers.css?v=44" />
   <link rel="stylesheet" href="assets/game/game-hud.css?v=44" />
@@ -2049,7 +2049,8 @@
 
   <!-- Scherm 1: beginscherm -->
   <main id="screen-start" class="screen screen-start">
-    <img class="start-bg-photo" src="assets/game/start-bg.png?v=1" alt="" aria-hidden="true" decoding="async" fetchpriority="high" />
+    <img class="start-bg-photo" src="assets/game/start-bg.png?v=2" alt="" aria-hidden="true" decoding="async" fetchpriority="high" />
+    <div class="start-overlay" aria-hidden="true"></div>
     <button id="btn-music-toggle" class="btn-music-toggle" type="button" aria-pressed="false" data-i18n-aria="musicAria" aria-label="Muziek aan/uit">🔊</button>
 
     <span class="start-deco start-deco--bubble d1" aria-hidden="true">?</span>
@@ -2134,16 +2135,17 @@
     <svg class="start-prop start-prop--note" viewBox="0 0 72 80" aria-hidden="true"><rect x="8" y="12" width="56" height="64" rx="6" fill="#fff" stroke="#a78bfa" stroke-width="3"/><line x1="16" y1="28" x2="56" y2="28" stroke="#c4b5fd" stroke-width="2"/><line x1="16" y1="40" x2="48" y2="40" stroke="#c4b5fd" stroke-width="2"/></svg>
     <svg class="start-prop start-prop--pawn" viewBox="0 0 48 64" aria-hidden="true"><ellipse cx="24" cy="54" rx="16" ry="8" fill="#6d28d9"/><path d="M24 8 C32 20 34 36 24 48 C14 36 16 20 24 8Z" fill="#8b5cf6"/></svg>
 
-    <div class="start-scene" aria-hidden="true">
+    <div class="start-scene">
       <div class="start-hero">
         <span class="start-bulb" aria-hidden="true">💡</span>
         <h1 id="start-title" class="start-title" data-i18n-html="startTitleHtml">Wie <span class="start-word-ben">Ben</span> Ik?</h1>
-        <p class="start-tagline" data-i18n="startTagline">Raad de verborgen persoon en ontdek wie jij bent!</p>
+        <div class="start-actions">
+          <button id="btn-begin" class="btn-start-begin" type="button" data-i18n="btnBegin" data-i18n-aria="btnBeginAria">LATEN WE SPELLEN</button>
+          <p class="start-tagline" data-i18n="startTagline">Raad de verborgen persoon en ontdek wie jij bent!</p>
+        </div>
       </div>
     </div>
-    <span class="start-small-btn-cover" aria-hidden="true"></span>
-    <button id="btn-begin" class="btn-start-begin btn-start-hit" type="button" data-i18n="btnBegin" data-i18n-aria="btnBeginAria">LATEN WE SPELLEN</button>
-    <p class="seo-brand" aria-hidden="true">wiehasit.com</p>
+    <p class="seo-brand">wiehasit.com</p>
   </main>
 
   <!-- Spelmodus: online of bot -->
