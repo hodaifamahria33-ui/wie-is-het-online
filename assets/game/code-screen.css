@@ -216,11 +216,101 @@
   }
 }
 
+/* Join met code — eigen foto + teal/goud kleuren */
+.screen-join-view {
+  background: #0a1628 !important;
+}
+
+.screen-join-view .code-overlay {
+  background:
+    radial-gradient(ellipse 85% 58% at 50% 42%, rgba(6, 78, 59, 0.45) 0%, transparent 70%),
+    linear-gradient(180deg, rgba(10, 30, 40, 0.45) 0%, transparent 38%, transparent 62%, rgba(10, 25, 35, 0.55) 100%);
+}
+
+.screen-join-view .join-bg-photo {
+  animation: joinBgDrift 20s ease-in-out infinite;
+}
+
+.screen-join-view .code-panel {
+  background: rgba(12, 40, 48, 0.58);
+  border-color: rgba(45, 212, 191, 0.35);
+  box-shadow:
+    0 20px 50px rgba(0, 0, 0, 0.45),
+    0 0 44px rgba(20, 184, 166, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.screen-join-view .code-kicker {
+  color: rgba(153, 246, 228, 0.95);
+}
+
+.screen-join-view h2 {
+  background: linear-gradient(165deg, #ffffff 0%, #ccfbf1 50%, #fde68a 100%);
+}
+
+.screen-join-view .code-accent {
+  background: linear-gradient(165deg, #5eead4 0%, #2dd4bf 40%, #fbbf24 100%);
+}
+
+.screen-join-view .code-hint {
+  color: rgba(204, 251, 241, 0.9);
+}
+
+.screen-join-view .code-input {
+  border-color: rgba(45, 212, 191, 0.5);
+  box-shadow:
+    inset 0 2px 8px rgba(0, 0, 0, 0.25),
+    0 0 22px rgba(20, 184, 166, 0.2);
+}
+
+.screen-join-view .code-input:focus {
+  border-color: rgba(251, 191, 36, 0.75);
+  box-shadow:
+    inset 0 2px 8px rgba(0, 0, 0, 0.25),
+    0 0 0 3px rgba(45, 212, 191, 0.3),
+    0 0 28px rgba(251, 191, 36, 0.2);
+}
+
+.screen-join-view .code-btn--primary {
+  color: #042f2e;
+  background: linear-gradient(135deg, #99f6e4 0%, #2dd4bf 35%, #14b8a6 65%, #0d9488 100%);
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, 0.3),
+    0 8px 0 #0f766e,
+    0 14px 36px rgba(13, 148, 136, 0.45);
+}
+
+.screen-join-view .code-btn--primary:hover {
+  filter: brightness(1.06) saturate(1.05);
+}
+
+.screen-join-view .code-btn--primary:active {
+  box-shadow: 0 4px 0 #0f766e, 0 8px 24px rgba(13, 148, 136, 0.35);
+}
+
+.screen-join-view .code-btn-back {
+  color: rgba(153, 246, 228, 0.9);
+  border-color: rgba(45, 212, 191, 0.4);
+}
+
+@keyframes joinBgDrift {
+  0%, 100% {
+    transform: scale(1.05) translate(0, 0);
+  }
+  50% {
+    transform: scale(1.11) translate(1%, -0.6%);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .screen-code-view .code-bg-photo {
     animation: none;
     inset: 0;
     width: 100%;
     height: 100%;
+  }
+
+  .screen-join-view .join-bg-photo {
+    animation: none;
   }
 }
