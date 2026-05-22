@@ -18,6 +18,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Nunito:wght@600;700;800&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="assets/game/start-screen.css?v=49" />
+  <link rel="stylesheet" href="assets/game/mode-screen.css?v=2" />
   <link rel="stylesheet" href="assets/game/premium-game.css?v=45" />
   <link rel="stylesheet" href="assets/game/game-drawers.css?v=44" />
   <link rel="stylesheet" href="assets/game/game-hud.css?v=44" />
@@ -914,55 +915,6 @@
       background: rgba(255, 255, 255, 0.15);
       backdrop-filter: blur(10px);
       border: 1px solid rgba(255, 255, 255, 0.3);
-    }
-
-    .screen-mode-pick .content {
-      text-align: center;
-    }
-
-    .screen-mode-pick h2 {
-      margin-bottom: 1.5rem;
-    }
-
-    .screen-mode-pick .btn {
-      display: block;
-      width: min(90vw, 320px);
-      margin: 0.65rem auto;
-      border-radius: 12px;
-      padding: 0.95rem 2rem;
-      font-weight: 800;
-    }
-
-    .screen-mode-pick .btn:not(.back) {
-      background: linear-gradient(135deg, #06b6d4 0%, #6366f1 50%, #ec4899 100%);
-      color: #fff;
-      border: 1px solid rgba(255, 255, 255, 0.35);
-      box-shadow: 0 8px 28px rgba(99, 102, 241, 0.4);
-    }
-
-    .screen-mode-pick .btn.secondary {
-      background: rgba(255, 255, 255, 0.95);
-      color: #1e1b4b;
-      border: 2px solid rgba(56, 189, 248, 0.5);
-    }
-
-    .screen-mode-pick .btn.back {
-      background: rgba(30, 27, 75, 0.08);
-      color: #4338ca;
-      border: 1px solid rgba(99, 102, 241, 0.25);
-    }
-
-    .btn-diff--easy {
-      background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%) !important;
-    }
-
-    .btn-diff--medium {
-      background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%) !important;
-      color: #1a1a2e !important;
-    }
-
-    .btn-diff--hard {
-      background: linear-gradient(135deg, #f87171 0%, #dc2626 100%) !important;
     }
 
     .screen-light {
@@ -2149,25 +2101,31 @@
   </main>
 
   <!-- Spelmodus: online of bot -->
-  <main id="screen-mode" class="screen screen-light screen-mode-pick hidden">
-    <span class="glow" aria-hidden="true"></span>
-    <section class="content">
-      <h2 data-i18n-html="modeTitle">Kies je<span class="accent">spelmodus</span></h2>
-      <button id="btn-play-online" class="btn" type="button" data-i18n="btnPlayOnline" onclick="window.wieShowScreen('screen-mode','screen-menu')">Online spelen</button>
-      <button id="btn-play-bot" class="btn secondary" type="button" data-i18n="btnPlayBot" onclick="window.wieShowScreen('screen-mode','screen-bot-diff')">Tegen bot spelen</button>
-      <button id="btn-mode-back" class="btn back" type="button" data-i18n="btnBack" onclick="window.wieShowScreen('screen-mode','screen-start')">TERUG</button>
+  <main id="screen-mode" class="screen screen-mode-view hidden">
+    <img class="mode-bg-photo" src="assets/game/start-bg.png?v=2" alt="" aria-hidden="true" decoding="async" />
+    <div class="mode-overlay" aria-hidden="true"></div>
+    <section class="mode-panel content">
+      <p class="mode-kicker" data-i18n="modeKicker">Klaar om te raden?</p>
+      <h2 data-i18n-html="modeTitle">Hoe wil je <span class="mode-accent">spelen</span>?</h2>
+      <p class="mode-sub" data-i18n="modeSub">Met vrienden online of oefenen tegen de computer</p>
+      <button id="btn-play-online" class="btn mode-btn mode-btn--online" type="button" data-i18n="btnPlayOnline" onclick="window.wieShowScreen('screen-mode','screen-menu')">Met vrienden online</button>
+      <button id="btn-play-bot" class="btn mode-btn mode-btn--bot" type="button" data-i18n="btnPlayBot" onclick="window.wieShowScreen('screen-mode','screen-bot-diff')">Tegen de computer</button>
+      <button id="btn-mode-back" class="btn mode-btn-back back" type="button" data-i18n="btnModeBack" onclick="window.wieShowScreen('screen-mode','screen-start')">Terug</button>
     </section>
   </main>
 
   <!-- Bot-moeilijkheid -->
-  <main id="screen-bot-diff" class="screen screen-light screen-mode-pick hidden">
-    <span class="glow" aria-hidden="true"></span>
-    <section class="content">
-      <h2 data-i18n-html="botDiffTitle">Kies<span class="accent">moeilijkheid</span></h2>
-      <button id="btn-bot-easy" class="btn btn-diff btn-diff--easy" type="button" data-i18n="btnEasy" onclick="window.wieStartBotGame('easy')">Makkelijk</button>
-      <button id="btn-bot-medium" class="btn btn-diff btn-diff--medium" type="button" data-i18n="btnMedium" onclick="window.wieStartBotGame('medium')">Gemiddeld</button>
-      <button id="btn-bot-hard" class="btn btn-diff btn-diff--hard" type="button" data-i18n="btnHard" onclick="window.wieStartBotGame('hard')">Moeilijk</button>
-      <button id="btn-bot-back" class="btn back" type="button" data-i18n="btnBack" onclick="window.wieShowScreen('screen-bot-diff','screen-mode')">TERUG</button>
+  <main id="screen-bot-diff" class="screen screen-mode-view hidden">
+    <img class="mode-bg-photo" src="assets/game/start-bg.png?v=2" alt="" aria-hidden="true" decoding="async" />
+    <div class="mode-overlay" aria-hidden="true"></div>
+    <section class="mode-panel content">
+      <p class="mode-kicker" data-i18n="botDiffKicker">Solo tegen de bot</p>
+      <h2 data-i18n-html="botDiffTitle">Kies je <span class="mode-accent">niveau</span></h2>
+      <p class="mode-sub" data-i18n="botDiffSub">Hoe slim moet de tegenstander zijn?</p>
+      <button id="btn-bot-easy" class="btn mode-btn mode-btn--easy" type="button" data-i18n="btnEasy" onclick="window.wieStartBotGame('easy')">Makkelijk</button>
+      <button id="btn-bot-medium" class="btn mode-btn mode-btn--medium" type="button" data-i18n="btnMedium" onclick="window.wieStartBotGame('medium')">Gemiddeld</button>
+      <button id="btn-bot-hard" class="btn mode-btn mode-btn--hard" type="button" data-i18n="btnHard" onclick="window.wieStartBotGame('hard')">Moeilijk</button>
+      <button id="btn-bot-back" class="btn mode-btn-back back" type="button" data-i18n="btnBack" onclick="window.wieShowScreen('screen-bot-diff','screen-mode')">Terug</button>
     </section>
   </main>
 
@@ -2468,10 +2426,15 @@
         btnBegin: "LATEN WE SPELEN",
         btnBeginAria: "Laten we spelen — start het spel",
         musicAria: "Muziek aan of uit",
-        modeTitle: 'Kies je<span class="accent">spelmodus</span>',
-        btnPlayOnline: "Online spelen",
-        btnPlayBot: "Tegen bot spelen",
-        botDiffTitle: 'Kies<span class="accent">moeilijkheid</span>',
+        modeKicker: "Klaar om te raden?",
+        modeTitle: 'Hoe wil je <span class="mode-accent">spelen</span>?',
+        modeSub: "Met vrienden online of oefenen tegen de computer",
+        btnPlayOnline: "Met vrienden online",
+        btnPlayBot: "Tegen de computer",
+        btnModeBack: "Terug",
+        botDiffKicker: "Solo tegen de bot",
+        botDiffSub: "Hoe slim moet de tegenstander zijn?",
+        botDiffTitle: 'Kies je <span class="mode-accent">niveau</span>',
         btnEasy: "Makkelijk",
         btnMedium: "Gemiddeld",
         btnHard: "Moeilijk",
@@ -2567,10 +2530,15 @@
         btnBegin: "LET'S BEGIN",
         btnBeginAria: "Let's play — start the game",
         musicAria: "Toggle music",
-        modeTitle: 'Choose your <span class="accent">game mode</span>',
-        btnPlayOnline: "Play online",
-        btnPlayBot: "Play against bot",
-        botDiffTitle: 'Choose <span class="accent">difficulty</span>',
+        modeKicker: "Ready to guess?",
+        modeTitle: 'How do you want to <span class="mode-accent">play</span>?',
+        modeSub: "Online with friends or practice against the computer",
+        btnPlayOnline: "Play with friends online",
+        btnPlayBot: "Against the computer",
+        btnModeBack: "Back",
+        botDiffKicker: "Solo vs bot",
+        botDiffSub: "How tough should your opponent be?",
+        botDiffTitle: 'Pick your <span class="mode-accent">level</span>',
         btnEasy: "Easy",
         btnMedium: "Medium",
         btnHard: "Hard",

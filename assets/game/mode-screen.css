@@ -1,0 +1,200 @@
+/* Spelmodus & bot-moeilijkheid — zelfde bergmeer-stijl als startscherm */
+
+.screen-mode-view {
+  background: #0f172a !important;
+  overflow: hidden;
+}
+
+.screen-mode-view .mode-bg-photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 42%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.screen-mode-view .mode-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 85% 50% at 50% 42%, rgba(15, 23, 42, 0.5) 0%, transparent 70%),
+    linear-gradient(180deg, rgba(15, 23, 42, 0.35) 0%, transparent 30%, transparent 70%, rgba(15, 23, 42, 0.55) 100%);
+}
+
+.screen-mode-view .glow {
+  display: none;
+}
+
+.screen-mode-view .mode-panel {
+  position: relative;
+  z-index: 5;
+  width: min(92vw, 400px);
+  margin: auto;
+  padding: clamp(1.5rem, 5vw, 2rem) clamp(1.25rem, 4vw, 1.75rem);
+  border-radius: 24px;
+  text-align: center;
+  background: rgba(255, 251, 235, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow:
+    0 20px 50px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.screen-mode-view .mode-kicker {
+  margin: 0 0 0.35rem;
+  font-family: "Nunito", "Outfit", sans-serif;
+  font-size: clamp(0.78rem, 2.8vw, 0.92rem);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(254, 243, 199, 0.9);
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.45);
+}
+
+.screen-mode-view h2 {
+  margin: 0 0 0.5rem;
+  font-family: "Fredoka", "Outfit", sans-serif;
+  font-size: clamp(1.75rem, 7vw, 2.35rem);
+  font-weight: 700;
+  line-height: 1.15;
+  background: linear-gradient(165deg, #ffffff 0%, #fff7ed 50%, #fde68a 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 2px 12px rgba(0, 0, 0, 0.4));
+}
+
+.screen-mode-view .mode-accent,
+.screen-mode-view .accent {
+  background: linear-gradient(165deg, #fef3c7 0%, #fbbf24 45%, #f97316 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.screen-mode-view .mode-sub {
+  margin: 0 0 1.35rem;
+  font-family: "Nunito", "Outfit", sans-serif;
+  font-size: clamp(0.88rem, 3.2vw, 1rem);
+  font-weight: 600;
+  line-height: 1.45;
+  color: rgba(255, 251, 235, 0.92);
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.45);
+}
+
+.screen-mode-view .mode-btn {
+  display: block;
+  width: 100%;
+  margin: 0.55rem 0 0;
+  padding: 1rem 1.5rem;
+  border: none;
+  border-radius: 999px;
+  font-family: "Nunito", "Outfit", sans-serif;
+  font-size: clamp(0.95rem, 3.8vw, 1.1rem);
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: transform 0.16s ease, box-shadow 0.16s ease, filter 0.16s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.screen-mode-view .mode-btn--online {
+  color: #431407;
+  background: linear-gradient(
+    135deg,
+    #fff7ed 0%,
+    #fed7aa 20%,
+    #fb923c 50%,
+    #ea580c 85%,
+    #c2410c 100%
+  );
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, 0.5),
+    0 8px 0 #9a3412,
+    0 12px 32px rgba(154, 52, 18, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+
+.screen-mode-view .mode-btn--online:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.06);
+}
+
+.screen-mode-view .mode-btn--bot {
+  color: #fff;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0.12) 100%);
+  border: 2px solid rgba(255, 255, 255, 0.45);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(6px);
+}
+
+.screen-mode-view .mode-btn--bot:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.38) 0%, rgba(255, 255, 255, 0.18) 100%);
+}
+
+.screen-mode-view .mode-btn--easy {
+  color: #052e16;
+  background: linear-gradient(135deg, #bbf7d0 0%, #4ade80 50%, #16a34a 100%) !important;
+  border: none !important;
+  box-shadow: 0 6px 0 #15803d, 0 10px 28px rgba(0, 0, 0, 0.25);
+}
+
+.screen-mode-view .mode-btn--medium {
+  color: #431407 !important;
+  background: linear-gradient(135deg, #fef3c7 0%, #fbbf24 50%, #f59e0b 100%) !important;
+  border: none !important;
+  box-shadow: 0 6px 0 #b45309, 0 10px 28px rgba(0, 0, 0, 0.25);
+}
+
+.screen-mode-view .mode-btn--hard {
+  color: #fff !important;
+  background: linear-gradient(135deg, #fca5a5 0%, #ef4444 55%, #b91c1c 100%) !important;
+  border: none !important;
+  box-shadow: 0 6px 0 #991b1b, 0 10px 28px rgba(0, 0, 0, 0.3);
+}
+
+.screen-mode-view .mode-btn:active {
+  transform: translateY(3px);
+}
+
+.screen-mode-view .mode-btn-back {
+  margin-top: 1rem;
+  padding: 0.7rem 1.25rem;
+  background: transparent;
+  color: rgba(254, 243, 199, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  box-shadow: none;
+}
+
+.screen-mode-view .mode-btn-back:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.screen-mode-view.screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding:
+    max(16px, env(safe-area-inset-top))
+    16px
+    max(20px, env(safe-area-inset-bottom));
+  box-sizing: border-box;
+}
+
+.screen-mode-view .lang-picker {
+  z-index: 420;
+}
