@@ -68,10 +68,10 @@ html.start-screen-active body {
 
 .screen-start .start-bulb {
   display: block;
-  margin: 0 auto 0.2rem;
+  margin: 0 auto 0.35rem;
   font-size: clamp(2rem, 7vw, 2.85rem);
-  filter: drop-shadow(0 0 14px rgba(250, 204, 21, 0.9));
-  animation: startBulbGlow 2s ease-in-out infinite;
+  filter: drop-shadow(0 0 18px rgba(251, 191, 36, 0.95));
+  animation: startBulbGlow 2.4s ease-in-out infinite;
 }
 
 .screen-start .start-title {
@@ -79,22 +79,23 @@ html.start-screen-active body {
   font-family: "Fredoka", "Outfit", sans-serif;
   font-size: clamp(2.5rem, 12vw, 4.5rem);
   font-weight: 700;
-  line-height: 1.05;
-  letter-spacing: -0.02em;
-  color: #fff;
-  text-shadow:
-    0 3px 0 #1e3a5f,
-    0 6px 0 #152d4d,
-    0 10px 28px rgba(0, 0, 0, 0.45);
+  line-height: 1.08;
+  letter-spacing: 0.01em;
+  background: linear-gradient(165deg, #ffffff 0%, #fff7ed 45%, #fde68a 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 2px 0 rgba(120, 53, 15, 0.35))
+    drop-shadow(0 6px 20px rgba(0, 0, 0, 0.35));
   animation: startTitlePulse 3.5s ease-in-out infinite;
 }
 
 .screen-start .start-word-ben {
-  color: #ffeb29;
-  text-shadow:
-    0 3px 0 #c9a800,
-    0 6px 0 #9a8200,
-    0 10px 22px rgba(0, 0, 0, 0.35);
+  background: linear-gradient(165deg, #fffbeb 0%, #fcd34d 28%, #f59e0b 55%, #ea580c 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 18px rgba(251, 146, 60, 0.55));
 }
 
 .screen-start .start-actions {
@@ -107,39 +108,76 @@ html.start-screen-active body {
 }
 
 .screen-start .btn-start-begin {
+  position: relative;
   display: inline-block;
-  min-width: min(88vw, 360px);
-  padding: 1.05rem 2.4rem;
-  border: 2px solid rgba(216, 180, 254, 0.9);
+  min-width: min(88vw, 340px);
+  padding: 1.1rem 2.5rem;
+  border: none;
   border-radius: 999px;
-  background: linear-gradient(180deg, #8b5cf6 0%, #7c3aed 38%, #6d28d9 72%, #5b21b6 100%);
-  color: #fff;
+  background: linear-gradient(
+    135deg,
+    #fff7ed 0%,
+    #fed7aa 18%,
+    #fb923c 48%,
+    #ea580c 78%,
+    #c2410c 100%
+  );
+  color: #431407;
   font-family: "Nunito", "Outfit", sans-serif;
-  font-size: clamp(1.08rem, 4.8vw, 1.4rem);
+  font-size: clamp(1rem, 4.5vw, 1.28rem);
   font-weight: 800;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   cursor: pointer;
   box-shadow:
-    0 0 32px rgba(139, 92, 246, 0.85),
-    0 0 64px rgba(124, 58, 237, 0.5),
-    0 12px 36px rgba(0, 0, 0, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.35);
-  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
-  animation: startBtnGlow 2.8s ease-in-out infinite;
+    0 0 0 2px rgba(255, 255, 255, 0.55),
+    0 0 0 4px rgba(251, 146, 60, 0.25),
+    0 10px 0 #9a3412,
+    0 14px 40px rgba(154, 52, 18, 0.45),
+    inset 0 2px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -3px 8px rgba(194, 65, 12, 0.35);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+  animation: startBtnShine 3.2s ease-in-out infinite;
   -webkit-tap-highlight-color: transparent;
+  overflow: hidden;
+}
+
+.screen-start .btn-start-begin::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -120%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(
+    105deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.55) 48%,
+    transparent 100%
+  );
+  transform: skewX(-18deg);
+  animation: startBtnSweep 3.2s ease-in-out infinite;
+  pointer-events: none;
 }
 
 .screen-start .btn-start-begin:hover {
-  transform: translateY(-2px) scale(1.02);
-  filter: brightness(1.08);
+  transform: translateY(-3px);
+  filter: brightness(1.06) saturate(1.05);
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, 0.65),
+    0 0 0 4px rgba(251, 146, 60, 0.35),
+    0 12px 0 #9a3412,
+    0 20px 48px rgba(154, 52, 18, 0.5),
+    inset 0 2px 0 rgba(255, 255, 255, 0.6);
 }
 
 .screen-start .btn-start-begin:active {
-  transform: translateY(2px) scale(0.98);
+  transform: translateY(4px);
   box-shadow:
-    0 0 20px rgba(124, 58, 237, 0.65),
-    0 6px 20px rgba(0, 0, 0, 0.35);
+    0 0 0 2px rgba(255, 255, 255, 0.45),
+    0 4px 0 #9a3412,
+    0 8px 24px rgba(154, 52, 18, 0.4),
+    inset 0 2px 6px rgba(124, 45, 18, 0.35);
 }
 
 .screen-start .start-tagline {
@@ -147,12 +185,10 @@ html.start-screen-active body {
   max-width: 26em;
   font-family: "Nunito", "Outfit", sans-serif;
   font-size: clamp(0.9rem, 3.4vw, 1.08rem);
-  font-weight: 700;
+  font-weight: 600;
   line-height: 1.45;
-  color: #fff;
-  text-shadow:
-    0 1px 4px rgba(0, 0, 0, 0.7),
-    0 4px 16px rgba(0, 0, 0, 0.5);
+  color: rgba(255, 251, 235, 0.95);
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.55);
 }
 
 .screen-start .seo-brand {
@@ -216,9 +252,14 @@ html.start-screen-active body {
   50% { transform: scale(1.02); }
 }
 
-@keyframes startBtnGlow {
-  0%, 100% { filter: brightness(1); }
-  50% { filter: brightness(1.07); }
+@keyframes startBtnShine {
+  0%, 100% { filter: brightness(1) saturate(1); }
+  50% { filter: brightness(1.05) saturate(1.08); }
+}
+
+@keyframes startBtnSweep {
+  0%, 72%, 100% { left: -120%; }
+  38% { left: 140%; }
 }
 
 @media (max-width: 520px) {
@@ -237,5 +278,9 @@ html.start-screen-active body {
   .screen-start .start-title,
   .screen-start .btn-start-begin {
     animation: none;
+  }
+
+  .screen-start .btn-start-begin::after {
+    display: none;
   }
 }
