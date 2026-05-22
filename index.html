@@ -1843,6 +1843,7 @@
     }
 
   </style>
+  <link rel="stylesheet" href="assets/game/game-screen-theme.css?v=2" />
 </head>
 <body>
   <div class="lang-picker">
@@ -2170,6 +2171,8 @@
 
   <!-- Scherm 5: countdown + speeltafel -->
   <main id="screen-game" class="screen screen-game-view hidden">
+    <img class="game-bg-photo" src="assets/game/start-bg.png?v=2" alt="" aria-hidden="true" decoding="async" />
+    <div class="game-bg-dim" aria-hidden="true"></div>
     <div class="game-ambient" aria-hidden="true"></div>
     <div class="game-vignette" aria-hidden="true"></div>
     <span class="glow" aria-hidden="true"></span>
@@ -2206,8 +2209,11 @@
             <div class="player-play-area">
               <button type="button" class="opponent-chest" id="opponent-chest" aria-label="Tik om te raden" data-i18n-aria="chestHint">
                 <div class="chest-visual">
-                  <img class="chest-avatar" src="assets/game/opponent-face.png" alt=""
-                    onerror="this.src='https://api.dicebear.com/7.x/lorelei/png?seed=Opponent&size=128'" />
+                  <img
+                    class="chest-avatar"
+                    src="https://api.dicebear.com/7.x/avataaars/png?seed=Opponent&size=160"
+                    alt=""
+                  />
                 </div>
                 <span class="chest-label" data-i18n="chestLabel">Tegenstander</span>
                 <span class="chest-hint" data-i18n="chestHint">Tik om te raden</span>
