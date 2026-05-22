@@ -4,7 +4,7 @@
 (function () {
   const PEER_PREFIX = "wieishet-";
   const PEER_TIMEOUT_MS = 22000;
-  const CONN_TIMEOUT_MS = 14000;
+  const CONN_TIMEOUT_MS = 10000;
 
   const PEER_OPTS = {
     debug: 0,
@@ -80,9 +80,12 @@
     const msg = String(err && err.message ? err.message : err || "").toLowerCase();
     if (
       type === "peer-unavailable" ||
+      msg.includes("lobby-not-found") ||
       msg.includes("unavailable") ||
       msg.includes("could not connect") ||
-      msg.includes("not found")
+      msg.includes("not found") ||
+      msg.includes("conn-timeout") ||
+      msg.includes("conn-closed")
     ) {
       return new Error("lobby-not-found");
     }
@@ -235,7 +238,7 @@
           });
         })
         .then(resolve)
-        .catch(reject);
+        .catch((err) => reject(mapJoinError(err)));
     });
   }
 

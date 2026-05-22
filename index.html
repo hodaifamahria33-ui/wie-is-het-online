@@ -366,7 +366,11 @@
                 String((e && e.message) || e || "")
                   .toLowerCase()
                   .indexOf("unavailable") >= 0;
-              status.textContent = window.wieMsg(nf ? "joinLobbyNotFound" : "joinFailed");
+              status.textContent = window.wieMsg(nf ? "joinWrongCode" : "joinFailed");
+              if (nf && errEl) {
+                window.wieShowOnly("screen-join");
+                errEl.textContent = window.wieMsg("joinWrongCode");
+              }
               status.classList.add("error");
             });
             return;
@@ -2200,7 +2204,7 @@
 
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
   <script src="assets/game/start-music.js?v=43"></script>
-  <script src="assets/game/online-room.js?v=42"></script>
+  <script src="assets/game/online-room.js?v=43"></script>
   <script src="assets/game/lobby-room.js?v=40"></script>
   <script src="assets/game/character-traits.js?v=40"></script>
   <script src="assets/game/game-play.js?v=42"></script>
@@ -2246,7 +2250,8 @@
         joinedHint: "Wacht tot de host het spel start",
         joinConnecting: "Verbinden met host…",
         joinConnected: "Verbonden! Wacht tot de host START GAME drukt.",
-        joinLobbyNotFound: "Deze lobby bestaat niet. Check de code of vraag een nieuwe link.",
+        joinWrongCode: "Verkeerde code",
+        joinLobbyNotFound: "Verkeerde code",
         joinFailed: "Kon host niet bereiken. Host moet eerst een potje maken en in de lobby blijven.",
         joinFailedHint: "Zelfde code · zelfde link (hodaifamahria33-ui.github.io). WiFi aan, geen privé-tab.",
         btnJoinRetry: "OPNIEUW VERBINDEN",
@@ -2354,7 +2359,8 @@
         joinedHint: "Wait for the host to start the game",
         joinConnecting: "Connecting to host…",
         joinConnected: "Connected! Wait for the host to press START GAME.",
-        joinLobbyNotFound: "This lobby does not exist. Check the code or ask for a new link.",
+        joinWrongCode: "Wrong code",
+        joinLobbyNotFound: "Wrong code",
         joinFailed: "Could not reach the host. Host must create a game and stay in the lobby.",
         joinFailedHint: "Same code · same link. Use WiFi, not a private browser tab.",
         btnJoinRetry: "RECONNECT",
@@ -3094,7 +3100,9 @@
         s.includes("lobby-not-found") ||
         s.includes("peer-unavailable") ||
         s.includes("unavailable") ||
-        s.includes("could not connect")
+        s.includes("could not connect") ||
+        s.includes("conn-timeout") ||
+        s.includes("conn-closed")
       );
     }
 
@@ -3123,7 +3131,7 @@
           WieIsHetOnline.reset();
           await WieIsHetOnline.setupGuest(c);
           if (!WieIsHetOnline.isConnected()) {
-            throw new Error("not-connected");
+            throw new Error("lobby-not-found");
           }
           sessionMode = "guest";
           sessionCode = c;
@@ -3134,8 +3142,7 @@
           lastErr = e;
           console.warn("join attempt", attempt + 1, e);
           if (isLobbyNotFound(e)) {
-            setJoinedStatus("joinLobbyNotFound", true);
-            if (joinError) joinError.textContent = t("joinLobbyNotFound");
+            WieIsHetOnline.reset();
             throw e;
           }
           if (attempt >= maxAttempts - 1) throw e;
@@ -3154,8 +3161,14 @@
 
     function backToJoinWithError(messageKey) {
       sessionMode = "solo";
-      if (joinError) joinError.textContent = t(messageKey);
+      if (window.WieIsHetOnline) WieIsHetOnline.reset();
+      const msgKey =
+        messageKey === "joinLobbyNotFound" || messageKey === "joinWrongCode"
+          ? "joinWrongCode"
+          : messageKey;
+      if (joinError) joinError.textContent = t(msgKey);
       if (joinCodeInput && joinedCode) joinCodeInput.value = joinedCode.textContent.trim();
+      if (screenPhotoLoad) screenPhotoLoad.classList.add("hidden");
       screenJoined.classList.add("hidden");
       screenJoined.classList.remove("join-error", "transition-active");
       screenJoin.classList.remove("hidden");
@@ -3171,7 +3184,7 @@
       runJoinLoading(c, () => {
         showJoinedScreen(c);
         connectGuestWithRetry(c).catch((e) => {
-          if (isLobbyNotFound(e)) backToJoinWithError("joinLobbyNotFound");
+          if (isLobbyNotFound(e)) backToJoinWithError("joinWrongCode");
           else {
             sessionMode = "solo";
             setJoinedStatus("joinFailed", true);
@@ -3400,7 +3413,7 @@
         const c = code.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 5);
         showJoinedScreen(c);
         connectGuestWithRetry(c).catch((e) => {
-          if (isLobbyNotFound(e)) backToJoinWithError("joinLobbyNotFound");
+          if (isLobbyNotFound(e)) backToJoinWithError("joinWrongCode");
           else {
             sessionMode = "solo";
             setJoinedStatus("joinFailed", true);
