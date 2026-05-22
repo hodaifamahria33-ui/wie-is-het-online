@@ -18,7 +18,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Nunito:wght@600;700;800&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="assets/game/start-screen.css?v=49" />
-  <link rel="stylesheet" href="assets/game/mode-screen.css?v=2" />
+  <link rel="stylesheet" href="assets/game/mode-screen.css?v=4" />
   <link rel="stylesheet" href="assets/game/premium-game.css?v=45" />
   <link rel="stylesheet" href="assets/game/game-drawers.css?v=44" />
   <link rel="stylesheet" href="assets/game/game-hud.css?v=44" />
@@ -663,41 +663,7 @@
       color: #6d5cad;
     }
 
-    /* —— Scherm 2: menu (levendig) —— */
-    #screen-menu {
-      background: linear-gradient(
-        -45deg,
-        #0c1445 0%,
-        #1a0f4a 25%,
-        #2d1b69 50%,
-        #1e3a5f 75%,
-        #0f766e 100%
-      );
-      background-size: 400% 400%;
-      animation: menuBgShift 14s ease infinite;
-    }
-
-    @keyframes menuBgShift {
-      0%, 100% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-    }
-
-    #screen-menu .glow {
-      background: radial-gradient(
-        ellipse,
-        rgba(56, 189, 248, 0.45) 0%,
-        rgba(167, 139, 250, 0.25) 45%,
-        transparent 72%
-      );
-      animation: glowPulse 5s ease-in-out infinite;
-    }
-
-    @keyframes glowPulse {
-      0%, 100% { opacity: 0.75; transform: translate(-50%, -50%) scale(1); }
-      50% { opacity: 1; transform: translate(-50%, -50%) scale(1.12); }
-    }
-
-    #screen-menu .cards { display: none; }
+    /* Online-menu: assets/game/mode-screen.css (.screen-menu-view) */
 
     .decor {
       position: absolute;
@@ -736,28 +702,8 @@
       transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) rotate(var(--rot));
     }
 
-    #screen-menu .polaroid {
-      background: linear-gradient(145deg, #fff 0%, #e0e7ff 100%);
-      border: 2px solid rgba(255, 255, 255, 0.65);
-      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
-      animation: menuCardFloat 5.5s ease-in-out infinite;
-    }
-
-    @keyframes menuCardFloat {
-      0%, 100% {
-        transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) rotate(var(--rot));
-      }
-      50% {
-        transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y) - 22px)) rotate(calc(var(--rot) + 5deg));
-      }
-    }
-
     .polaroid .face {
       background: rgba(150, 130, 220, 0.45);
-    }
-
-    #screen-menu .polaroid .face {
-      background: linear-gradient(135deg, #22d3ee 0%, #a78bfa 100%);
     }
 
     .p1 { width: 110px; height: 140px; --x: -22vw; --y: -4vh; --rot: -8deg; }
@@ -774,147 +720,6 @@
       color: rgba(139, 92, 246, 0.22);
       transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y)));
       pointer-events: none;
-    }
-
-    #screen-menu .qm {
-      color: rgba(56, 189, 248, 0.4);
-      text-shadow: 0 0 24px rgba(56, 189, 248, 0.5);
-      animation: qmPulse 4s ease-in-out infinite;
-    }
-
-    @keyframes qmPulse {
-      0%, 100% { opacity: 0.35; transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) scale(1); }
-      50% { opacity: 0.7; transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y) - 10px)) scale(1.08); }
-    }
-
-    #screen-menu .bubble {
-      animation: menuBubble 8s ease-in-out infinite;
-      filter: blur(1px);
-    }
-
-    @keyframes menuBubble {
-      0%, 100% { transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) scale(1); }
-      50% { transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y) - 18px)) scale(1.15); }
-    }
-
-    #screen-menu .b1 { background: rgba(34, 211, 238, 0.35); }
-    #screen-menu .b2 { background: rgba(167, 139, 250, 0.4); }
-    #screen-menu .b3 { background: rgba(244, 114, 182, 0.35); }
-    #screen-menu .b4 { background: rgba(250, 204, 21, 0.3); }
-    #screen-menu .b5 { background: rgba(52, 211, 153, 0.38); }
-    #screen-menu .b6 { background: rgba(96, 165, 250, 0.38); }
-
-    .menu-spark {
-      position: absolute;
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: #fff;
-      box-shadow: 0 0 14px #38bdf8, 0 0 28px #a78bfa;
-      animation: sparkTwinkle 2.5s ease-in-out infinite;
-      pointer-events: none;
-    }
-
-    .menu-spark.s1 { left: 12%; top: 18%; animation-delay: 0s; }
-    .menu-spark.s2 { left: 88%; top: 22%; animation-delay: 0.6s; }
-    .menu-spark.s3 { left: 8%; top: 72%; animation-delay: 1.2s; }
-    .menu-spark.s4 { left: 92%; top: 68%; animation-delay: 0.3s; }
-    .menu-spark.s5 { left: 50%; top: 8%; animation-delay: 1.8s; width: 4px; height: 4px; }
-
-    @keyframes sparkTwinkle {
-      0%, 100% { opacity: 0.2; transform: scale(0.6); }
-      50% { opacity: 1; transform: scale(1.4); }
-    }
-
-    .q1 { --x: -28vw; --y: 0; font-size: 3.5rem; }
-    .q2 { --x: 30vw; --y: 2vh; font-size: 3rem; }
-    .q3 { --x: 0; --y: 28vh; font-size: 2.5rem; }
-
-    #screen-menu .menu-content h2 {
-      color: #fff;
-      text-shadow: 0 4px 24px rgba(56, 189, 248, 0.45);
-      animation: menuTitleIn 0.75s cubic-bezier(0.34, 1.4, 0.64, 1) both;
-    }
-
-    #screen-menu .menu-content .accent {
-      color: #38bdf8;
-      animation: accentShine 2.5s ease-in-out infinite;
-    }
-
-    @keyframes accentShine {
-      0%, 100% { color: #38bdf8; }
-      50% { color: #f472b6; }
-    }
-
-    @keyframes menuTitleIn {
-      from { opacity: 0; transform: translateY(-28px) scale(0.92); }
-      to { opacity: 1; transform: translateY(0) scale(1); }
-    }
-
-    #screen-menu .btn {
-      background: linear-gradient(135deg, #06b6d4 0%, #6366f1 45%, #ec4899 100%);
-      background-size: 220% 220%;
-      color: #fff;
-      border-radius: 12px;
-      padding: 0.95rem 2.5rem;
-      box-shadow: 0 8px 32px rgba(99, 102, 241, 0.45);
-      border: 1px solid rgba(255, 255, 255, 0.35);
-      animation: menuBtnGradient 5s ease infinite, menuBtnIn 0.65s cubic-bezier(0.34, 1.3, 0.64, 1) both;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    #btn-host { animation-delay: 0s, 0.2s; }
-    #btn-join-menu { animation-delay: 0s, 0.32s; }
-    #btn-back { animation-delay: 0s, 0.44s; }
-
-    @keyframes menuBtnGradient {
-      0%, 100% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-    }
-
-    @keyframes menuBtnIn {
-      from { opacity: 0; transform: translateY(24px) scale(0.9); }
-      to { opacity: 1; transform: translateY(0) scale(1); }
-    }
-
-    #screen-menu .btn:hover {
-      transform: scale(1.06) translateY(-2px);
-      box-shadow: 0 12px 40px rgba(236, 72, 153, 0.5);
-    }
-
-    #screen-menu .btn.secondary {
-      background: rgba(255, 255, 255, 0.95);
-      color: #1e1b4b;
-      border: 2px solid rgba(56, 189, 248, 0.5);
-      box-shadow: 0 8px 28px rgba(56, 189, 248, 0.25);
-      animation: menuBtnIn 0.65s cubic-bezier(0.34, 1.3, 0.64, 1) both;
-      animation-delay: 0.32s;
-    }
-
-    #screen-menu .btn.secondary:hover {
-      border-color: #ec4899;
-      box-shadow: 0 10px 36px rgba(244, 114, 182, 0.35);
-    }
-
-    #screen-menu .btn.back {
-      background: rgba(255, 255, 255, 0.12);
-      color: #a5f3fc;
-      border: 1px solid rgba(165, 243, 252, 0.35);
-      border-radius: 10px;
-      backdrop-filter: blur(8px);
-      animation: menuBtnIn 0.65s cubic-bezier(0.34, 1.3, 0.64, 1) both;
-      animation-delay: 0.44s;
-    }
-
-    #screen-menu .btn.back:hover {
-      background: rgba(255, 255, 255, 0.22);
-      color: #fff;
-    }
-
-    #screen-menu .lang-globe {
-      background: rgba(255, 255, 255, 0.15);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.3);
     }
 
     .screen-light {
@@ -2129,34 +1934,17 @@
     </section>
   </main>
 
-  <!-- Scherm 2: licht menu (online) -->
-  <main id="screen-menu" class="screen screen-menu hidden">
-    <span class="glow" aria-hidden="true"></span>
-    <section class="decor" aria-hidden="true">
-      <span class="bubble b1"></span>
-      <span class="bubble b2"></span>
-      <span class="bubble b3"></span>
-      <span class="bubble b4"></span>
-      <span class="bubble b5"></span>
-      <span class="bubble b6"></span>
-      <article class="polaroid p1"><span class="face"></span></article>
-      <article class="polaroid p2"><span class="face"></span></article>
-      <article class="polaroid p3"><span class="face"></span></article>
-      <article class="polaroid p4"><span class="face"></span></article>
-      <span class="qm q1">?</span>
-      <span class="qm q2">?</span>
-      <span class="qm q3">?</span>
-      <span class="menu-spark s1" aria-hidden="true"></span>
-      <span class="menu-spark s2" aria-hidden="true"></span>
-      <span class="menu-spark s3" aria-hidden="true"></span>
-      <span class="menu-spark s4" aria-hidden="true"></span>
-      <span class="menu-spark s5" aria-hidden="true"></span>
-    </section>
-    <section class="content menu-content">
-      <h2 data-i18n-html="menuTitle">Kies hoe je<span class="accent">wilt spelen</span></h2>
-      <button id="btn-host" class="btn" type="button" data-i18n="btnHost" onclick="window.wieGoHost()">HOST GAME</button>
-      <button id="btn-join-menu" class="btn secondary" type="button" data-i18n="btnJoinMenu" onclick="window.wieGoJoin()">JOIN MET CODE</button>
-      <button id="btn-back" class="btn back" type="button" data-i18n="btnBack" onclick="window.wieShowScreen('screen-menu','screen-mode')">TERUG</button>
+  <!-- Scherm 2: online menu (host / join) -->
+  <main id="screen-menu" class="screen screen-menu screen-menu-view hidden">
+    <img class="mode-bg-photo" src="assets/game/start-bg.png?v=2" alt="" aria-hidden="true" decoding="async" />
+    <div class="mode-overlay" aria-hidden="true"></div>
+    <section class="mode-panel content menu-content">
+      <p class="mode-kicker" data-i18n="menuKicker">Online met vrienden</p>
+      <h2 data-i18n-html="menuTitle">Wat ga je <span class="mode-accent">doen</span>?</h2>
+      <p class="mode-sub" data-i18n="menuSub">Start een potje of doe mee met een code</p>
+      <button id="btn-host" class="btn mode-btn mode-btn--online" type="button" data-i18n="btnHost" onclick="window.wieGoHost()">Start een potje</button>
+      <button id="btn-join-menu" class="btn mode-btn mode-btn--bot" type="button" data-i18n="btnJoinMenu" onclick="window.wieGoJoin()">Meedoen met code</button>
+      <button id="btn-back" class="btn mode-btn-back back" type="button" data-i18n="btnBack" onclick="window.wieShowScreen('screen-menu','screen-mode')">Terug</button>
     </section>
   </main>
 
@@ -2438,9 +2226,11 @@
         btnEasy: "Makkelijk",
         btnMedium: "Gemiddeld",
         btnHard: "Moeilijk",
-        menuTitle: 'Kies hoe je<span class="accent">wilt spelen</span>',
-        btnHost: "HOST GAME",
-        btnJoinMenu: "JOIN MET CODE",
+        menuKicker: "Online met vrienden",
+        menuTitle: 'Wat ga je <span class="mode-accent">doen</span>?',
+        menuSub: "Start een potje of doe mee met een code",
+        btnHost: "Start een potje",
+        btnJoinMenu: "Meedoen met code",
         btnBack: "TERUG",
         hostTitle: 'Kies je<span class="accent">potcode</span>',
         hostHint: "Max 5 letters of cijfers",
@@ -2542,9 +2332,11 @@
         btnEasy: "Easy",
         btnMedium: "Medium",
         btnHard: "Hard",
-        menuTitle: 'Choose how you<span class="accent">want to play</span>',
-        btnHost: "HOST GAME",
-        btnJoinMenu: "JOIN WITH CODE",
+        menuKicker: "Online with friends",
+        menuTitle: 'What will you <span class="mode-accent">do</span>?',
+        menuSub: "Start a game or join with a code",
+        btnHost: "Start a game",
+        btnJoinMenu: "Join with code",
         btnBack: "BACK",
         hostTitle: 'Choose your<span class="accent">game code</span>',
         hostHint: "Max 5 letters or numbers",
@@ -3424,7 +3216,8 @@
     }
 
     function replayMenuAnimations() {
-      screenMenu.querySelectorAll(".menu-content h2, #screen-menu .btn").forEach((el) => {
+      if (!screenMenu) return;
+      screenMenu.querySelectorAll(".mode-panel h2, .mode-panel .mode-btn").forEach((el) => {
         el.style.animation = "none";
         void el.offsetHeight;
         el.style.animation = "";
