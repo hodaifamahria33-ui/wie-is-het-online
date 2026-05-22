@@ -31,23 +31,70 @@ html.start-screen-active body {
 
 .screen-start .start-scene {
   position: absolute;
-  inset: 0;
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  padding:
-    max(12px, env(safe-area-inset-top))
-    16px
-    max(72px, env(safe-area-inset-bottom));
-  padding-top: min(46vh, 400px);
-  box-sizing: border-box;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
   pointer-events: none;
 }
 
-.screen-start .start-scene > * {
-  pointer-events: auto;
+/* Kleine paarse knop op de foto verbergen */
+.screen-start .start-small-btn-cover {
+  position: absolute;
+  left: 50%;
+  top: 40.5%;
+  transform: translateX(-50%);
+  width: min(52vw, 228px);
+  height: clamp(32px, 5.8vh, 42px);
+  border-radius: 999px;
+  z-index: 4;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(130, 158, 198, 0.72) 0%,
+    rgba(95, 128, 175, 0.82) 45%,
+    rgba(78, 112, 158, 0.88) 100%
+  );
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 4px 24px rgba(60, 90, 130, 0.35);
+}
+
+/* Onzichtbare klikzone op de grote knop in de foto */
+.screen-start .btn-start-hit {
+  position: absolute;
+  left: 50%;
+  top: 53%;
+  transform: translateX(-50%);
+  width: min(86vw, 480px);
+  height: clamp(58px, 12vh, 88px);
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+  opacity: 0;
+  color: transparent;
+  font-size: 0;
+  line-height: 0;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  animation: none !important;
+  z-index: 10;
+  cursor: pointer;
+  border-radius: 999px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.screen-start .btn-start-hit:hover {
+  transform: translateX(-50%);
+  filter: none;
+  box-shadow: none !important;
+}
+
+.screen-start .btn-start-hit:active {
+  transform: translateX(-50%) scale(0.98);
+  opacity: 0.12;
+  background: rgba(255, 255, 255, 0.35) !important;
 }
 
 .screen-start .start-deco {
@@ -270,51 +317,8 @@ html.start-screen-active body {
     0 12px 20px rgba(120, 90, 0, 0.3);
 }
 
-.screen-start .start-actions {
-  margin-top: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0;
-  width: 100%;
-}
-
-.screen-start .btn-start-begin {
-  display: inline-block;
-  min-width: min(88vw, 340px);
-  padding: 1rem 2.25rem;
-  border: 2px solid rgba(196, 181, 253, 0.85);
-  border-radius: 999px;
-  background: linear-gradient(180deg, #7c3aed 0%, #6d28d9 42%, #5b21b6 100%);
-  color: #fff;
-  font-family: "Nunito", "Outfit", sans-serif;
-  font-size: clamp(1.05rem, 4.5vw, 1.35rem);
-  font-weight: 800;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  cursor: pointer;
-  box-shadow:
-    0 0 28px rgba(139, 92, 246, 0.75),
-    0 0 56px rgba(124, 58, 237, 0.45),
-    0 10px 32px rgba(0, 0, 0, 0.35);
-  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
-  animation: startBtnGlow 2.8s ease-in-out infinite;
-}
-
-.screen-start .btn-start-begin:hover {
-  transform: translateY(-2px) scale(1.02);
-  filter: brightness(1.08);
-  box-shadow:
-    0 0 36px rgba(167, 139, 250, 0.9),
-    0 0 64px rgba(124, 58, 237, 0.55),
-    0 14px 36px rgba(0, 0, 0, 0.4);
-}
-
-.screen-start .btn-start-begin:active {
-  transform: translateY(2px) scale(0.98);
-  box-shadow:
-    0 0 18px rgba(124, 58, 237, 0.6),
-    0 4px 16px rgba(0, 0, 0, 0.35);
+.screen-start .btn-start-begin:not(.btn-start-hit) {
+  display: none;
 }
 
 .screen-start .start-tagline {
@@ -331,23 +335,7 @@ html.start-screen-active body {
 }
 
 .screen-start .seo-brand {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: max(10px, env(safe-area-inset-bottom));
-  z-index: 12;
-  margin: 0;
-  padding: 0 1rem;
-  font-family: "Nunito", "Outfit", sans-serif;
-  font-size: clamp(0.65rem, 2.5vw, 0.8rem);
-  font-weight: 800;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  text-align: center;
-  color: #fff;
-  opacity: 0.72;
-  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.55);
-  pointer-events: none;
+  display: none;
 }
 
 .screen-start .btn-music-toggle {
@@ -417,11 +405,29 @@ html.start-screen-active body {
 }
 
 @media (max-width: 520px) {
-  .screen-start .start-card--tl { top: 10%; left: 2%; }
-  .screen-start .start-card--tr { top: 9%; right: 2%; }
-  .screen-start .start-card--bl { bottom: 26%; left: 1%; }
-  .screen-start .start-card--br { bottom: 24%; right: 1%; }
-  .screen-start .start-prop--glass { left: 8%; }
+  .screen-start .start-small-btn-cover {
+    top: 39.5%;
+    width: min(58vw, 200px);
+    height: clamp(28px, 5.2vh, 36px);
+  }
+
+  .screen-start .btn-start-hit {
+    top: 51.5%;
+    width: min(90vw, 400px);
+    height: clamp(52px, 11vh, 76px);
+  }
+}
+
+@media (min-width: 900px) {
+  .screen-start .start-small-btn-cover {
+    top: 41%;
+  }
+
+  .screen-start .btn-start-hit {
+    top: 54%;
+    width: min(72vw, 520px);
+    height: 72px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
