@@ -1,0 +1,226 @@
+/* Host / join code — abstract speels (geen bergmeer) */
+
+.screen-code-view {
+  background: #1a1035 !important;
+  overflow: hidden;
+}
+
+.screen-code-view .code-bg-photo {
+  position: absolute;
+  inset: -8%;
+  width: 116%;
+  height: 116%;
+  object-fit: cover;
+  object-position: center center;
+  z-index: 0;
+  pointer-events: none;
+  animation: codeBgDrift 18s ease-in-out infinite;
+  will-change: transform;
+}
+
+.screen-code-view .code-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 80% 55% at 50% 45%, rgba(26, 16, 53, 0.55) 0%, transparent 72%),
+    linear-gradient(180deg, rgba(15, 10, 35, 0.4) 0%, transparent 35%, transparent 65%, rgba(15, 10, 35, 0.5) 100%);
+}
+
+.screen-code-view .glow {
+  display: none;
+}
+
+.screen-code-view .decor {
+  display: none !important;
+}
+
+.screen-code-view .code-panel {
+  position: relative;
+  z-index: 5;
+  width: min(92vw, 400px);
+  margin: auto;
+  padding: clamp(1.4rem, 5vw, 1.9rem) clamp(1.2rem, 4vw, 1.6rem);
+  border-radius: 22px;
+  text-align: center;
+  background: rgba(30, 20, 60, 0.55);
+  border: 1px solid rgba(167, 139, 250, 0.35);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow:
+    0 20px 50px rgba(0, 0, 0, 0.45),
+    0 0 40px rgba(99, 102, 241, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.screen-code-view .code-kicker {
+  margin: 0 0 0.35rem;
+  font-family: "Nunito", "Outfit", sans-serif;
+  font-size: clamp(0.78rem, 2.8vw, 0.9rem);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(196, 181, 253, 0.95);
+}
+
+.screen-code-view h2 {
+  margin: 0 0 0.45rem;
+  font-family: "Fredoka", "Outfit", sans-serif;
+  font-size: clamp(1.65rem, 6.5vw, 2.2rem);
+  font-weight: 700;
+  line-height: 1.15;
+  background: linear-gradient(165deg, #ffffff 0%, #e9d5ff 55%, #a5b4fc 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 2px 14px rgba(0, 0, 0, 0.45));
+}
+
+.screen-code-view .code-accent,
+.screen-code-view .accent {
+  background: linear-gradient(165deg, #67e8f9 0%, #22d3ee 45%, #a78bfa 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.screen-code-view .code-hint {
+  margin: 0 0 1rem;
+  font-family: "Nunito", "Outfit", sans-serif;
+  font-size: clamp(0.85rem, 3vw, 0.98rem);
+  font-weight: 600;
+  line-height: 1.4;
+  color: rgba(226, 232, 240, 0.88);
+}
+
+.screen-code-view .code-input {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.95rem 1rem;
+  margin: 0 0 0.35rem;
+  font-family: "Nunito", "Outfit", sans-serif;
+  font-size: clamp(1.5rem, 6vw, 1.85rem);
+  font-weight: 800;
+  text-align: center;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #f8fafc;
+  background: rgba(15, 10, 40, 0.65);
+  border: 2px solid rgba(103, 232, 249, 0.45);
+  border-radius: 14px;
+  box-shadow:
+    inset 0 2px 8px rgba(0, 0, 0, 0.25),
+    0 0 20px rgba(34, 211, 238, 0.15);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.screen-code-view .code-input::placeholder {
+  color: rgba(148, 163, 184, 0.55);
+  letter-spacing: 0.18em;
+}
+
+.screen-code-view .code-input:focus {
+  outline: none;
+  border-color: rgba(167, 139, 250, 0.85);
+  box-shadow:
+    inset 0 2px 8px rgba(0, 0, 0, 0.25),
+    0 0 0 3px rgba(139, 92, 246, 0.35),
+    0 0 28px rgba(34, 211, 238, 0.25);
+}
+
+.screen-code-view .code-error {
+  min-height: 1.2rem;
+  margin: 0 0 0.65rem;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #fda4af;
+}
+
+.screen-code-view .code-btn {
+  display: block;
+  width: 100%;
+  margin: 0.5rem 0 0;
+  padding: 1rem 1.5rem;
+  border: none;
+  border-radius: 999px;
+  font-family: "Nunito", "Outfit", sans-serif;
+  font-size: clamp(0.95rem, 3.8vw, 1.08rem);
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: transform 0.16s ease, box-shadow 0.16s ease, filter 0.16s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.screen-code-view .code-btn--primary {
+  color: #fff;
+  background: linear-gradient(135deg, #22d3ee 0%, #6366f1 50%, #a855f7 100%);
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, 0.25),
+    0 8px 0 #4338ca,
+    0 14px 36px rgba(99, 102, 241, 0.45);
+}
+
+.screen-code-view .code-btn--primary:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.08);
+}
+
+.screen-code-view .code-btn--primary:active {
+  transform: translateY(3px);
+  box-shadow: 0 4px 0 #4338ca, 0 8px 24px rgba(99, 102, 241, 0.35);
+}
+
+.screen-code-view .code-btn-back {
+  margin-top: 0.85rem;
+  padding: 0.65rem 1.2rem;
+  background: transparent;
+  color: rgba(196, 181, 253, 0.9);
+  border: 1px solid rgba(167, 139, 250, 0.4);
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  box-shadow: none;
+}
+
+.screen-code-view .code-btn-back:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.screen-code-view.screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding:
+    max(16px, env(safe-area-inset-top))
+    16px
+    max(20px, env(safe-area-inset-bottom));
+  box-sizing: border-box;
+}
+
+.screen-code-view .lang-picker {
+  z-index: 420;
+}
+
+@keyframes codeBgDrift {
+  0%, 100% {
+    transform: scale(1.06) translate(0, 0) rotate(0deg);
+  }
+  50% {
+    transform: scale(1.1) translate(-1.2%, 0.8%) rotate(0.4deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .screen-code-view .code-bg-photo {
+    animation: none;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+}

@@ -19,6 +19,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Nunito:wght@600;700;800&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="assets/game/start-screen.css?v=49" />
   <link rel="stylesheet" href="assets/game/mode-screen.css?v=4" />
+  <link rel="stylesheet" href="assets/game/code-screen.css?v=1" />
   <link rel="stylesheet" href="assets/game/premium-game.css?v=45" />
   <link rel="stylesheet" href="assets/game/game-drawers.css?v=44" />
   <link rel="stylesheet" href="assets/game/game-hud.css?v=44" />
@@ -1949,20 +1950,17 @@
   </main>
 
   <!-- Scherm 3: host code -->
-  <main id="screen-host" class="screen screen-light hidden">
-    <span class="glow" aria-hidden="true"></span>
-    <section class="decor" aria-hidden="true">
-      <span class="bubble b1"></span><span class="bubble b2"></span><span class="bubble b3"></span>
-      <article class="polaroid p1"><span class="face"></span></article>
-      <article class="polaroid p2"><span class="face"></span></article>
-    </section>
-    <section class="content">
-      <h2 data-i18n-html="hostTitle">Kies je<span class="accent">potcode</span></h2>
-      <p class="hint" data-i18n="hostHint">Max 5 letters of cijfers</p>
-      <input id="pot-code" class="code-input" type="text" maxlength="5" placeholder="FUN42" autocomplete="off" />
-      <p id="host-error" class="error"></p>
-      <button id="btn-make-pot" class="btn" type="button" data-i18n="btnMakePot" onclick="window.wieMakePot()">MAAK POTJE</button>
-      <button id="btn-host-back" class="btn back" type="button" data-i18n="btnBack" onclick="window.wieShowScreen('screen-host','screen-menu')">TERUG</button>
+  <main id="screen-host" class="screen screen-code-view hidden">
+    <img class="code-bg-photo" src="assets/game/code-bg.png?v=1" alt="" aria-hidden="true" decoding="async" />
+    <div class="code-overlay" aria-hidden="true"></div>
+    <section class="code-panel content">
+      <p class="code-kicker" data-i18n="hostKicker">Nieuw potje</p>
+      <h2 data-i18n-html="hostTitle">Kies een <span class="code-accent">code</span></h2>
+      <p class="code-hint" data-i18n="hostHint">Max. 5 letters of cijfers — deel met vrienden</p>
+      <input id="pot-code" class="code-input" type="text" maxlength="5" placeholder="FUN42" autocomplete="off" autocapitalize="characters" />
+      <p id="host-error" class="code-error error"></p>
+      <button id="btn-make-pot" class="code-btn code-btn--primary" type="button" data-i18n="btnMakePot" onclick="window.wieMakePot()">Potje maken</button>
+      <button id="btn-host-back" class="code-btn code-btn-back back" type="button" data-i18n="btnBack" onclick="window.wieShowScreen('screen-host','screen-menu')">Terug</button>
     </section>
   </main>
 
@@ -1982,15 +1980,17 @@
   </main>
 
   <!-- Join handmatig -->
-  <main id="screen-join" class="screen screen-light hidden">
-    <span class="glow" aria-hidden="true"></span>
-    <section class="content">
-      <h2 data-i18n-html="joinTitle">Join een<span class="accent">potje</span></h2>
-      <p class="hint" data-i18n="joinHint">Vul de code in</p>
-      <input id="join-code" class="code-input" type="text" maxlength="5" placeholder="FUN42" autocomplete="off" />
-      <p id="join-error" class="error"></p>
-      <button id="btn-join-game" class="btn" type="button" data-i18n="btnJoinGame" onclick="window.wieJoinWithCode()">JOIN GAME</button>
-      <button id="btn-join-back" class="btn back" type="button" data-i18n="btnBack" onclick="window.wieShowScreen('screen-join','screen-menu')">TERUG</button>
+  <main id="screen-join" class="screen screen-code-view hidden">
+    <img class="code-bg-photo" src="assets/game/code-bg.png?v=1" alt="" aria-hidden="true" decoding="async" />
+    <div class="code-overlay" aria-hidden="true"></div>
+    <section class="code-panel content">
+      <p class="code-kicker" data-i18n="joinKicker">Meedoen</p>
+      <h2 data-i18n-html="joinTitle">Vul de <span class="code-accent">code</span> in</h2>
+      <p class="code-hint" data-i18n="joinHint">Vraag je vriend om de 5-letterige code</p>
+      <input id="join-code" class="code-input" type="text" maxlength="5" placeholder="FUN42" autocomplete="off" autocapitalize="characters" />
+      <p id="join-error" class="code-error error"></p>
+      <button id="btn-join-game" class="code-btn code-btn--primary" type="button" data-i18n="btnJoinGame" onclick="window.wieJoinWithCode()">Meedoen</button>
+      <button id="btn-join-back" class="code-btn code-btn-back back" type="button" data-i18n="btnBack" onclick="window.wieShowScreen('screen-join','screen-menu')">Terug</button>
     </section>
   </main>
 
@@ -2232,14 +2232,16 @@
         btnHost: "Start een potje",
         btnJoinMenu: "Meedoen met code",
         btnBack: "TERUG",
-        hostTitle: 'Kies je<span class="accent">potcode</span>',
-        hostHint: "Max 5 letters of cijfers",
-        btnMakePot: "MAAK POTJE",
+        hostKicker: "Nieuw potje",
+        hostTitle: 'Kies een <span class="code-accent">code</span>',
+        hostHint: "Max. 5 letters of cijfers — deel met vrienden",
+        btnMakePot: "Potje maken",
         loadingTitle: "Potje wordt gemaakt…",
         loadingSub: "Foto's worden geladen",
-        joinTitle: 'Join een<span class="accent">potje</span>',
-        joinHint: "Vul de code in",
-        btnJoinGame: "JOIN GAME",
+        joinKicker: "Meedoen",
+        joinTitle: 'Vul de <span class="code-accent">code</span> in',
+        joinHint: "Vraag je vriend om de 5-letterige code",
+        btnJoinGame: "Meedoen",
         joinedTitle: 'Je zit in<span class="accent">het potje!</span>',
         joinedHint: "Wacht tot de host het spel start",
         joinConnecting: "Verbinden met host…",
@@ -2338,14 +2340,16 @@
         btnHost: "Start a game",
         btnJoinMenu: "Join with code",
         btnBack: "BACK",
-        hostTitle: 'Choose your<span class="accent">game code</span>',
-        hostHint: "Max 5 letters or numbers",
-        btnMakePot: "CREATE GAME",
+        hostKicker: "New game",
+        hostTitle: 'Pick a <span class="code-accent">code</span>',
+        hostHint: "Up to 5 letters or numbers — share with friends",
+        btnMakePot: "Create game",
         loadingTitle: "Creating your game…",
         loadingSub: "Loading photos",
-        joinTitle: 'Join a<span class="accent">game</span>',
-        joinHint: "Enter the game code",
-        btnJoinGame: "JOIN GAME",
+        joinKicker: "Join",
+        joinTitle: 'Enter the <span class="code-accent">code</span>',
+        joinHint: "Ask your friend for the 5-character code",
+        btnJoinGame: "Join game",
         joinedTitle: 'You\'re in<span class="accent">the game!</span>',
         joinedHint: "Wait for the host to start the game",
         joinConnecting: "Connecting to host…",
