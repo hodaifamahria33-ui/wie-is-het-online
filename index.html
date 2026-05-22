@@ -17,7 +17,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Nunito:wght@600;700;800&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/game/start-screen.css?v=45" />
+  <link rel="stylesheet" href="assets/game/start-screen.css?v=46" />
   <link rel="stylesheet" href="assets/game/premium-game.css?v=45" />
   <link rel="stylesheet" href="assets/game/game-drawers.css?v=44" />
   <link rel="stylesheet" href="assets/game/game-hud.css?v=44" />
@@ -406,9 +406,7 @@
 
     .screen.screen-start,
     #screen-start.screen-start {
-      background:
-        radial-gradient(ellipse 120% 80% at 50% -10%, #ffffff 0%, transparent 55%),
-        linear-gradient(180deg, #e8f7ff 0%, #cceeff 45%, #b8e4ff 100%) !important;
+      background: #0f172a !important;
     }
 
     .screen.hidden { display: none; }
@@ -2051,6 +2049,7 @@
 
   <!-- Scherm 1: beginscherm -->
   <main id="screen-start" class="screen screen-start">
+    <img class="start-bg-photo" src="assets/game/start-bg.png?v=1" alt="" aria-hidden="true" decoding="async" fetchpriority="high" />
     <button id="btn-music-toggle" class="btn-music-toggle" type="button" aria-pressed="false" data-i18n-aria="musicAria" aria-label="Muziek aan/uit">🔊</button>
 
     <span class="start-deco start-deco--bubble d1" aria-hidden="true">?</span>
@@ -2465,7 +2464,7 @@
         startTitleHtml: 'Wie <span class="start-word-ben">Ben</span> Ik?',
         startOnlineBadge: "ONLINE",
         startTagline: "Raad de verborgen persoon en ontdek wie jij bent!",
-        btnBegin: "LATEN WE BEGINNEN",
+        btnBegin: "LATEN WE SPELLEN",
         musicAria: "Muziek aan of uit",
         modeTitle: 'Kies je<span class="accent">spelmodus</span>',
         btnPlayOnline: "Online spelen",
