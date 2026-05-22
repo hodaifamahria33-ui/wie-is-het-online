@@ -29,11 +29,13 @@
   }
 
   function getPlayerName() {
+    if (typeof window.wieGetPlayerName === "function") {
+      const n = window.wieGetPlayerName();
+      if (n) return n;
+    }
     const saved = localStorage.getItem("wiePlayerName");
     if (saved && saved.trim()) return saved.trim().slice(0, 16);
-    const generated = "Speler" + Math.floor(100 + Math.random() * 900);
-    localStorage.setItem("wiePlayerName", generated);
-    return generated;
+    return "Speler";
   }
 
   function renderPlayers(listEl, isHostView) {

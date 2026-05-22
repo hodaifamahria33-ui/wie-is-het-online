@@ -1,0 +1,437 @@
+/* Join loading (2s) + gast-lobby — foto-achtergrond, glas-panelen */
+
+.screen-join-loading {
+  background: #0f0a1e !important;
+  overflow: hidden;
+  z-index: 50;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+}
+
+.screen-join-loading.active {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.screen-join-loading .join-load-bg {
+  position: absolute;
+  inset: -6%;
+  width: 112%;
+  height: 112%;
+  object-fit: cover;
+  object-position: center center;
+  z-index: 0;
+  pointer-events: none;
+  animation: joinedBgDrift 22s ease-in-out infinite;
+}
+
+.screen-join-loading .join-load-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 75% 50% at 50% 40%, rgba(15, 10, 35, 0.35) 0%, transparent 70%),
+    linear-gradient(180deg, rgba(8, 5, 20, 0.55) 0%, rgba(15, 10, 35, 0.75) 100%);
+}
+
+.screen-join-loading .join-load-scene {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100%;
+  min-height: 100dvh;
+  padding:
+    max(20px, env(safe-area-inset-top))
+    24px
+    max(28px, env(safe-area-inset-bottom));
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.screen-join-loading .join-load-ring {
+  width: clamp(72px, 18vw, 96px);
+  height: clamp(72px, 18vw, 96px);
+  margin-bottom: 1.25rem;
+  border-radius: 50%;
+  border: 3px solid rgba(167, 139, 250, 0.25);
+  border-top-color: #22d3ee;
+  border-right-color: #a78bfa;
+  animation: joinLoadSpin 1.1s linear infinite;
+  box-shadow:
+    0 0 32px rgba(34, 211, 238, 0.35),
+    inset 0 0 24px rgba(167, 139, 250, 0.15);
+}
+
+.screen-join-loading .join-load-title {
+  margin: 0 0 0.35rem;
+  font-family: "Fredoka", "Outfit", sans-serif;
+  font-size: clamp(1.75rem, 7vw, 2.5rem);
+  font-weight: 700;
+  line-height: 1.1;
+  background: linear-gradient(165deg, #fff 0%, #e9d5ff 50%, #67e8f9 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 4px 20px rgba(0, 0, 0, 0.5));
+}
+
+.screen-join-loading .join-load-sub {
+  margin: 0 0 1.1rem;
+  font-family: "Nunito", "Outfit", sans-serif;
+  font-size: clamp(0.9rem, 3.2vw, 1.05rem);
+  font-weight: 700;
+  color: rgba(226, 232, 240, 0.9);
+  letter-spacing: 0.04em;
+}
+
+.screen-join-loading .join-load-bar {
+  width: min(280px, 78vw);
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+.screen-join-loading .join-load-bar-fill {
+  display: block;
+  height: 100%;
+  width: 0%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #22d3ee, #a78bfa, #f472b6);
+  box-shadow: 0 0 14px rgba(167, 139, 250, 0.65);
+  animation: joinLoadProgress var(--load-ms, 2000ms) ease-out forwards;
+}
+
+.screen-join-loading .join-load-code {
+  margin: 1rem 0 0;
+  font-family: "Fredoka", "Outfit", sans-serif;
+  font-size: clamp(1.5rem, 5vw, 2rem);
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.45);
+  font-variant-numeric: tabular-nums;
+}
+
+@keyframes joinLoadSpin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes joinLoadProgress {
+  to { width: 100%; }
+}
+
+@keyframes joinedBgDrift {
+  0%, 100% { transform: scale(1.04) translate(0, 0); }
+  50% { transform: scale(1.08) translate(-1.5%, 1%); }
+}
+
+/* —— Gast lobby (screen-joined) —— */
+.screen-joined-view {
+  background: #0f0a1e !important;
+  overflow: hidden;
+}
+
+.screen-joined-view .glow {
+  display: none !important;
+}
+
+.screen-joined-view .joined-bg-photo {
+  position: absolute;
+  inset: -6%;
+  width: 112%;
+  height: 112%;
+  object-fit: cover;
+  object-position: center center;
+  z-index: 0;
+  pointer-events: none;
+  animation: joinedBgDrift 24s ease-in-out infinite;
+}
+
+.screen-joined-view .joined-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 70% 45% at 50% 35%, rgba(20, 12, 45, 0.4) 0%, transparent 68%),
+    linear-gradient(105deg, rgba(8, 5, 22, 0.82) 0%, rgba(15, 10, 35, 0.55) 42%, rgba(8, 5, 22, 0.75) 100%);
+}
+
+.screen-joined-view .joined-shell {
+  position: relative;
+  z-index: 5;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) min(340px, 38vw);
+  grid-template-rows: 1fr;
+  width: 100%;
+  height: 100%;
+  min-height: 100dvh;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding:
+    max(12px, env(safe-area-inset-top))
+    max(14px, env(safe-area-inset-right))
+    max(12px, env(safe-area-inset-bottom))
+    max(14px, env(safe-area-inset-left));
+  box-sizing: border-box;
+  gap: 14px;
+  pointer-events: auto;
+}
+
+.screen-joined-view .joined-main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  padding: clamp(0.5rem, 2vw, 1.5rem);
+}
+
+.screen-joined-view .joined-card {
+  width: min(100%, 420px);
+  padding: clamp(1.35rem, 4.5vw, 2rem) clamp(1.2rem, 4vw, 1.75rem);
+  border-radius: 24px;
+  text-align: center;
+  background: rgba(28, 18, 58, 0.58);
+  border: 1px solid rgba(167, 139, 250, 0.32);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow:
+    0 24px 56px rgba(0, 0, 0, 0.45),
+    0 0 48px rgba(99, 102, 241, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.screen-joined-view .joined-kicker {
+  margin: 0 0 0.4rem;
+  font-family: "Nunito", "Outfit", sans-serif;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(196, 181, 253, 0.95);
+}
+
+.screen-joined-view h2 {
+  margin: 0 0 0.75rem !important;
+  font-family: "Fredoka", "Outfit", sans-serif !important;
+  font-size: clamp(1.5rem, 5.5vw, 2.1rem) !important;
+  font-weight: 700 !important;
+  line-height: 1.15 !important;
+  color: transparent !important;
+  text-shadow: none !important;
+  background: linear-gradient(165deg, #ffffff 0%, #e9d5ff 55%, #a5b4fc 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+.screen-joined-view h2 .accent {
+  background: linear-gradient(165deg, #67e8f9 0%, #22d3ee 45%, #f472b6 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.screen-joined-view .joined-code-wrap {
+  margin: 0 0 1rem;
+  padding: 0.65rem 1rem;
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.28);
+  border: 1px solid rgba(34, 211, 238, 0.35);
+  box-shadow: 0 0 28px rgba(34, 211, 238, 0.15);
+}
+
+.screen-joined-view .pot-code {
+  margin: 0 !important;
+  font-family: "Fredoka", "Outfit", sans-serif !important;
+  font-size: clamp(2.2rem, 8vw, 3.2rem) !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.22em !important;
+  color: #fff !important;
+  text-shadow: 0 2px 20px rgba(34, 211, 238, 0.45);
+}
+
+.screen-joined-view .joined-status {
+  margin: 0 0 0.5rem !important;
+  font-family: "Nunito", "Outfit", sans-serif;
+  font-size: 0.92rem !important;
+  font-weight: 700;
+  color: rgba(167, 243, 208, 0.95) !important;
+}
+
+.screen-joined-view .joined-status.error {
+  color: #fca5a5 !important;
+}
+
+.screen-joined-view .joined-hint {
+  margin: 0 0 1.1rem !important;
+  font-size: 0.88rem !important;
+  line-height: 1.45 !important;
+  color: rgba(226, 232, 240, 0.82) !important;
+}
+
+.screen-joined-view .btn {
+  width: 100%;
+  max-width: 100%;
+  margin: 0.35rem 0 0 !important;
+  padding: 0.9rem 1.25rem !important;
+  border-radius: 14px !important;
+  font-family: "Nunito", "Outfit", sans-serif !important;
+  font-weight: 800 !important;
+  font-size: 0.95rem !important;
+  letter-spacing: 0.06em;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.screen-joined-view .btn.secondary {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
+  color: #fff !important;
+  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.45);
+}
+
+.screen-joined-view .btn.back {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: rgba(226, 232, 240, 0.95) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  box-shadow: none;
+}
+
+.screen-joined-view .btn:hover {
+  transform: translateY(-2px);
+}
+
+.screen-joined-view .joined-side {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  gap: 10px;
+}
+
+.screen-joined-view .joined-panel {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0.85rem 0.9rem;
+  border-radius: 18px;
+  background: rgba(22, 14, 48, 0.62);
+  border: 1px solid rgba(167, 139, 250, 0.28);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+}
+
+.screen-joined-view .joined-panel-title {
+  margin: 0 0 0.5rem;
+  font-family: "Nunito", "Outfit", sans-serif;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(196, 181, 253, 0.95);
+  text-align: left;
+}
+
+.screen-joined-view .lobby-players {
+  flex: 0 0 auto;
+  max-height: 140px;
+  overflow-y: auto;
+}
+
+.screen-joined-view .lobby-player {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid rgba(167, 139, 250, 0.2) !important;
+  color: #f1f5f9 !important;
+  border-radius: 12px !important;
+}
+
+.screen-joined-view .lobby-player-badge {
+  background: rgba(34, 197, 94, 0.2) !important;
+  color: #86efac !important;
+}
+
+.screen-joined-view .lobby-chat-panel {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.screen-joined-view .lobby-chat-messages {
+  flex: 1;
+  min-height: 80px;
+  max-height: none;
+  background: rgba(0, 0, 0, 0.25) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 12px !important;
+}
+
+.screen-joined-view .lobby-chat-line {
+  color: rgba(241, 245, 249, 0.92) !important;
+}
+
+.screen-joined-view .lobby-chat-line--mine {
+  color: #a5f3fc !important;
+}
+
+.screen-joined-view .lobby-chat-line--system {
+  color: rgba(148, 163, 184, 0.9) !important;
+}
+
+.screen-joined-view .lobby-chat-input {
+  background: rgba(15, 10, 35, 0.65) !important;
+  border: 1px solid rgba(167, 139, 250, 0.35) !important;
+  color: #f8fafc !important;
+  border-radius: 12px !important;
+}
+
+.screen-joined-view .lobby-chat-input::placeholder {
+  color: rgba(148, 163, 184, 0.75);
+}
+
+.screen-joined-view .lobby-chat-send {
+  background: linear-gradient(135deg, #22d3ee, #6366f1) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 14px rgba(34, 211, 238, 0.35);
+}
+
+#screen-joined.join-error .joined-side {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+@media (max-width: 720px) {
+  .screen-joined-view .joined-shell {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+    height: auto;
+    min-height: 100dvh;
+    overflow-y: auto;
+  }
+
+  .screen-joined-view .joined-main {
+    order: 1;
+    padding-top: 0.25rem;
+  }
+
+  .screen-joined-view .joined-side {
+    order: 2;
+    min-height: 220px;
+  }
+
+  .screen-joined-view .lobby-chat-messages {
+    min-height: 100px;
+    max-height: min(28vh, 180px);
+  }
+}

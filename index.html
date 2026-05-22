@@ -17,8 +17,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Nunito:wght@600;700;800&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/game/start-screen.css?v=49" />
-  <link rel="stylesheet" href="assets/game/mode-screen.css?v=4" />
+  <link rel="stylesheet" href="assets/game/start-screen.css?v=50" />
+  <link rel="stylesheet" href="assets/game/mode-screen.css?v=7" />
+  <link rel="stylesheet" href="assets/game/joined-screen.css?v=2" />
   <link rel="stylesheet" href="assets/game/code-screen.css?v=2" />
   <link rel="stylesheet" href="assets/game/premium-game.css?v=45" />
   <link rel="stylesheet" href="assets/game/game-drawers.css?v=44" />
@@ -56,20 +57,58 @@
       document.documentElement.classList.toggle("start-screen-active", !!on);
       document.documentElement.style.backgroundColor = on ? "#d4f1ff" : "#1a0f2e";
     };
-    window.wieShowMode = function () {
+    window.wieGoBegin = function () {
+      if (window.wieApp && window.wieApp.goName) return window.wieApp.goName();
       if (window.WieStartMusic && window.WieStartMusic.stop) window.WieStartMusic.stop();
-      window.wieSetStartBg(false);
+      if (window.wieSetStartBg) window.wieSetStartBg(false);
       var start = document.getElementById("screen-start");
-      var mode = document.getElementById("screen-mode");
-      if (!start || !mode) return;
-      start.classList.add("hidden");
-      start.style.display = "";
-      mode.classList.remove("hidden");
-      ["transition-out", "transition-in-from-right", "transition-in-from-left", "transition-active"].forEach(function (c) {
-        start.classList.remove(c);
-        mode.classList.remove(c);
+      var nameScreen = document.getElementById("screen-name");
+      if (!start || !nameScreen) return;
+      document.querySelectorAll("main.screen").forEach(function (el) {
+        if (el !== nameScreen) el.classList.add("hidden");
       });
+      start.classList.add("hidden");
+      nameScreen.classList.remove("hidden");
+      var inp = document.getElementById("player-name-input");
+      var err = document.getElementById("name-error");
+      if (err) err.textContent = "";
+      try {
+        var saved = localStorage.getItem("wiePlayerName");
+        if (inp && saved) inp.value = saved;
+      } catch (e) {}
+      setTimeout(function () {
+        if (inp) inp.focus();
+      }, 120);
     };
+    window.wieNameContinue = function () {
+      if (window.wieApp && window.wieApp.continueName) return window.wieApp.continueName();
+      var inp = document.getElementById("player-name-input");
+      var err = document.getElementById("name-error");
+      var name = inp ? String(inp.value || "").trim().slice(0, 16) : "";
+      if (!name) {
+        if (err) err.textContent = window.wieMsg("errNameEmpty");
+        if (inp) inp.focus();
+        return;
+      }
+      try {
+        localStorage.setItem("wiePlayerName", name);
+      } catch (e) {}
+      if (err) err.textContent = "";
+      var nameScreen = document.getElementById("screen-name");
+      var mode = document.getElementById("screen-mode");
+      if (!nameScreen || !mode) return;
+      document.querySelectorAll("main.screen").forEach(function (el) {
+        if (el !== mode) el.classList.add("hidden");
+      });
+      nameScreen.classList.add("hidden");
+      mode.classList.remove("hidden");
+    };
+    window.wieNameBack = function () {
+      if (window.wieApp && window.wieApp.nameBack) return window.wieApp.nameBack();
+      if (window.wieSetStartBg) window.wieSetStartBg(true);
+      window.wieShowScreen("screen-name", "screen-start");
+    };
+    window.wieShowMode = window.wieGoBegin;
     window.wieShowScreen = function (fromId, toId) {
       var from = document.getElementById(fromId);
       var to = document.getElementById(toId);
@@ -90,6 +129,7 @@
     };
     window.WIE_HEAD_I18N = {
       nl: {
+        errNameEmpty: "Vul je naam in (max. 16 tekens)",
         errHostEmpty: "Kies een code (max 5 tekens)",
         errJoinEmpty: "Vul een potcode in",
         lobbyChatHint: "Praat even — daarna start de host het spel.",
@@ -105,6 +145,7 @@
         btnBack: "TERUG"
       },
       en: {
+        errNameEmpty: "Enter your name (max 16 characters)",
         errHostEmpty: "Pick a code (max 5 characters)",
         errJoinEmpty: "Enter a game code",
         lobbyChatHint: "Chat briefly — then the host starts the game.",
@@ -358,20 +399,22 @@
         (function waitConnect() {
           if (window.wieApp && window.wieApp.connectGuest) {
             window.wieApp.connectGuest(code).catch(function (e) {
-              if (!status) return;
+              var s = String((e && e.message) || (e && e.type) || e || "").toLowerCase();
               var nf =
-                String((e && e.message) || e || "")
-                  .toLowerCase()
-                  .indexOf("lobby-not-found") >= 0 ||
-                String((e && e.message) || e || "")
-                  .toLowerCase()
-                  .indexOf("unavailable") >= 0;
-              status.textContent = window.wieMsg(nf ? "joinWrongCode" : "joinFailed");
-              if (nf && errEl) {
+                s.indexOf("lobby-not-found") >= 0 ||
+                s.indexOf("unavailable") >= 0 ||
+                s.indexOf("conn-timeout") >= 0 ||
+                s.indexOf("conn-closed") >= 0 ||
+                s.indexOf("no-connection") >= 0;
+              if (nf) {
                 window.wieShowOnly("screen-join");
-                errEl.textContent = window.wieMsg("joinWrongCode");
+                if (errEl) errEl.textContent = window.wieMsg("joinWrongCode");
+                return;
               }
-              status.classList.add("error");
+              if (status) {
+                status.textContent = window.wieMsg("joinFailed");
+                status.classList.add("error");
+              }
             });
             return;
           }
@@ -1902,7 +1945,16 @@
         <span class="start-bulb" aria-hidden="true">💡</span>
         <h1 id="start-title" class="start-title" data-i18n-html="startTitleHtml">Wie <span class="start-word-ben">Ben</span> Ik?</h1>
         <div class="start-actions">
-          <button id="btn-begin" class="btn-start-begin" type="button" data-i18n="btnBegin" data-i18n-aria="btnBeginAria">LATEN WE SPELEN</button>
+          <button
+            id="btn-begin"
+            class="btn-start-begin"
+            type="button"
+            data-i18n="btnBegin"
+            data-i18n-aria="btnBeginAria"
+            onclick="window.wieGoBegin()"
+          >
+            LATEN WE BEGINNEN
+          </button>
           <p class="start-tagline" data-i18n="startTagline">Raad de verborgen persoon en ontdek wie jij bent!</p>
         </div>
       </div>
@@ -1910,17 +1962,63 @@
     <p class="seo-brand">wiehasit.com</p>
   </main>
 
-  <!-- Spelmodus: online of bot -->
+  <!-- Naam kiezen (na LATEN WE BEGINNEN) -->
+  <main id="screen-name" class="screen screen-mode-view screen-name-view hidden">
+    <img class="mode-bg-photo" src="assets/game/start-bg.png?v=2" alt="" aria-hidden="true" decoding="async" />
+    <div class="mode-overlay" aria-hidden="true"></div>
+    <section class="mode-panel content">
+      <p class="mode-kicker" data-i18n="nameKicker">Stap 1</p>
+      <h2 data-i18n="nameTitle">Typ je naam</h2>
+      <p class="mode-sub" data-i18n="nameSub">Dit is je echte naam in het spel en in de chat</p>
+      <input
+        id="player-name-input"
+        class="name-input"
+        type="text"
+        maxlength="16"
+        autocomplete="nickname"
+        autocapitalize="words"
+        data-i18n-placeholder="namePlaceholder"
+        placeholder="Bijv. Sam, Lisa, Hodai…"
+      />
+      <p id="name-error" class="name-error error"></p>
+      <button
+        id="btn-name-continue"
+        class="btn mode-btn mode-btn--online"
+        type="button"
+        data-i18n="btnNameContinue"
+        onclick="window.wieNameContinue()"
+      >
+        VERDER
+      </button>
+      <button id="btn-name-back" class="btn mode-btn-back back" type="button" data-i18n="btnNameBack" onclick="window.wieNameBack()">Terug</button>
+    </section>
+  </main>
+
+  <!-- Keuzescherm: online of bot -->
   <main id="screen-mode" class="screen screen-mode-view hidden">
     <img class="mode-bg-photo" src="assets/game/start-bg.png?v=2" alt="" aria-hidden="true" decoding="async" />
     <div class="mode-overlay" aria-hidden="true"></div>
     <section class="mode-panel content">
-      <p class="mode-kicker" data-i18n="modeKicker">Klaar om te raden?</p>
+      <p class="mode-kicker" data-i18n="modeKicker">Kies je spel</p>
       <h2 data-i18n-html="modeTitle">Hoe wil je <span class="mode-accent">spelen</span>?</h2>
-      <p class="mode-sub" data-i18n="modeSub">Met vrienden online of oefenen tegen de computer</p>
-      <button id="btn-play-online" class="btn mode-btn mode-btn--online" type="button" data-i18n="btnPlayOnline" onclick="window.wieShowScreen('screen-mode','screen-menu')">Met vrienden online</button>
-      <button id="btn-play-bot" class="btn mode-btn mode-btn--bot" type="button" data-i18n="btnPlayBot" onclick="window.wieShowScreen('screen-mode','screen-bot-diff')">Tegen de computer</button>
-      <button id="btn-mode-back" class="btn mode-btn-back back" type="button" data-i18n="btnModeBack" onclick="window.wieShowScreen('screen-mode','screen-start')">Terug</button>
+      <p class="mode-sub" data-i18n="modeSub">Kies één optie — daarna ga je verder</p>
+      <div class="mode-choices" role="group" aria-label="Spelmodus">
+        <button id="btn-play-online" class="mode-choice mode-choice--online" type="button">
+          <span class="mode-choice-icon" aria-hidden="true">🌐</span>
+          <span class="mode-choice-text">
+            <span class="mode-choice-label" data-i18n="btnPlayOnline">Met vrienden online</span>
+            <span class="mode-choice-desc" data-i18n="modeOnlineDesc">Start of join met een code</span>
+          </span>
+        </button>
+        <button id="btn-play-bot" class="mode-choice mode-choice--bot" type="button">
+          <span class="mode-choice-icon" aria-hidden="true">🤖</span>
+          <span class="mode-choice-text">
+            <span class="mode-choice-label" data-i18n="btnPlayBot">Tegen de computer</span>
+            <span class="mode-choice-desc" data-i18n="modeBotDesc">Oefenen in je eentje</span>
+          </span>
+        </button>
+      </div>
+      <button id="btn-mode-back" class="btn mode-btn-back back" type="button" data-i18n="btnModeBack">Terug</button>
     </section>
   </main>
 
@@ -1968,18 +2066,16 @@
     </section>
   </main>
 
-  <!-- Foto loading -->
-  <main id="screen-photo-load" class="screen screen-loading-photos hidden">
-    <section class="loading-photos" aria-hidden="true">
-      <article class="polaroid lp1"><span class="face"></span></article>
-      <article class="polaroid lp2"><span class="face"></span></article>
-      <article class="polaroid lp3"><span class="face"></span></article>
-      <article class="polaroid lp4"><span class="face"></span></article>
-      <article class="polaroid lp5"><span class="face"></span></article>
-    </section>
-    <section class="content loading-text">
-      <h2 data-i18n="loadingTitle">Potje wordt gemaakt…</h2>
-      <p data-i18n="loadingSub">Foto's worden geladen</p>
+  <!-- Join / pot loading (2s, foto) -->
+  <main id="screen-photo-load" class="screen screen-join-loading hidden" aria-live="polite">
+    <img class="join-load-bg" src="assets/game/join-bg.png?v=1" alt="" aria-hidden="true" decoding="async" />
+    <div class="join-load-overlay" aria-hidden="true"></div>
+    <section class="join-load-scene">
+      <div class="join-load-ring" aria-hidden="true"></div>
+      <h2 id="join-load-title" class="join-load-title" data-i18n="joinLoadTitle">Je zit erbij!</h2>
+      <p id="join-load-sub" class="join-load-sub" data-i18n="joinLoadSub">Lobby wordt geladen…</p>
+      <div class="join-load-bar" aria-hidden="true"><span class="join-load-bar-fill"></span></div>
+      <p id="join-load-code" class="join-load-code" aria-hidden="true"></p>
     </section>
   </main>
 
@@ -1993,20 +2089,36 @@
       <p class="code-hint" data-i18n="joinHint">Vraag je vriend om de 5-letterige code</p>
       <input id="join-code" class="code-input" type="text" maxlength="5" placeholder="FUN42" autocomplete="off" autocapitalize="characters" />
       <p id="join-error" class="code-error error"></p>
-      <button id="btn-join-game" class="code-btn code-btn--primary" type="button" data-i18n="btnJoinGame" onclick="window.wieJoinWithCode()">Meedoen</button>
+      <button id="btn-join-game" class="code-btn code-btn--primary" type="button" data-i18n="btnJoinGame">Meedoen</button>
       <button id="btn-join-back" class="code-btn code-btn-back back" type="button" data-i18n="btnBack" onclick="window.wieShowScreen('screen-join','screen-menu')">Terug</button>
     </section>
   </main>
 
-  <!-- Join gelukt -->
-  <main id="screen-joined" class="screen screen-light lobby-joined-layout hidden">
-    <span class="glow" aria-hidden="true"></span>
-    <div class="lobby-layout">
-      <aside class="lobby-sidebar">
-        <h3 class="lobby-sidebar-title" data-i18n="lobbyPlayersTitle">In het potje</h3>
-        <ul id="joined-players" class="lobby-players" aria-live="polite"></ul>
-        <div class="lobby-chat-panel">
-          <h3 class="lobby-sidebar-title" data-i18n="lobbyChatTitle">Chat</h3>
+  <!-- Join gelukt — gast lobby -->
+  <main id="screen-joined" class="screen screen-joined-view hidden">
+    <img class="joined-bg-photo" src="assets/game/join-bg.png?v=1" alt="" aria-hidden="true" decoding="async" />
+    <div class="joined-overlay" aria-hidden="true"></div>
+    <div class="joined-shell">
+      <section class="joined-main">
+        <div class="joined-card">
+          <p class="joined-kicker" data-i18n="joinedKicker">In het potje</p>
+          <h2 data-i18n-html="joinedTitle">Je zit in<span class="accent">het potje!</span></h2>
+          <div class="joined-code-wrap">
+            <p id="joined-code" class="pot-code">-----</p>
+          </div>
+          <p id="joined-status" class="joined-status">Verbinden met host…</p>
+          <p class="joined-hint" data-i18n="joinedHint">Wacht tot de host het spel start</p>
+          <button id="btn-join-retry" class="btn secondary hidden" type="button" data-i18n="btnJoinRetry">OPNIEUW VERBINDEN</button>
+          <button id="btn-joined-back" class="btn back" type="button" data-i18n="btnBack" onclick="window.wieShowScreen('screen-joined','screen-menu')">TERUG</button>
+        </div>
+      </section>
+      <aside class="joined-side">
+        <div class="joined-panel">
+          <h3 class="joined-panel-title" data-i18n="lobbyPlayersTitle">In het potje</h3>
+          <ul id="joined-players" class="lobby-players" aria-live="polite"></ul>
+        </div>
+        <div class="joined-panel lobby-chat-panel">
+          <h3 class="joined-panel-title" data-i18n="lobbyChatTitle">Chat</h3>
           <div id="joined-chat-messages" class="lobby-chat-messages" aria-live="polite"></div>
           <form id="joined-chat-form" class="lobby-chat-form">
             <input id="joined-chat-input" class="lobby-chat-input" type="text" maxlength="200" autocomplete="off" data-i18n-placeholder="lobbyChatPlaceholder" placeholder="Typ een bericht…" onkeydown="if(event.key==='Enter'){event.preventDefault();window.wieSendChat(this);}" />
@@ -2014,16 +2126,6 @@
           </form>
         </div>
       </aside>
-      <div class="lobby-content-main">
-        <section class="content">
-          <h2 data-i18n-html="joinedTitle">Je zit in<span class="accent">het potje!</span></h2>
-          <p id="joined-code" class="pot-code">-----</p>
-          <p id="joined-status" class="hint joined-status">Verbinden met host…</p>
-          <p class="hint" data-i18n="joinedHint">Wacht tot de host het spel start</p>
-          <button id="btn-join-retry" class="btn secondary hidden" type="button" data-i18n="btnJoinRetry">OPNIEUW VERBINDEN</button>
-          <button id="btn-joined-back" class="btn back" type="button" data-i18n="btnBack" onclick="window.wieShowScreen('screen-joined','screen-menu')">TERUG</button>
-        </section>
-      </div>
     </div>
   </main>
 
@@ -2204,7 +2306,7 @@
 
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
   <script src="assets/game/start-music.js?v=43"></script>
-  <script src="assets/game/online-room.js?v=43"></script>
+  <script src="assets/game/online-room.js?v=45"></script>
   <script src="assets/game/lobby-room.js?v=40"></script>
   <script src="assets/game/character-traits.js?v=40"></script>
   <script src="assets/game/game-play.js?v=42"></script>
@@ -2215,15 +2317,25 @@
         startTitleHtml: 'Wie <span class="start-word-ben">Ben</span> Ik?',
         startOnlineBadge: "ONLINE",
         startTagline: "Raad de verborgen persoon en ontdek wie jij bent!",
-        btnBegin: "LATEN WE SPELEN",
-        btnBeginAria: "Laten we spelen — start het spel",
+        startNameLabel: "Jouw naam in het spel",
+        btnBegin: "LATEN WE BEGINNEN",
+        btnBeginAria: "Laten we beginnen — kies je naam",
         musicAria: "Muziek aan of uit",
-        modeKicker: "Klaar om te raden?",
+        nameKicker: "Stap 1",
+        nameTitle: "Typ je naam",
+        nameSub: "Dit wordt je echte naam in het spel en in de chat",
+        namePlaceholder: "Bijv. Sam, Lisa, Hodai…",
+        btnNameContinue: "VERDER",
+        btnNameBack: "Terug naar start",
+        errNameEmpty: "Vul een naam in (max. 16 tekens)",
+        modeKicker: "Kies je spel",
         modeTitle: 'Hoe wil je <span class="mode-accent">spelen</span>?',
-        modeSub: "Met vrienden online of oefenen tegen de computer",
+        modeSub: "Kies één optie — daarna ga je verder",
+        modeOnlineDesc: "Start of join met een code",
+        modeBotDesc: "Oefenen in je eentje",
         btnPlayOnline: "Met vrienden online",
         btnPlayBot: "Tegen de computer",
-        btnModeBack: "Terug",
+        btnModeBack: "Terug naar start",
         botDiffKicker: "Solo tegen de bot",
         botDiffSub: "Hoe slim moet de tegenstander zijn?",
         botDiffTitle: 'Kies je <span class="mode-accent">niveau</span>',
@@ -2242,6 +2354,9 @@
         btnMakePot: "Potje maken",
         loadingTitle: "Potje wordt gemaakt…",
         loadingSub: "Foto's worden geladen",
+        joinLoadTitle: "Je zit erbij!",
+        joinLoadSub: "Lobby wordt geladen…",
+        joinedKicker: "In het potje",
         joinKicker: "Meedoen",
         joinTitle: 'Vul de <span class="code-accent">code</span> in',
         joinHint: "Vraag je vriend om de 5-letterige code",
@@ -2324,15 +2439,25 @@
         startTitleHtml: 'Who <span class="start-word-ben">Am</span> I?',
         startOnlineBadge: "ONLINE",
         startTagline: "Guess the hidden person and discover who you are!",
+        startNameLabel: "Your name in the game",
         btnBegin: "LET'S BEGIN",
-        btnBeginAria: "Let's play — start the game",
+        btnBeginAria: "Let's begin — enter your name",
         musicAria: "Toggle music",
-        modeKicker: "Ready to guess?",
+        nameKicker: "Step 1",
+        nameTitle: "Type your name",
+        nameSub: "This becomes your name in the game and chat",
+        namePlaceholder: "e.g. Sam, Lisa, Alex…",
+        btnNameContinue: "CONTINUE",
+        btnNameBack: "Back to start",
+        errNameEmpty: "Enter a name (max 16 characters)",
+        modeKicker: "Pick your game",
         modeTitle: 'How do you want to <span class="mode-accent">play</span>?',
-        modeSub: "Online with friends or practice against the computer",
+        modeSub: "Choose one option — then continue",
+        modeOnlineDesc: "Host or join with a code",
+        modeBotDesc: "Practice on your own",
         btnPlayOnline: "Play with friends online",
         btnPlayBot: "Against the computer",
-        btnModeBack: "Back",
+        btnModeBack: "Back to start",
         botDiffKicker: "Solo vs bot",
         botDiffSub: "How tough should your opponent be?",
         botDiffTitle: 'Pick your <span class="mode-accent">level</span>',
@@ -2351,6 +2476,9 @@
         btnMakePot: "Create game",
         loadingTitle: "Creating your game…",
         loadingSub: "Loading photos",
+        joinLoadTitle: "You're in!",
+        joinLoadSub: "Loading lobby…",
+        joinedKicker: "In the game",
         joinKicker: "Join",
         joinTitle: 'Enter the <span class="code-accent">code</span>',
         joinHint: "Ask your friend for the 5-character code",
@@ -2503,7 +2631,10 @@
     applyLanguage();
 
     const screenStart = document.getElementById("screen-start");
+    const screenName = document.getElementById("screen-name");
     const screenMode = document.getElementById("screen-mode");
+    const playerNameInput = document.getElementById("player-name-input");
+    const nameError = document.getElementById("name-error");
 
     const btnBeginEl = document.getElementById("btn-begin");
     const btnMusicToggle = document.getElementById("btn-music-toggle");
@@ -2543,11 +2674,104 @@
       );
     }
 
+    let pendingJoinCode = null;
+
+    function getSavedPlayerName() {
+      const s = localStorage.getItem("wiePlayerName");
+      return s && String(s).trim() ? String(s).trim().slice(0, 16) : "";
+    }
+
+    function savePlayerNameFromInput() {
+      const raw = playerNameInput ? playerNameInput.value : "";
+      const name = String(raw || "")
+        .trim()
+        .slice(0, 16);
+      if (!name) {
+        if (nameError) nameError.textContent = t("errNameEmpty");
+        if (playerNameInput) playerNameInput.focus();
+        return "";
+      }
+      localStorage.setItem("wiePlayerName", name);
+      if (nameError) nameError.textContent = "";
+      return name;
+    }
+
+    window.wieGetPlayerName = getSavedPlayerName;
+    window.wieSavePlayerName = function (name) {
+      const n = String(name || "")
+        .trim()
+        .slice(0, 16);
+      if (n) localStorage.setItem("wiePlayerName", n);
+      return n;
+    };
+
+    function goToNameScreen() {
+      busy = false;
+      tryStartMusic();
+      if (window.WieStartMusic && WieStartMusic.stop) WieStartMusic.stop();
+      if (window.wieSetStartBg) window.wieSetStartBg(false);
+      if (playerNameInput) {
+        playerNameInput.value = getSavedPlayerName();
+        if (nameError) nameError.textContent = "";
+      }
+      if (!screenStart || !screenName) return;
+      transition(screenStart, screenName, "transition-in-from-right");
+      setTimeout(() => playerNameInput && playerNameInput.focus(), TRANSITION_MS + 40);
+    }
+
+    function continueFromNameScreen() {
+      if (!savePlayerNameFromInput()) return;
+      if (pendingJoinCode) {
+        const code = pendingJoinCode;
+        pendingJoinCode = null;
+        transition(screenName, screenJoin, "transition-in-from-right");
+        setTimeout(() => {
+          if (joinCodeInput) joinCodeInput.value = code;
+          doJoinWithCode();
+        }, TRANSITION_MS + 80);
+        return;
+      }
+      busy = false;
+      transition(screenName, screenMode, "transition-in-from-right");
+    }
+
+    function nameBackToStart() {
+      pendingJoinCode = null;
+      if (window.wieSetStartBg) window.wieSetStartBg(true);
+      transition(screenName, screenStart, "transition-in-from-left");
+      setTimeout(resumeStartMusicIfVisible, 320);
+    }
+
+    function goToModeChoice() {
+      if (!getSavedPlayerName()) {
+        goToNameScreen();
+        return;
+      }
+      busy = false;
+      if (window.wieSetStartBg) window.wieSetStartBg(false);
+      const from =
+        screenName && !screenName.classList.contains("hidden")
+          ? screenName
+          : screenStart;
+      transition(from, screenMode, "transition-in-from-right");
+    }
+
     if (btnBeginEl) {
       btnBeginEl.addEventListener("click", (e) => {
         e.preventDefault();
-        tryStartMusic();
-        window.wieShowMode();
+        goToNameScreen();
+      });
+    }
+
+    if (playerNameInput) {
+      playerNameInput.addEventListener("input", () => {
+        if (nameError) nameError.textContent = "";
+      });
+      playerNameInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          continueFromNameScreen();
+        }
       });
     }
 
@@ -2588,7 +2812,7 @@
     const joinedCode = document.getElementById("joined-code");
 
     const TRANSITION_MS = 300;
-    const PHOTO_LOAD_MS = 1200;
+    const PHOTO_LOAD_MS = 2000;
     const COUNTDOWN_SEC = 3;
     let busy = false;
     let countdownTimeout = null;
@@ -2921,6 +3145,9 @@
       if (window.wieSetStartBg) window.wieSetStartBg(true);
       clearCountdown();
       busy = false;
+      if (playerNameInput && getSavedPlayerName()) {
+        playerNameInput.value = getSavedPlayerName();
+      }
       if (gameCountdown) gameCountdown.classList.add("hidden");
       if (gameTable) gameTable.classList.add("hidden");
       if (screenPhotoLoad) screenPhotoLoad.classList.add("hidden");
@@ -2942,6 +3169,7 @@
     }
 
     function resetToStartScreen() {
+      pendingJoinCode = null;
       try {
         resetGameScreen();
         if (window.WieIsHetPlay && WieIsHetPlay.hideEndOverlay) WieIsHetPlay.hideEndOverlay();
@@ -3078,16 +3306,44 @@
       });
     }
 
-    function runJoinLoading(code, onDone) {
+    const joinLoadTitle = document.getElementById("join-load-title");
+    const joinLoadSub = document.getElementById("join-load-sub");
+    const joinLoadCodeEl = document.getElementById("join-load-code");
+
+    function runJoinLoading(code, onDone, kind) {
+      const isHost = kind === "host";
+      const c = String(code || "")
+        .toUpperCase()
+        .replace(/[^A-Z0-9]/g, "")
+        .slice(0, 5);
+      if (joinLoadTitle) joinLoadTitle.textContent = isHost ? t("loadingTitle") : t("joinLoadTitle");
+      if (joinLoadSub) joinLoadSub.textContent = isHost ? t("loadingSub") : t("joinLoadSub");
+      if (joinLoadCodeEl) {
+        joinLoadCodeEl.textContent = c;
+        joinLoadCodeEl.style.display = c ? "block" : "none";
+      }
+      const barFill = screenPhotoLoad && screenPhotoLoad.querySelector(".join-load-bar-fill");
+      if (barFill) {
+        barFill.style.animation = "none";
+        void barFill.offsetWidth;
+        barFill.style.animation = "";
+      }
+      if (screenPhotoLoad) {
+        screenPhotoLoad.style.setProperty("--load-ms", PHOTO_LOAD_MS + "ms");
+      }
+      const loadBg = screenPhotoLoad && screenPhotoLoad.querySelector(".join-load-bg");
+      if (loadBg) {
+        loadBg.src = isHost ? "assets/game/code-bg.png?v=1" : "assets/game/join-bg.png?v=1";
+      }
       screenPhotoLoad.classList.remove("hidden");
       requestAnimationFrame(() => screenPhotoLoad.classList.add("active"));
       setTimeout(() => {
         screenPhotoLoad.classList.remove("active");
         setTimeout(() => {
           screenPhotoLoad.classList.add("hidden");
-          joinedCode.textContent = code.toUpperCase();
+          if (joinedCode) joinedCode.textContent = c || code.toUpperCase();
           onDone();
-        }, 250);
+        }, 280);
       }, PHOTO_LOAD_MS);
     }
 
@@ -3101,9 +3357,22 @@
         s.includes("peer-unavailable") ||
         s.includes("unavailable") ||
         s.includes("could not connect") ||
+        s.includes("not found") ||
         s.includes("conn-timeout") ||
-        s.includes("conn-closed")
+        s.includes("conn-closed") ||
+        s.includes("no-connection")
       );
+    }
+
+    let joinBusy = false;
+
+    async function connectGuestOnce(code) {
+      const c = code.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 5);
+      if (!c || !window.WieIsHetOnline) throw new Error("lobby-not-found");
+      WieIsHetOnline.reset();
+      await WieIsHetOnline.setupGuest(c);
+      if (!WieIsHetOnline.isConnected()) throw new Error("lobby-not-found");
+      return c;
     }
 
     function setJoinedStatus(key, isError) {
@@ -3181,16 +3450,20 @@
       [screenStart, screenMode, screenBotDiff, screenMenu, screenHost, screenLobby, screenJoin].forEach((s) =>
         s.classList.add("hidden")
       );
-      runJoinLoading(c, () => {
-        showJoinedScreen(c);
-        connectGuestWithRetry(c).catch((e) => {
-          if (isLobbyNotFound(e)) backToJoinWithError("joinWrongCode");
-          else {
-            sessionMode = "solo";
-            setJoinedStatus("joinFailed", true);
-          }
-        });
-      });
+      runJoinLoading(
+        c,
+        () => {
+          showJoinedScreen(c);
+          connectGuestWithRetry(c).catch((e) => {
+            if (isLobbyNotFound(e)) backToJoinWithError("joinWrongCode");
+            else {
+              sessionMode = "solo";
+              setJoinedStatus("joinFailed", true);
+            }
+          });
+        },
+        "guest"
+      );
     }
 
     if (btnJoinRetry) {
@@ -3200,7 +3473,8 @@
         if (screenJoined) screenJoined.classList.remove("join-error");
         if (joinError) joinError.textContent = "";
         connectGuestWithRetry(c).catch((e) => {
-          if (!isLobbyNotFound(e)) setJoinedStatus("joinFailed", true);
+          if (isLobbyNotFound(e)) backToJoinWithError("joinWrongCode");
+          else setJoinedStatus("joinFailed", true);
         });
       });
     }
@@ -3241,10 +3515,17 @@
       });
     }
 
+    onClick("btn-name-continue", continueFromNameScreen);
+    onClick("btn-name-back", nameBackToStart);
+
     onClick("btn-mode-back", () => {
-      if (window.wieSetStartBg) window.wieSetStartBg(true);
-      transition(screenMode, screenStart, "transition-in-from-left");
-      setTimeout(resumeStartMusicIfVisible, 320);
+      transition(screenMode, screenName, "transition-in-from-left");
+      setTimeout(() => {
+        if (playerNameInput) {
+          playerNameInput.value = getSavedPlayerName();
+          playerNameInput.focus();
+        }
+      }, 320);
     });
 
     onClick("btn-play-online", () => {
@@ -3350,7 +3631,28 @@
 
     const linkCode = joinCodeFromUrl();
     if (linkCode.length >= 4) {
-      joinViaLink(linkCode);
+      if (getSavedPlayerName()) {
+        joinViaLink(linkCode);
+      } else {
+        pendingJoinCode = linkCode;
+        busy = false;
+        document.querySelectorAll("main.screen").forEach((el) => {
+          el.classList.remove(
+            "transition-out",
+            "transition-active",
+            "transition-in-from-right",
+            "transition-in-from-left"
+          );
+          if (el === screenName) el.classList.remove("hidden");
+          else el.classList.add("hidden");
+        });
+        if (window.wieSetStartBg) window.wieSetStartBg(false);
+        if (playerNameInput) {
+          playerNameInput.value = "";
+          if (nameError) nameError.textContent = "";
+          setTimeout(() => playerNameInput.focus(), 200);
+        }
+      }
     } else {
       ensureStartScreenVisible();
     }
@@ -3370,14 +3672,10 @@
         return;
       }
 
-      screenPhotoLoad.classList.remove("hidden");
-      requestAnimationFrame(() => screenPhotoLoad.classList.add("active"));
-
-      setTimeout(() => {
-        screenPhotoLoad.classList.remove("active");
-        setTimeout(() => {
-          screenPhotoLoad.classList.add("hidden");
-          const pot = code.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 5);
+      const pot = code.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 5);
+      runJoinLoading(
+        pot,
+        () => {
           lobbyCode.textContent = pot;
           sessionMode = "host";
           sessionCode = pot;
@@ -3398,33 +3696,52 @@
           screenLobby.classList.remove("hidden");
           screenLobby.classList.add("transition-active");
           setTimeout(() => screenLobby.classList.remove("transition-active"), 50);
-        }, 250);
-      }, PHOTO_LOAD_MS);
+        },
+        "host"
+      );
     }
 
-    function doJoinWithCode() {
+    async function doJoinWithCode() {
+      if (joinBusy) return;
       const code = joinCodeInput ? joinCodeInput.value.trim() : "";
       if (!code) {
         if (joinError) joinError.textContent = t("errJoinEmpty");
         return;
       }
-      screenJoin.classList.add("hidden");
-      runJoinLoading(code, () => {
-        const c = code.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 5);
-        showJoinedScreen(c);
-        connectGuestWithRetry(c).catch((e) => {
-          if (isLobbyNotFound(e)) backToJoinWithError("joinWrongCode");
-          else {
-            sessionMode = "solo";
-            setJoinedStatus("joinFailed", true);
-          }
-        });
-      });
+      joinBusy = true;
+      const btnJoin = document.getElementById("btn-join-game");
+      if (btnJoin) btnJoin.disabled = true;
+      if (joinError) joinError.textContent = t("joinConnecting");
+      try {
+        const c = await connectGuestOnce(code);
+        sessionMode = "guest";
+        sessionCode = c;
+        if (joinError) joinError.textContent = "";
+        screenJoin.classList.add("hidden");
+        runJoinLoading(
+          c,
+          () => {
+            showJoinedScreen(c);
+            setJoinedStatus("joinConnected", false);
+            wireGuestOnline();
+          },
+          "guest"
+        );
+      } catch (e) {
+        console.warn("join failed", e);
+        if (window.WieIsHetOnline) WieIsHetOnline.reset();
+        sessionMode = "solo";
+        if (joinError) joinError.textContent = t("joinWrongCode");
+        screenJoin.classList.remove("hidden");
+      } finally {
+        joinBusy = false;
+        if (btnJoin) btnJoin.disabled = false;
+      }
     }
 
     onClick("btn-make-pot", doMakePot);
 
-    onClick("btn-join-game", doJoinWithCode);
+    onClick("btn-join-game", () => doJoinWithCode());
 
     function doStartGame() {
       if (startingGame) return;
@@ -3465,6 +3782,10 @@
     }
 
     window.wieApp = {
+      goName: goToNameScreen,
+      continueName: continueFromNameScreen,
+      nameBack: nameBackToStart,
+      goMode: goToModeChoice,
       goHost() {
         if (hostError) hostError.textContent = "";
         busy = false;

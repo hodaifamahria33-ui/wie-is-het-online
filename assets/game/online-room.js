@@ -4,7 +4,11 @@
 (function () {
   const PEER_PREFIX = "wieishet-";
   const PEER_TIMEOUT_MS = 22000;
-  const CONN_TIMEOUT_MS = 10000;
+  const CONN_TIMEOUT_MS = 3500;
+  const HOST_PROBE_MS = 1800;
+  const PEER_CLOUD = "https://0.peerjs.com";
+  const PEER_PATH = "/peerjs";
+  const PEER_KEY = "peerjs";
 
   const PEER_OPTS = {
     debug: 0,
@@ -34,6 +38,34 @@
 
   function peerId(code) {
     return PEER_PREFIX + sanitizeCode(code);
+  }
+
+  /** PeerJS cloud: 404 = host niet online → snelle "verkeerde code". */
+  async function probeHostOnline(code) {
+    const id = peerId(code);
+    const url =
+      PEER_CLOUD +
+      PEER_PATH +
+      "/" +
+      PEER_KEY +
+      "/peers/" +
+      encodeURIComponent(id);
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), HOST_PROBE_MS);
+    try {
+      const res = await fetch(url, {
+        signal: ctrl.signal,
+        cache: "no-store",
+        mode: "cors",
+      });
+      if (res.status === 404) return false;
+      if (res.ok) return true;
+      return null;
+    } catch (_) {
+      return null;
+    } finally {
+      clearTimeout(timer);
+    }
   }
 
   function emit(msg) {
@@ -114,6 +146,7 @@
         reject(mapJoinError(err));
       };
       const onClose = () => {
+        if (connection.open) return;
         clearTimeout(timeout);
         cleanup();
         reject(new Error("conn-closed"));
@@ -226,15 +259,32 @@
       waitForPeerOpen(peer, PEER_TIMEOUT_MS)
         .then(() => {
           const targetId = peerId(roomCode);
-          const c = peer.connect(targetId, { reliable: true });
-          return waitForConnectionOpen(c, CONN_TIMEOUT_MS).then(() => {
-            wireConnection(c);
-            if (c.open) {
-              connected = true;
-              flushOutbox();
-              emit({ type: "connected" });
+          return new Promise((res, rej) => {
+            const c = peer.connect(targetId, { reliable: true });
+            if (!c) {
+              rej(new Error("no-connection"));
+              return;
             }
-            return { role, roomCode };
+            let settled = false;
+            const finish = (fn, arg) => {
+              if (settled) return;
+              settled = true;
+              peer.off("error", onPeerErr);
+              fn(arg);
+            };
+            const onPeerErr = (err) => finish(rej, mapJoinError(err));
+            peer.on("error", onPeerErr);
+            waitForConnectionOpen(c, CONN_TIMEOUT_MS)
+              .then(() => {
+                wireConnection(c);
+                if (c.open) {
+                  connected = true;
+                  flushOutbox();
+                  emit({ type: "connected" });
+                }
+                finish(res, { role, roomCode });
+              })
+              .catch((err) => finish(rej, mapJoinError(err)));
           });
         })
         .then(resolve)
@@ -255,7 +305,15 @@
       return createHost(code);
     },
 
+    async probeHostOnline(code) {
+      return probeHostOnline(code);
+    },
+
     async setupGuest(code) {
+      const probe = await probeHostOnline(code);
+      if (probe === false) {
+        throw new Error("lobby-not-found");
+      }
       return joinAsGuest(code);
     },
 
