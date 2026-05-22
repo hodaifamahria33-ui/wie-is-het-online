@@ -20,6 +20,7 @@
   <link rel="stylesheet" href="assets/game/start-screen.css?v=50" />
   <link rel="stylesheet" href="assets/game/mode-screen.css?v=7" />
   <link rel="stylesheet" href="assets/game/joined-screen.css?v=2" />
+  <link rel="stylesheet" href="assets/game/lobby-screen.css?v=1" />
   <link rel="stylesheet" href="assets/game/code-screen.css?v=2" />
   <link rel="stylesheet" href="assets/game/premium-game.css?v=45" />
   <link rel="stylesheet" href="assets/game/game-drawers.css?v=44" />
@@ -2129,15 +2130,34 @@
     </div>
   </main>
 
-  <!-- Scherm 4: potje klaar -->
-  <main id="screen-lobby" class="screen screen-light screen-lobby hidden">
-    <span class="glow" aria-hidden="true"></span>
-    <div class="lobby-layout">
-      <aside class="lobby-sidebar">
-        <h3 class="lobby-sidebar-title" data-i18n="lobbyPlayersTitle">In je potje</h3>
-        <ul id="lobby-players" class="lobby-players" aria-live="polite"></ul>
-        <div class="lobby-chat-panel">
-          <h3 class="lobby-sidebar-title" data-i18n="lobbyChatTitle">Chat</h3>
+  <!-- Host lobby — potje klaar -->
+  <main id="screen-lobby" class="screen screen-lobby-view hidden">
+    <img class="lobby-bg-photo" src="assets/game/code-bg.png?v=1" alt="" aria-hidden="true" decoding="async" />
+    <div class="lobby-overlay" aria-hidden="true"></div>
+    <div class="lobby-shell">
+      <section class="lobby-main">
+        <div class="lobby-card">
+          <p class="lobby-kicker" data-i18n="lobbyKicker">Host lobby</p>
+          <h2 data-i18n-html="lobbyTitle">Je potje is<span class="accent">klaar!</span></h2>
+          <div class="lobby-code-wrap">
+            <p id="lobby-code" class="pot-code">-----</p>
+          </div>
+          <p class="lobby-hint" data-i18n="lobbyHint">Stuur deze link naar je vrienden — zij joinen automatisch</p>
+          <div class="lobby-actions">
+            <button id="btn-copy-code" class="lobby-btn lobby-btn--copy" type="button" data-i18n="btnCopyCode" onclick="window.wieCopyLink()">KOPIEER LINK</button>
+            <button id="btn-share-wa" class="lobby-btn lobby-btn--wa" type="button" data-i18n="btnShareWa" onclick="window.wieShareWa()">DEEL VIA WHATSAPP</button>
+            <button id="btn-start-game" class="lobby-btn lobby-btn--start" type="button" data-i18n="btnStartGame" onclick="window.wieStartGame()">START GAME</button>
+            <button id="btn-lobby-back" class="lobby-btn lobby-btn--back" type="button" data-i18n="btnBack" onclick="window.wieShowScreen('screen-lobby','screen-menu')">TERUG</button>
+          </div>
+        </div>
+      </section>
+      <aside class="lobby-side">
+        <div class="lobby-panel">
+          <h3 class="lobby-panel-title" data-i18n="lobbyPlayersTitle">In je potje</h3>
+          <ul id="lobby-players" class="lobby-players" aria-live="polite"></ul>
+        </div>
+        <div class="lobby-panel lobby-chat-panel">
+          <h3 class="lobby-panel-title" data-i18n="lobbyChatTitle">Chat</h3>
           <div id="lobby-chat-messages" class="lobby-chat-messages" aria-live="polite"></div>
           <form id="lobby-chat-form" class="lobby-chat-form">
             <input id="lobby-chat-input" class="lobby-chat-input" type="text" maxlength="200" autocomplete="off" data-i18n-placeholder="lobbyChatPlaceholder" placeholder="Typ een bericht…" onkeydown="if(event.key==='Enter'){event.preventDefault();window.wieSendChat(this);}" />
@@ -2145,17 +2165,6 @@
           </form>
         </div>
       </aside>
-      <div class="lobby-main">
-        <section class="content">
-          <h2 data-i18n-html="lobbyTitle">Je potje is<span class="accent">klaar!</span></h2>
-          <p id="lobby-code" class="pot-code">-----</p>
-          <p class="hint" data-i18n="lobbyHint">Stuur deze link naar je vrienden — zij joinen automatisch</p>
-          <button id="btn-copy-code" class="btn btn-copy-code" type="button" data-i18n="btnCopyCode" onclick="window.wieCopyLink()">KOPIEER LINK</button>
-          <button id="btn-share-wa" class="btn secondary" type="button" data-i18n="btnShareWa" onclick="window.wieShareWa()">DEEL VIA WHATSAPP</button>
-          <button id="btn-start-game" class="btn btn-start-game" type="button" data-i18n="btnStartGame" onclick="window.wieStartGame()">START GAME</button>
-          <button id="btn-lobby-back" class="btn back" type="button" data-i18n="btnBack" onclick="window.wieShowScreen('screen-lobby','screen-menu')">TERUG</button>
-        </section>
-      </div>
     </div>
   </main>
 
@@ -2370,6 +2379,7 @@
         joinFailed: "Kon host niet bereiken. Host moet eerst een potje maken en in de lobby blijven.",
         joinFailedHint: "Zelfde code · zelfde link (hodaifamahria33-ui.github.io). WiFi aan, geen privé-tab.",
         btnJoinRetry: "OPNIEUW VERBINDEN",
+        lobbyKicker: "Host lobby",
         lobbyTitle: 'Je potje is<span class="accent">klaar!</span>',
         lobbyHint: "Stuur deze link naar je vrienden — zij joinen automatisch",
         lobbyPlayersTitle: "In je potje",
@@ -2492,6 +2502,7 @@
         joinFailed: "Could not reach the host. Host must create a game and stay in the lobby.",
         joinFailedHint: "Same code · same link. Use WiFi, not a private browser tab.",
         btnJoinRetry: "RECONNECT",
+        lobbyKicker: "Host lobby",
         lobbyTitle: 'Your game is<span class="accent">ready!</span>',
         lobbyHint: "Send this link to your friends — they join automatically",
         lobbyPlayersTitle: "In your game",
