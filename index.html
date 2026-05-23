@@ -2518,7 +2518,7 @@
   <script src="assets/game/start-music.js?v=43"></script>
   <script src="assets/game/online-room.js?v=48"></script>
   <script src="assets/game/lobby-room.js?v=41"></script>
-  <script src="assets/game/character-traits.js?v=56"></script>
+  <script src="assets/game/character-traits.js?v=57"></script>
   <script src="assets/game/rank-system.js?v=2"></script>
   <script src="assets/game/ranked-queue.js?v=1"></script>
   <script src="assets/game/answer-coach.js?v=1"></script>
@@ -3127,7 +3127,7 @@
         img.alt = "";
         img.loading = "eager";
         img.decoding = "async";
-        if (WieCharacterArt.applyImgFilter) WieCharacterArt.applyImgFilter(img);
+        if (WieCharacterArt.applyImgFilter) WieCharacterArt.applyImgFilter(img, name);
         img.addEventListener("error", function () {
           if (WieCharacterArt.onImageError) WieCharacterArt.onImageError(img, name, null);
         });
@@ -3341,7 +3341,7 @@
             "MrBeast", "Pokimane", "PewDiePie", "Valkyrae", "Markiplier", "iJustine",
             "Jacksepticeye", "SSSniperWolf", "KSI", "LaurDIY", "Ninja", "Emma",
             "Dream", "Aphmau", "Vanoss", "Jelly", "DanTDM", "Zoella", "Ludwig", "Tana",
-            "xQc", "Nikkie", "IShowSpeed", "Wengie", "Enzo", "Safiya", "Gio", "Gibi",
+            "xQc", "Nikkie", "IShowSpeed", "Anas", "Enzo", "Safiya", "Gio", "Gibi",
             "Kalvijn", "Rosanna", "MKBHD", "Jess",
           ];
 

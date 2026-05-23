@@ -3,7 +3,7 @@
  */
 (function () {
   const PORTRAITS = "assets/portraits/";
-  const AVATAR_CACHE = "yt-likeness-v6";
+  const AVATAR_CACHE = "yt-likeness-v7-anas";
   const REMOTE_STYLE = "adventurer";
   const AVATAR_SIZE = 256;
 
@@ -32,7 +32,7 @@
     { name: "xQc", slug: "xqc", seed: "xQc-Felix", female: false, bg: "94a3b8,64748b,334155", hair: "short01", beard: "variant02", skinColor: "f2d3b1", hairColor: "afafaf", eyes: "variant07" },
     { name: "Nikkie", slug: "nikkie", seed: "NikkieTutorials", female: true, bg: "e879f9,d946ef,a21caf", hair: "long04", glasses: "variant05", skinColor: "f2d3b1", hairColor: "e5d7a3", eyes: "variant16" },
     { name: "IShowSpeed", slug: "ishowspeed", seed: "IShowSpeed-Darren", female: false, bg: "ef4444,dc2626,991b1b", hair: "short15", skinColor: "9e5622", hairColor: "0e0e0e", eyes: "variant18" },
-    { name: "Wengie", slug: "wengie", seed: "Wengie-Wendy", female: true, bg: "2dd4bf,14b8a6,0f766e", hair: "long02", skinColor: "ecad80", hairColor: "592454", eyes: "variant14" },
+    { name: "Anas", slug: "anas", seed: "Anas-Custom", female: false, customPhoto: true, bg: "2dd4bf,14b8a6,0f766e", hair: "short05", skinColor: "ecad80", hairColor: "562306", eyes: "variant10" },
     { name: "Enzo", slug: "enzo", seed: "Enzo-Knol", female: false, bg: "f97316,ea580c,c2410c", hair: "short09", beard: "variant02", skinColor: "f2d3b1", hairColor: "562306", eyes: "variant11" },
     { name: "Safiya", slug: "safiya", seed: "Safiya-Nygaard", female: true, bg: "a78bfa,8b5cf6,6d28d9", hair: "long26", glasses: "variant02", skinColor: "9e5622", hairColor: "0e0e0e", eyes: "variant15" },
     { name: "Gio", slug: "gio", seed: "Gio-Scott", female: false, bg: "60a5fa,3b82f6,1d4ed8", hair: "short07", beard: "variant03", skinColor: "ecad80", hairColor: "562306", eyes: "variant10" },
@@ -70,7 +70,7 @@
     xQc: ["gaming", "stream"],
     Nikkie: ["beauty"],
     IShowSpeed: ["gaming", "stream"],
-    Wengie: ["beauty"],
+    Anas: ["gaming", "vlog"],
     Enzo: ["dutch", "vlog"],
     Safiya: ["vlog", "beauty"],
     Gio: ["gaming"],
@@ -89,6 +89,7 @@
       portrait: PORTRAITS + c.slug + ".png",
       avatar: c,
       tags: CREATOR_TAGS[c.name] || [],
+      customPhoto: Boolean(c.customPhoto),
     };
   });
 
@@ -158,6 +159,11 @@
     const girl = isGirl(name);
     const t = getTraits(name);
     photoWrap.classList.remove("card-photo--real", "card-photo--avatar", "card-photo--creator");
+    if (t.customPhoto) {
+      photoWrap.classList.add("card-photo--portrait", "card-photo--real", "card-photo--color");
+      photoWrap.classList.add(girl ? "card-photo--girl" : "card-photo--boy");
+      return;
+    }
     photoWrap.classList.add(
       "card-photo--portrait",
       "card-photo--illustrated",
@@ -173,8 +179,16 @@
     }
   }
 
-  function applyImgFilter(img) {
+  function applyImgFilter(img, name) {
     if (!img) return;
+    const t = getTraits(name);
+    if (t.customPhoto) {
+      img.style.filter =
+        "saturate(1.05) contrast(1.04) brightness(1.02) drop-shadow(0 2px 8px rgba(0,0,0,0.25))";
+      img.style.objectFit = "cover";
+      img.style.objectPosition = "center 18%";
+      return;
+    }
     img.style.filter =
       "saturate(1.22) contrast(1.05) brightness(1.06) drop-shadow(0 3px 10px rgba(139,92,246,0.4))";
   }

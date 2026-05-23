@@ -39,7 +39,7 @@ const ROSTER = [
   { name: "xQc", slug: "xqc", seed: "xQc-Felix", female: false, bg: "94a3b8,64748b,334155", hair: "short01", beard: "variant02", skinColor: "f2d3b1", hairColor: "afafaf", eyes: "variant07" },
   { name: "Nikkie", slug: "nikkie", seed: "NikkieTutorials", female: true, bg: "e879f9,d946ef,a21caf", hair: "long04", glasses: "variant05", skinColor: "f2d3b1", hairColor: "e5d7a3", eyes: "variant16" },
   { name: "IShowSpeed", slug: "ishowspeed", seed: "IShowSpeed-Darren", female: false, bg: "ef4444,dc2626,991b1b", hair: "short15", skinColor: "9e5622", hairColor: "0e0e0e", eyes: "variant18" },
-  { name: "Wengie", slug: "wengie", seed: "Wengie-Wendy", female: true, bg: "2dd4bf,14b8a6,0f766e", hair: "long02", skinColor: "ecad80", hairColor: "592454", eyes: "variant14" },
+  { name: "Anas", slug: "anas", seed: "Anas-Custom", female: false, bg: "2dd4bf,14b8a6,0f766e", hair: "short05", skinColor: "ecad80", hairColor: "562306", eyes: "variant10" },
   { name: "Enzo", slug: "enzo", seed: "Enzo-Knol", female: false, bg: "f97316,ea580c,c2410c", hair: "short09", beard: "variant02", skinColor: "f2d3b1", hairColor: "562306", eyes: "variant11" },
   { name: "Safiya", slug: "safiya", seed: "Safiya-Nygaard", female: true, bg: "a78bfa,8b5cf6,6d28d9", hair: "long26", glasses: "variant02", skinColor: "9e5622", hairColor: "0e0e0e", eyes: "variant15" },
   { name: "Gio", slug: "gio", seed: "Gio-Scott", female: false, bg: "60a5fa,3b82f6,1d4ed8", hair: "short07", beard: "variant03", skinColor: "ecad80", hairColor: "562306", eyes: "variant10" },
