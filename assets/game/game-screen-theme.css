@@ -4,6 +4,10 @@
   background: #05030c !important;
 }
 
+.screen-game-view .glow {
+  display: none !important;
+}
+
 .screen-game-view .game-bg-photo {
   display: block !important;
   position: absolute;
