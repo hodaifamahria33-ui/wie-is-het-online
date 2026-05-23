@@ -22,7 +22,7 @@
   <link rel="stylesheet" href="assets/game/mode-screen.css?v=8" />
   <link rel="stylesheet" href="assets/game/support-screen.css?v=1" />
   <link rel="stylesheet" href="assets/game/stripe-donate.css?v=1" />
-  <link rel="stylesheet" href="assets/game/joined-screen.css?v=2" />
+  <link rel="stylesheet" href="assets/game/joined-screen.css?v=5" />
   <link rel="stylesheet" href="assets/game/lobby-screen.css?v=1" />
   <link rel="stylesheet" href="assets/game/code-screen.css?v=2" />
   <link rel="stylesheet" href="assets/game/premium-game.css?v=46" />
@@ -500,51 +500,14 @@
         return;
       }
       code = code.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 5);
-      var load = document.getElementById("screen-photo-load");
-      var joinedCode = document.getElementById("joined-code");
-      function finish() {
-        if (joinedCode) joinedCode.textContent = code;
-        window.wieShowOnly("screen-joined");
-        window.wieInitLobby("guest");
-        var status = document.getElementById("joined-status");
-        if (status) status.textContent = window.wieMsg("joinConnecting");
-        var tries = 0;
-        (function waitConnect() {
-          if (window.wieApp && window.wieApp.connectGuest) {
-            window.wieApp.connectGuest(code).catch(function (e) {
-              var s = String((e && e.message) || (e && e.type) || e || "").toLowerCase();
-              var nf =
-                s.indexOf("lobby-not-found") >= 0 ||
-                s.indexOf("unavailable") >= 0 ||
-                s.indexOf("conn-timeout") >= 0 ||
-                s.indexOf("conn-closed") >= 0 ||
-                s.indexOf("no-connection") >= 0;
-              if (nf) {
-                window.wieShowOnly("screen-join");
-                if (errEl) errEl.textContent = window.wieMsg("joinWrongCode");
-                return;
-              }
-              if (status) {
-                status.textContent = window.wieMsg("joinFailed");
-                status.classList.add("error");
-              }
-            });
-            return;
-          }
-          if (++tries < 120) setTimeout(waitConnect, 50);
-        })();
-      }
-      if (load) {
-        window.wieShowOnly("screen-photo-load");
-        load.classList.add("active");
-        setTimeout(function () {
-          load.classList.remove("active");
-          load.classList.add("hidden");
-          finish();
-        }, 1200);
-      } else {
-        finish();
-      }
+      var tries = 0;
+      (function waitApp() {
+        if (window.wieApp && window.wieApp.joinWithCode) {
+          window.wieApp.joinWithCode();
+          return;
+        }
+        if (++tries < 120) setTimeout(waitApp, 50);
+      })();
     };
   </script>
   <style>
@@ -2452,8 +2415,8 @@
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
   <link rel="stylesheet" href="assets/game/game-screen-theme.css?v=6" />
   <script src="assets/game/start-music.js?v=43"></script>
-  <script src="assets/game/online-room.js?v=46"></script>
-  <script src="assets/game/lobby-room.js?v=40"></script>
+  <script src="assets/game/online-room.js?v=47"></script>
+  <script src="assets/game/lobby-room.js?v=41"></script>
   <script src="assets/game/character-traits.js?v=56"></script>
   <script src="assets/game/rank-system.js?v=2"></script>
   <script src="assets/game/ranked-queue.js?v=1"></script>
@@ -2572,6 +2535,7 @@
         loadingSub: "Foto's worden geladen",
         joinLoadTitle: "Je zit erbij!",
         joinLoadSub: "Lobby wordt geladen…",
+        joinConnectingTitle: "Meedoen…",
         joinedKicker: "In het potje",
         joinKicker: "Meedoen",
         joinTitle: 'Vul de <span class="code-accent">code</span> in',
@@ -2807,6 +2771,7 @@
         loadingSub: "Loading photos",
         joinLoadTitle: "You're in!",
         joinLoadSub: "Loading lobby…",
+        joinConnectingTitle: "Joining…",
         joinedKicker: "In the game",
         joinKicker: "Join",
         joinTitle: 'Enter the <span class="code-accent">code</span>',
@@ -3213,6 +3178,7 @@
 
     const TRANSITION_MS = 300;
     const PHOTO_LOAD_MS = 2000;
+    const GUEST_JOIN_SUCCESS_MS = 700;
     const COUNTDOWN_SEC = 3;
     let busy = false;
     let countdownTimeout = null;
@@ -3751,6 +3717,7 @@
     }
 
     function ensureStartScreenVisible() {
+      if (sessionMode === "guest" || sessionMode === "host") return;
       if (window.wieSetStartBg) window.wieSetStartBg(true);
       clearCountdown();
       busy = false;
@@ -3936,6 +3903,7 @@
         joinLoadCodeEl.textContent = c;
         joinLoadCodeEl.style.display = c ? "block" : "none";
       }
+      if (screenPhotoLoad) screenPhotoLoad.classList.remove("is-connecting");
       const barFill = screenPhotoLoad && screenPhotoLoad.querySelector(".join-load-bar-fill");
       if (barFill) {
         barFill.style.animation = "none";
@@ -3962,6 +3930,161 @@
           console.warn("runJoinLoading onDone", err);
         }
       }, PHOTO_LOAD_MS);
+    }
+
+    function openGuestJoinLoading(code, connecting) {
+      const c = String(code || "")
+        .toUpperCase()
+        .replace(/[^A-Z0-9]/g, "")
+        .slice(0, 5);
+      [
+        screenStart,
+        screenMode,
+        screenBotDiff,
+        screenMenu,
+        screenHost,
+        screenLobby,
+        screenJoin,
+        screenJoined,
+      ].forEach((s) => s && s.classList.add("hidden"));
+      if (joinLoadTitle) {
+        joinLoadTitle.textContent = connecting ? t("joinConnectingTitle") : t("joinLoadTitle");
+      }
+      if (joinLoadSub) {
+        joinLoadSub.textContent = connecting ? t("joinConnecting") : t("joinLoadSub");
+      }
+      if (joinLoadCodeEl) {
+        joinLoadCodeEl.textContent = c;
+        joinLoadCodeEl.style.display = c ? "block" : "none";
+      }
+      const loadBg = screenPhotoLoad && screenPhotoLoad.querySelector(".join-load-bg");
+      if (loadBg) loadBg.src = "assets/game/join-bg.png?v=1";
+      if (screenPhotoLoad) {
+        screenPhotoLoad.classList.toggle("is-connecting", !!connecting);
+        if (connecting) {
+          screenPhotoLoad.style.setProperty("--load-ms", "45000ms");
+        } else {
+          screenPhotoLoad.style.setProperty("--load-ms", GUEST_JOIN_SUCCESS_MS + "ms");
+        }
+      }
+      const barFill = screenPhotoLoad && screenPhotoLoad.querySelector(".join-load-bar-fill");
+      if (barFill) {
+        barFill.style.animation = "none";
+        void barFill.offsetWidth;
+        barFill.style.animation = "";
+      }
+      if (screenPhotoLoad) {
+        screenPhotoLoad.classList.remove("hidden");
+        requestAnimationFrame(() => screenPhotoLoad.classList.add("active"));
+      }
+    }
+
+    function hideJoinLoadingImmediate() {
+      if (!screenPhotoLoad) return;
+      screenPhotoLoad.style.transition = "none";
+      screenPhotoLoad.classList.remove("active", "is-connecting");
+      screenPhotoLoad.classList.add("hidden");
+      screenPhotoLoad.style.display = "none";
+      requestAnimationFrame(() => {
+        if (screenPhotoLoad) screenPhotoLoad.style.transition = "";
+      });
+    }
+
+    function prepareGuestLobby(code) {
+      const c = String(code || "")
+        .toUpperCase()
+        .replace(/[^A-Z0-9]/g, "")
+        .slice(0, 5);
+      hideJoinLoadingImmediate();
+      if (window.wieShowOnly) {
+        window.wieShowOnly("screen-joined");
+      }
+      document.querySelectorAll("main.screen").forEach((el) => {
+        el.classList.remove(
+          "transition-out",
+          "transition-active",
+          "transition-in-from-right",
+          "transition-in-from-left"
+        );
+        if (el === screenJoined) {
+          el.classList.remove("hidden", "join-error");
+          el.style.display = "";
+          el.style.opacity = "1";
+          el.style.visibility = "visible";
+          el.classList.add("transition-active");
+        } else {
+          el.classList.add("hidden");
+          if (el === screenPhotoLoad) el.style.display = "none";
+        }
+      });
+      if (joinedCode) joinedCode.textContent = c;
+      const card = screenJoined && screenJoined.querySelector(".joined-main");
+      if (card && card.scrollIntoView) {
+        try {
+          card.scrollIntoView({ block: "start", behavior: "instant" });
+        } catch (_) {
+          card.scrollIntoView(true);
+        }
+      }
+      return c;
+    }
+
+    function showGuestLobby(code) {
+      prepareGuestLobby(code);
+    }
+
+    async function runGuestJoinFlow(code) {
+      if (joinBusy) return;
+      const c = String(code || "")
+        .toUpperCase()
+        .replace(/[^A-Z0-9]/g, "")
+        .slice(0, 5);
+      if (!c) {
+        if (joinError) joinError.textContent = t("errJoinEmpty");
+        return;
+      }
+      joinBusy = true;
+      const btnJoin = document.getElementById("btn-join-game");
+      if (btnJoin) btnJoin.disabled = true;
+      if (joinError) joinError.textContent = "";
+      prepareGuestLobby(c);
+      setJoinedStatus("joinConnecting", false);
+      try {
+        await connectGuestWithRetry(c, {
+          wire: false,
+          onProgress(attempt, max) {
+            if (joinedStatus) {
+              joinedStatus.textContent = t("joinRetrying") + " (" + (attempt + 1) + "/" + max + ")";
+            }
+          },
+        });
+        sessionMode = "guest";
+        sessionCode = c;
+        showGuestLobby(c);
+        setJoinedStatus("joinConnected", false);
+        wireGuestOnline();
+        window.setTimeout(() => {
+          if (sessionMode === "guest" && screenJoined && screenJoined.classList.contains("hidden")) {
+            showGuestLobby(sessionCode);
+          }
+        }, 400);
+      } catch (e) {
+        console.warn("join failed", e);
+        hideJoinLoadingImmediate();
+        if (window.WieIsHetOnline) WieIsHetOnline.reset();
+        sessionMode = "solo";
+        if (joinError) {
+          joinError.textContent = isLobbyNotFound(e) ? t("joinWrongCode") : t("joinFailed");
+        }
+        screenJoin.classList.remove("hidden");
+        if (screenJoined) screenJoined.classList.add("hidden");
+        [screenStart, screenMode, screenMenu, screenHost, screenLobby].forEach((s) =>
+          s && s.classList.add("hidden")
+        );
+      } finally {
+        joinBusy = false;
+        if (btnJoin) btnJoin.disabled = false;
+      }
     }
 
     const joinedStatus = document.getElementById("joined-status");
@@ -4012,16 +4135,18 @@
       el.classList.toggle("error", !online);
     }
 
-    async function connectGuestWithRetry(code) {
+    async function connectGuestWithRetry(code, opts) {
+      const options = opts || {};
       const c = code.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 5);
       if (!c || !window.WieIsHetOnline) throw new Error("no-online");
       setJoinedStatus("joinConnecting", false);
       if (joinError) joinError.textContent = t("joinConnecting");
       if (btnJoinRetry) btnJoinRetry.classList.add("hidden");
-      const maxAttempts = 16;
+      const maxAttempts = 8;
       let lastErr = null;
       for (let attempt = 0; attempt < maxAttempts; attempt++) {
         try {
+          if (options.onProgress) options.onProgress(attempt, maxAttempts);
           WieIsHetOnline.reset();
           await WieIsHetOnline.setupGuest(c);
           if (!WieIsHetOnline.isConnected()) {
@@ -4030,24 +4155,23 @@
           sessionMode = "guest";
           sessionCode = c;
           setJoinedStatus("joinConnected", false);
-          wireGuestOnline();
-          return true;
+          if (options.wire !== false) wireGuestOnline();
+          return c;
         } catch (e) {
           lastErr = e;
           console.warn("join attempt", attempt + 1, e);
           if (attempt >= maxAttempts - 1) throw e;
           if (joinError) joinError.textContent = t("joinRetrying");
+          if (joinLoadSub) joinLoadSub.textContent = t("joinRetrying") + " (" + (attempt + 2) + "/" + maxAttempts + ")";
           setJoinedStatus("joinConnecting", false);
-          await new Promise((r) => setTimeout(r, 1800));
+          await new Promise((r) => setTimeout(r, 1100));
         }
       }
       throw lastErr || new Error("join-failed");
     }
 
     function showJoinedScreen(code) {
-      joinedCode.textContent = code.toUpperCase();
-      screenJoined.classList.remove("hidden", "join-error");
-      screenJoined.classList.add("transition-active");
+      showGuestLobby(code);
     }
 
     function backToJoinWithError(messageKey) {
@@ -4059,7 +4183,7 @@
           : messageKey;
       if (joinError) joinError.textContent = t(msgKey);
       if (joinCodeInput && joinedCode) joinCodeInput.value = joinedCode.textContent.trim();
-      if (screenPhotoLoad) screenPhotoLoad.classList.add("hidden");
+      hideJoinLoadingImmediate();
       screenJoined.classList.add("hidden");
       screenJoined.classList.remove("join-error", "transition-active");
       screenJoin.classList.remove("hidden");
@@ -4067,25 +4191,7 @@
     }
 
     function joinViaLink(code) {
-      const c = code.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 5);
-      if (!c) return;
-      [screenStart, screenMode, screenBotDiff, screenMenu, screenHost, screenLobby, screenJoin].forEach((s) =>
-        s.classList.add("hidden")
-      );
-      runJoinLoading(
-        c,
-        () => {
-          showJoinedScreen(c);
-          connectGuestWithRetry(c).catch((e) => {
-            if (isLobbyNotFound(e)) backToJoinWithError("joinWrongCode");
-            else {
-              sessionMode = "solo";
-              setJoinedStatus("joinFailed", true);
-            }
-          });
-        },
-        "guest"
-      );
+      runGuestJoinFlow(code);
     }
 
     if (btnJoinRetry) {
@@ -4362,43 +4468,8 @@
     }
 
     async function doJoinWithCode() {
-      if (joinBusy) return;
       const code = joinCodeInput ? joinCodeInput.value.trim() : "";
-      if (!code) {
-        if (joinError) joinError.textContent = t("errJoinEmpty");
-        return;
-      }
-      joinBusy = true;
-      const btnJoin = document.getElementById("btn-join-game");
-      if (btnJoin) btnJoin.disabled = true;
-      if (joinError) joinError.textContent = t("joinConnecting");
-      try {
-        const c = await connectGuestWithRetry(code);
-        sessionMode = "guest";
-        sessionCode = c;
-        if (joinError) joinError.textContent = "";
-        screenJoin.classList.add("hidden");
-        runJoinLoading(
-          c,
-          () => {
-            showJoinedScreen(c);
-            setJoinedStatus("joinConnected", false);
-            wireGuestOnline();
-          },
-          "guest"
-        );
-      } catch (e) {
-        console.warn("join failed", e);
-        if (window.WieIsHetOnline) WieIsHetOnline.reset();
-        sessionMode = "solo";
-        if (joinError) {
-          joinError.textContent = isLobbyNotFound(e) ? t("joinWrongCode") : t("joinFailed");
-        }
-        screenJoin.classList.remove("hidden");
-      } finally {
-        joinBusy = false;
-        if (btnJoin) btnJoin.disabled = false;
-      }
+      await runGuestJoinFlow(code);
     }
 
     onClick("btn-make-pot", doMakePot);

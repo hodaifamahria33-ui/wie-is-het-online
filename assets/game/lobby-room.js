@@ -226,10 +226,16 @@
       role = "guest";
       if (ui.chatGuest) ui.chatGuest.innerHTML = "";
       ensureChatBound();
-      if (ui.inputGuest) {
+      var isMobile = window.matchMedia("(max-width: 720px), (hover: none) and (pointer: coarse)").matches;
+      if (ui.inputGuest && !isMobile) {
         ui.inputGuest.disabled = false;
         ui.inputGuest.readOnly = false;
-        setTimeout(() => ui.inputGuest.focus(), 100);
+        setTimeout(function () {
+          ui.inputGuest.focus();
+        }, 100);
+      } else if (ui.inputGuest) {
+        ui.inputGuest.disabled = false;
+        ui.inputGuest.readOnly = false;
       }
       addSystemLine(tFn("lobbyChatHint"));
       refreshAllPlayers();

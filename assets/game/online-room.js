@@ -3,8 +3,8 @@
  */
 (function () {
   const PEER_PREFIX = "wieishet-";
-  const PEER_TIMEOUT_MS = 28000;
-  const CONN_TIMEOUT_MS = 14000;
+  const PEER_TIMEOUT_MS = 20000;
+  const CONN_TIMEOUT_MS = 10000;
   const HOST_PROBE_MS = 2500;
   const PEER_CLOUD = "https://0.peerjs.com";
   const PEER_PATH = "/peerjs";
@@ -326,7 +326,7 @@
       const sanitized = sanitizeCode(code);
       if (!sanitized) throw new Error("empty-code");
 
-      const maxAttempts = 14;
+      const maxAttempts = 6;
       let lastErr = null;
       for (let attempt = 0; attempt < maxAttempts; attempt++) {
         try {
@@ -340,7 +340,7 @@
           lastErr = mapJoinError(e);
           console.warn("setupGuest attempt", attempt + 1, lastErr.message);
           if (attempt < maxAttempts - 1) {
-            await sleep(1600 + attempt * 350);
+            await sleep(700 + attempt * 250);
           }
         }
       }
