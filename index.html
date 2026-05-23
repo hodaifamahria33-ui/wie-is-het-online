@@ -18,7 +18,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Nunito:wght@600;700;800&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/game/start-screen.css?v=51" />
+  <link rel="stylesheet" href="assets/game/start-screen.css?v=52" />
   <link rel="stylesheet" href="assets/game/mode-screen.css?v=8" />
   <link rel="stylesheet" href="assets/game/support-screen.css?v=1" />
   <link rel="stylesheet" href="assets/game/stripe-donate.css?v=1" />
@@ -1925,7 +1925,7 @@
             data-i18n-aria="btnBeginAria"
             onclick="window.wieGoBegin()"
           >
-            LATEN WE BEGINNEN
+            START
           </button>
           <p class="start-tagline" data-i18n="startTagline">Raad de verborgen persoon en ontdek wie jij bent!</p>
         </div>
@@ -1944,7 +1944,7 @@
     <p class="seo-brand">wiehasit.com</p>
   </main>
 
-  <!-- Naam kiezen (na LATEN WE BEGINNEN) -->
+  <!-- Naam kiezen (na START) -->
   <main id="screen-name" class="screen screen-mode-view screen-name-view hidden">
     <img class="mode-bg-photo" src="assets/game/backgrounds/arena-start-bg.png?v=2" alt="" aria-hidden="true" decoding="async" />
     <div class="mode-overlay" aria-hidden="true"></div>
@@ -2468,8 +2468,8 @@
         startOnlineBadge: "ONLINE",
         startTagline: "Raad de verborgen persoon en ontdek wie jij bent!",
         startNameLabel: "Jouw naam in het spel",
-        btnBegin: "LATEN WE BEGINNEN",
-        btnBeginAria: "Laten we beginnen — kies je naam",
+        btnBegin: "START",
+        btnBeginAria: "Start — kies je naam",
         musicAria: "Muziek aan of uit",
         nameKicker: "Stap 1",
         nameTitle: "Typ je naam",
@@ -2700,8 +2700,8 @@
         startOnlineBadge: "ONLINE",
         startTagline: "Guess the hidden person and discover who you are!",
         startNameLabel: "Your name in the game",
-        btnBegin: "LET'S BEGIN",
-        btnBeginAria: "Let's begin — enter your name",
+        btnBegin: "START",
+        btnBeginAria: "Start — enter your name",
         musicAria: "Toggle music",
         nameKicker: "Step 1",
         nameTitle: "Type your name",
@@ -3007,22 +3007,34 @@
       const names = WieCharacterArt.CARD_NAMES || [];
       const total = Math.min(12, names.length);
       ring.innerHTML = "";
+      const orbit = document.createElement("div");
+      orbit.className = "start-char-orbit";
       for (let i = 0; i < total; i++) {
         const name = names[i];
+        const slot = document.createElement("div");
+        slot.className = "start-char-slot";
+        slot.style.setProperty("--i", String(i));
+        slot.style.setProperty("--n", String(total));
         const card = document.createElement("div");
         card.className =
           "start-char-card " +
           (WieCharacterArt.isGirl(name) ? "start-char-card--girl" : "start-char-card--boy");
         card.style.setProperty("--i", String(i));
-        card.style.setProperty("--n", String(total));
+        const upright = document.createElement("div");
+        upright.className = "start-char-upright";
+        upright.style.setProperty("--i", String(i));
+        upright.style.setProperty("--n", String(total));
         const img = document.createElement("img");
         img.src = WieCharacterArt.cardAvatarUrl(name);
         img.alt = "";
         img.loading = "lazy";
         img.decoding = "async";
         card.appendChild(img);
-        ring.appendChild(card);
+        upright.appendChild(card);
+        slot.appendChild(upright);
+        orbit.appendChild(slot);
       }
+      ring.appendChild(orbit);
     }
 
     buildStartCharRing();
