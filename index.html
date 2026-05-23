@@ -18,7 +18,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Nunito:wght@600;700;800&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/game/start-screen.css?v=55" />
+  <link rel="stylesheet" href="assets/game/start-screen.css?v=56" />
   <link rel="stylesheet" href="assets/game/mode-screen.css?v=8" />
   <link rel="stylesheet" href="assets/game/support-screen.css?v=1" />
   <link rel="stylesheet" href="assets/game/stripe-donate.css?v=1" />
@@ -1899,52 +1899,33 @@
     </div>
   </div>
 
-  <!-- Scherm 1: beginscherm -->
-  <main id="screen-start" class="screen screen-start">
-    <img class="start-bg-photo" src="assets/game/backgrounds/arena-start-bg.png?v=3" alt="" aria-hidden="true" decoding="async" fetchpriority="high" />
-    <div class="start-overlay" aria-hidden="true"></div>
+  <!-- Scherm 1: beginscherm — alleen jouw achtergrondfoto + klikvlakken -->
+  <main id="screen-start" class="screen screen-start screen-start--photo">
+    <img class="start-bg-photo" src="assets/game/backgrounds/arena-start-bg.png?v=4" alt="" aria-hidden="true" decoding="async" fetchpriority="high" />
     <button id="btn-music-toggle" class="btn-music-toggle" type="button" aria-pressed="false" data-i18n-aria="musicAria" aria-label="Muziek aan/uit">🔊</button>
 
+    <h1 class="start-sr-only">
+      <span data-i18n-html="startTitleHtml">Wie <span class="start-word-ben">Ben</span> Ik?</span>
+      <span data-i18n="startOnlineBadge">Online</span>
+    </h1>
 
-    <div class="start-scene">
-      <div class="start-stage">
-        <div id="start-char-ring" class="start-char-ring" aria-hidden="true"></div>
-        <div class="start-hero-hub">
-          <span class="start-bulb" aria-hidden="true">💡</span>
-          <h1 id="start-title" class="start-title start-title--hub">
-            <span class="start-title-main" data-i18n-html="startTitleHtml">Wie <span class="start-word-ben">Ben</span> Ik?</span>
-            <span class="start-title-online" data-i18n="startOnlineBadge">Online</span>
-          </h1>
-        </div>
-      </div>
-
-      <div class="start-bottom">
-        <div class="start-actions">
-          <button
-            id="btn-begin"
-            class="btn-start-begin"
-            type="button"
-            data-i18n="btnBegin"
-            data-i18n-aria="btnBeginAria"
-            onclick="window.wieGoBegin()"
-          >
-            START
-          </button>
-          <p class="start-tagline" data-i18n="startTagline">Raad de verborgen persoon en ontdek wie jij bent!</p>
-        </div>
-        <nav class="start-support-bar start-support-bar--inline" aria-label="Steun en deel">
-          <button type="button" class="start-support-btn" onclick="window.wieOpenSupport('screen-start')">
-            <span aria-hidden="true">❤️</span>
-            <span data-i18n="btnSupport">Steun</span>
-          </button>
-          <button type="button" class="start-support-btn" onclick="window.wieShareGame()">
-            <span aria-hidden="true">📤</span>
-            <span data-i18n="btnShareGame">Deel</span>
-          </button>
-        </nav>
-      </div>
+    <div class="start-tap-layer">
+      <button
+        id="btn-begin"
+        class="start-tap start-tap--begin"
+        type="button"
+        data-i18n-aria="btnBeginAria"
+        onclick="window.wieGoBegin()"
+      >
+        <span data-i18n="btnBegin">START</span>
+      </button>
+      <button type="button" class="start-tap start-tap--support" onclick="window.wieOpenSupport('screen-start')">
+        <span data-i18n="btnSupport">Steun</span>
+      </button>
+      <button type="button" class="start-tap start-tap--share" onclick="window.wieShareGame()">
+        <span data-i18n="btnShareGame">Deel</span>
+      </button>
     </div>
-    <p class="seo-brand">wiehasit.com</p>
   </main>
 
   <!-- Naam kiezen (na START) -->
@@ -3004,49 +2985,14 @@
 
     applyLanguage();
 
-    const START_RING_COLORS = ["blue", "pink", "orange", "green", "yellow"];
-
-    function buildStartCharRing() {
-      const ring = document.getElementById("start-char-ring");
-      if (!ring || !window.WieCharacterArt) return;
-      const names = WieCharacterArt.CARD_NAMES || [];
-      const total = Math.min(12, names.length);
-      ring.innerHTML = "";
-      const orbit = document.createElement("div");
-      orbit.className = "start-char-orbit";
-      for (let i = 0; i < total; i++) {
-        const name = names[i];
-        const slot = document.createElement("div");
-        slot.className = "start-char-slot";
-        slot.style.setProperty("--i", String(i));
-        slot.style.setProperty("--n", String(total));
-        const card = document.createElement("div");
-        card.className =
-          "start-char-card start-char-card--" + START_RING_COLORS[i % START_RING_COLORS.length];
-        card.style.setProperty("--i", String(i));
-        const img = document.createElement("img");
-        img.src = WieCharacterArt.cardAvatarUrl(name);
-        img.alt = "";
-        img.loading = "lazy";
-        img.decoding = "async";
-        card.appendChild(img);
-        slot.appendChild(card);
-        orbit.appendChild(slot);
-      }
-      ring.appendChild(orbit);
-    }
-
-    buildStartCharRing();
-
+    const btnBeginEl = document.getElementById("btn-begin");
+    const btnMusicToggle = document.getElementById("btn-music-toggle");
     const screenStart = document.getElementById("screen-start");
     const screenName = document.getElementById("screen-name");
     const screenMode = document.getElementById("screen-mode");
     const screenSupport = document.getElementById("screen-support");
     const playerNameInput = document.getElementById("player-name-input");
     const nameError = document.getElementById("name-error");
-
-    const btnBeginEl = document.getElementById("btn-begin");
-    const btnMusicToggle = document.getElementById("btn-music-toggle");
 
     function syncMusicButton() {
       if (!btnMusicToggle || !window.WieStartMusic) return;
