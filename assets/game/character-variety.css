@@ -1,4 +1,26 @@
-/* Realistische portretkaarten */
+/* YouTuber / creator portretkaarten */
+
+.card-photo.card-photo--creator {
+  background: linear-gradient(180deg, #1e1b4b 0%, #450a0a 100%) !important;
+}
+
+.card-photo.card-photo--creator::before {
+  content: "▶";
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  z-index: 2;
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 8px;
+  line-height: 16px;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+  pointer-events: none;
+}
 
 .card-photo.card-photo--portrait {
   background: linear-gradient(180deg, #1e1b4b 0%, #0f0a1e 100%) !important;
@@ -58,7 +80,7 @@
   color: #f8fafc !important;
   font-family: "Nunito", "Outfit", sans-serif !important;
   font-weight: 800 !important;
-  font-size: clamp(0.48rem, 1.35vw, 0.68rem) !important;
+  font-size: clamp(0.38rem, 1.1vw, 0.58rem) !important;
   letter-spacing: 0.08em !important;
   text-transform: uppercase;
   padding: 4px 2px 5px !important;
