@@ -18,7 +18,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Nunito:wght@600;700;800&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/game/start-screen.css?v=56" />
+  <link rel="stylesheet" href="assets/game/start-screen.css?v=57" />
   <link rel="stylesheet" href="assets/game/mode-screen.css?v=8" />
   <link rel="stylesheet" href="assets/game/support-screen.css?v=1" />
   <link rel="stylesheet" href="assets/game/stripe-donate.css?v=1" />
@@ -171,7 +171,7 @@
     };
     window.wieSetStartBg = function (on) {
       document.documentElement.classList.toggle("start-screen-active", !!on);
-      document.documentElement.style.backgroundColor = on ? "#d4f1ff" : "#1a0f2e";
+      document.documentElement.style.backgroundColor = on ? "#05030a" : "#1a0f2e";
     };
     window.wieGoBegin = function () {
       if (window.wieApp && window.wieApp.goName) return window.wieApp.goName();
@@ -595,7 +595,12 @@
 
     .screen.screen-start,
     #screen-start.screen-start {
-      background: #07050f !important;
+      background: #05030a !important;
+      cursor: pointer;
+    }
+
+    html.start-screen-active .lang-picker {
+      display: none !important;
     }
 
     .screen.hidden { display: none; }
@@ -1899,33 +1904,27 @@
     </div>
   </div>
 
-  <!-- Scherm 1: beginscherm — alleen jouw achtergrondfoto + klikvlakken -->
-  <main id="screen-start" class="screen screen-start screen-start--photo">
-    <img class="start-bg-photo" src="assets/game/backgrounds/arena-start-bg.png?v=4" alt="" aria-hidden="true" decoding="async" fetchpriority="high" />
-    <button id="btn-music-toggle" class="btn-music-toggle" type="button" aria-pressed="false" data-i18n-aria="musicAria" aria-label="Muziek aan/uit">🔊</button>
-
+  <!-- Scherm 1: beginscherm — alleen achtergrondfoto -->
+  <main
+    id="screen-start"
+    class="screen screen-start"
+    role="button"
+    tabindex="0"
+    data-i18n-aria="btnBeginAria"
+    aria-label="Start — tik om te beginnen"
+  >
+    <img
+      class="start-bg-photo"
+      src="assets/game/backgrounds/arena-start-bg.png?v=5"
+      alt=""
+      aria-hidden="true"
+      decoding="async"
+      fetchpriority="high"
+    />
     <h1 class="start-sr-only">
       <span data-i18n-html="startTitleHtml">Wie <span class="start-word-ben">Ben</span> Ik?</span>
       <span data-i18n="startOnlineBadge">Online</span>
     </h1>
-
-    <div class="start-tap-layer">
-      <button
-        id="btn-begin"
-        class="start-tap start-tap--begin"
-        type="button"
-        data-i18n-aria="btnBeginAria"
-        onclick="window.wieGoBegin()"
-      >
-        <span data-i18n="btnBegin">START</span>
-      </button>
-      <button type="button" class="start-tap start-tap--support" onclick="window.wieOpenSupport('screen-start')">
-        <span data-i18n="btnSupport">Steun</span>
-      </button>
-      <button type="button" class="start-tap start-tap--share" onclick="window.wieShareGame()">
-        <span data-i18n="btnShareGame">Deel</span>
-      </button>
-    </div>
   </main>
 
   <!-- Naam kiezen (na START) -->
@@ -2985,8 +2984,6 @@
 
     applyLanguage();
 
-    const btnBeginEl = document.getElementById("btn-begin");
-    const btnMusicToggle = document.getElementById("btn-music-toggle");
     const screenStart = document.getElementById("screen-start");
     const screenName = document.getElementById("screen-name");
     const screenMode = document.getElementById("screen-mode");
@@ -2995,38 +2992,26 @@
     const nameError = document.getElementById("name-error");
 
     function syncMusicButton() {
-      if (!btnMusicToggle || !window.WieStartMusic) return;
-      const on = !WieStartMusic.isMuted();
-      btnMusicToggle.textContent = on ? "🔊" : "🔇";
-      btnMusicToggle.classList.toggle("is-muted", !on);
-      btnMusicToggle.setAttribute("aria-pressed", on ? "true" : "false");
+      /* geen muziekknop op beginscherm */
     }
 
     function tryStartMusic() {
       if (!window.WieStartMusic) return;
       WieStartMusic.unlock();
       if (!WieStartMusic.isMuted()) WieStartMusic.play();
-      syncMusicButton();
     }
 
-    if (btnMusicToggle && window.WieStartMusic) {
-      btnMusicToggle.addEventListener("click", (e) => {
-        e.stopPropagation();
-        WieStartMusic.unlock();
-        WieStartMusic.toggle();
-        syncMusicButton();
-      });
-      syncMusicButton();
+    function handleStartScreenActivate(e) {
+      if (!screenStart || screenStart.classList.contains("hidden")) return;
+      if (e && e.type === "keydown" && e.key !== "Enter" && e.key !== " ") return;
+      if (e && e.type === "keydown") e.preventDefault();
+      tryStartMusic();
+      goToNameScreen();
     }
 
     if (screenStart) {
-      screenStart.addEventListener(
-        "click",
-        () => {
-          tryStartMusic();
-        },
-        { once: true }
-      );
+      screenStart.addEventListener("click", handleStartScreenActivate);
+      screenStart.addEventListener("keydown", handleStartScreenActivate);
     }
 
     let pendingJoinCode = null;
@@ -3110,13 +3095,6 @@
           : screenStart;
       transition(from, screenMode, "transition-in-from-right");
       setTimeout(refreshRankDisplays, 340);
-    }
-
-    if (btnBeginEl) {
-      btnBeginEl.addEventListener("click", (e) => {
-        e.preventDefault();
-        goToNameScreen();
-      });
     }
 
     if (playerNameInput) {
