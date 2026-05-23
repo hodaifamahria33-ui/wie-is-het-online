@@ -10,9 +10,12 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="mobile-web-app-capable" content="yes" />
-  <meta name="theme-color" content="#d4f1ff" />
-  <link rel="manifest" href="manifest.webmanifest" />
+  <meta name="theme-color" content="#1c1036" />
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#1c1036" />
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0f0a1e" />
+  <link rel="manifest" href="manifest.json" />
   <link rel="icon" href="og-image.png" type="image/png" />
   <link rel="apple-touch-icon" href="og-image.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -4661,5 +4664,16 @@
     refreshRankDisplays();
   </script>
   <div id="wie-toast" class="wie-toast hidden" role="status" aria-live="polite"></div>
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", function () {
+        navigator.serviceWorker
+          .register("./service-worker.js", { scope: "./" })
+          .catch(function (err) {
+            console.warn("Service worker registration failed:", err);
+          });
+      });
+    }
+  </script>
 </body>
 </html>

@@ -4,7 +4,7 @@
   "description": "wiehasit.com — gratis Wie-is-het spel, 24/7 online. Open de link en speel meteen.",
   "start_url": "./index.html",
   "scope": "./",
-  "display": "standalone",
+  "display": "fullscreen",
   "background_color": "#1c1036",
   "theme_color": "#1c1036",
   "orientation": "any",
