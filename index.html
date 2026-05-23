@@ -392,9 +392,12 @@
     };
     window.wieGoHost = function () {
       if (window.wieApp && window.wieApp.goHost) return window.wieApp.goHost();
-      window.wieShowScreen("screen-menu", "screen-host");
-      var err = document.getElementById("host-error");
-      if (err) err.textContent = "";
+      var chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+      var code = "";
+      for (var i = 0; i < 5; i++) code += chars[Math.floor(Math.random() * chars.length)];
+      var input = document.getElementById("pot-code");
+      if (input) input.value = code;
+      window.wieMakePot();
     };
     window.wieGoJoin = function () {
       if (window.wieApp && window.wieApp.goJoin) return window.wieApp.goJoin();
@@ -417,8 +420,8 @@
       var errEl = document.getElementById("host-error");
       var code = input ? String(input.value).trim() : "";
       if (!code) {
-        if (errEl) errEl.textContent = window.wieMsg("errHostEmpty");
-        return;
+        var chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+        for (var i = 0; i < 5; i++) code += chars[Math.floor(Math.random() * chars.length)];
       }
       code = code.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 5);
       var load = document.getElementById("screen-photo-load");
@@ -2166,9 +2169,9 @@
     <div class="code-overlay" aria-hidden="true"></div>
     <section class="code-panel content">
       <p class="code-kicker" data-i18n="hostKicker">Nieuw potje</p>
-      <h2 data-i18n-html="hostTitle">Kies een <span class="code-accent">code</span></h2>
-      <p class="code-hint" data-i18n="hostHint">Max. 5 letters of cijfers — deel met vrienden</p>
-      <input id="pot-code" class="code-input" type="text" maxlength="5" placeholder="FUN42" autocomplete="off" autocapitalize="characters" />
+      <h2 data-i18n-html="hostTitle">Jouw <span class="code-accent">code</span></h2>
+      <p class="code-hint" data-i18n="hostHint">Automatisch gegenereerd — deel met vrienden</p>
+      <input id="pot-code" class="code-input code-input--readonly" type="text" maxlength="5" readonly aria-readonly="true" autocomplete="off" />
       <p id="host-error" class="code-error error"></p>
       <button id="btn-make-pot" class="code-btn code-btn--primary" type="button" data-i18n="btnMakePot" onclick="window.wieMakePot()">Potje maken</button>
       <button id="btn-host-back" class="code-btn code-btn-back back" type="button" data-i18n="btnBack" onclick="window.wieShowScreen('screen-host','screen-menu')">Terug</button>
@@ -2568,8 +2571,8 @@
         btnJoinMenu: "Meedoen met code",
         btnBack: "TERUG",
         hostKicker: "Nieuw potje",
-        hostTitle: 'Kies een <span class="code-accent">code</span>',
-        hostHint: "Max. 5 letters of cijfers — deel met vrienden",
+        hostTitle: 'Jouw <span class="code-accent">code</span>',
+        hostHint: "Automatisch gegenereerd — deel met vrienden",
         btnMakePot: "Potje maken",
         loadingTitle: "Potje wordt gemaakt…",
         loadingSub: "Foto's worden geladen",
@@ -2591,7 +2594,7 @@
         btnJoinRetry: "OPNIEUW VERBINDEN",
         lobbyKicker: "Host lobby",
         lobbyTitle: 'Je potje is<span class="accent">klaar!</span>',
-        lobbyHint: "Stuur deze link naar je vrienden — zij joinen automatisch",
+        lobbyHint: "Deel deze code of link — vrienden joinen via Meedoen met code",
         lobbyPlayersTitle: "In je potje",
         lobbyChatTitle: "Chat",
         lobbyChatPlaceholder: "Typ een bericht…",
@@ -2800,8 +2803,8 @@
         btnJoinMenu: "Join with code",
         btnBack: "BACK",
         hostKicker: "New game",
-        hostTitle: 'Pick a <span class="code-accent">code</span>',
-        hostHint: "Up to 5 letters or numbers — share with friends",
+        hostTitle: 'Your <span class="code-accent">code</span>',
+        hostHint: "Generated automatically — share with friends",
         btnMakePot: "Create game",
         loadingTitle: "Creating your game…",
         loadingSub: "Loading photos",
@@ -2823,7 +2826,7 @@
         btnJoinRetry: "RECONNECT",
         lobbyKicker: "Host lobby",
         lobbyTitle: 'Your game is<span class="accent">ready!</span>',
-        lobbyHint: "Send this link to your friends — they join automatically",
+        lobbyHint: "Share this code or link — friends join via Join with code",
         lobbyPlayersTitle: "In your game",
         lobbyChatTitle: "Chat",
         lobbyChatPlaceholder: "Type a message…",
@@ -4171,8 +4174,7 @@
     });
 
     onClick("btn-host", () => {
-      if (hostError) hostError.textContent = "";
-      transition(screenMenu, screenHost, "transition-in-from-right");
+      goHostAndCreatePot();
     });
 
     onClick("btn-host-back", () => {
@@ -4291,14 +4293,26 @@
       console.warn("wieishet error", event.message || event);
     });
 
-    function doMakePot() {
-      const code = potCodeInput ? potCodeInput.value.trim() : "";
-      if (!code) {
+    function generateRandomRoomCode() {
+      const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+      let code = "";
+      for (let i = 0; i < 5; i++) {
+        code += chars[(Math.random() * chars.length) | 0];
+      }
+      return code;
+    }
+
+    function createHostPot(rawCode) {
+      const pot = String(rawCode || "")
+        .toUpperCase()
+        .replace(/[^A-Z0-9]/g, "")
+        .slice(0, 5);
+      if (!pot) {
         if (hostError) hostError.textContent = t("errHostEmpty");
         return;
       }
-
-      const pot = code.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 5);
+      if (potCodeInput) potCodeInput.value = pot;
+      if (hostError) hostError.textContent = "";
       runJoinLoading(
         pot,
         () => {
@@ -4325,6 +4339,17 @@
         },
         "host"
       );
+    }
+
+    function goHostAndCreatePot() {
+      if (hostError) hostError.textContent = "";
+      busy = false;
+      createHostPot(generateRandomRoomCode());
+    }
+
+    function doMakePot() {
+      const code = potCodeInput ? potCodeInput.value.trim() : "";
+      createHostPot(code || generateRandomRoomCode());
     }
 
     async function doJoinWithCode() {
@@ -4487,11 +4512,7 @@
       continueName: continueFromNameScreen,
       nameBack: nameBackToStart,
       goMode: goToModeChoice,
-      goHost() {
-        if (hostError) hostError.textContent = "";
-        busy = false;
-        transition(screenMenu, screenHost, "transition-in-from-right");
-      },
+      goHost: goHostAndCreatePot,
       goJoin() {
         if (joinError) joinError.textContent = "";
         busy = false;
