@@ -18,7 +18,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Nunito:wght@600;700;800&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/game/start-screen.css?v=58" />
+  <link rel="stylesheet" href="assets/game/start-screen.css?v=59" />
   <link rel="stylesheet" href="assets/game/mode-screen.css?v=8" />
   <link rel="stylesheet" href="assets/game/support-screen.css?v=1" />
   <link rel="stylesheet" href="assets/game/stripe-donate.css?v=1" />
@@ -1905,29 +1905,31 @@
 
   <!-- Scherm 1: beginscherm -->
   <main id="screen-start" class="screen screen-start">
-    <div class="start-bg-wrap" aria-hidden="true">
-      <img
-        class="start-bg-photo"
-        src="assets/game/backgrounds/arena-start-bg.png?v=6"
-        alt=""
-        decoding="async"
-        fetchpriority="high"
-      />
-    </div>
+    <img
+      class="start-bg-photo"
+      src="assets/game/backgrounds/arena-start-bg.png?v=7"
+      alt=""
+      aria-hidden="true"
+      decoding="async"
+      fetchpriority="high"
+    />
 
-    <div class="start-stage">
-      <div id="start-char-ring" class="start-char-ring" aria-hidden="true"></div>
-      <div class="start-center-ui">
-        <button
-          id="btn-begin"
-          class="btn-start-glow"
-          type="button"
-          data-i18n="btnBegin"
-          data-i18n-aria="btnBeginAria"
-        >
-          START
-        </button>
-      </div>
+    <div class="start-tap-layer">
+      <button
+        id="btn-begin"
+        class="start-hit start-hit--begin"
+        type="button"
+        data-i18n-aria="btnBeginAria"
+      >
+        <span class="start-hit-glow" aria-hidden="true"></span>
+        <span data-i18n="btnBegin">START</span>
+      </button>
+      <button type="button" class="start-hit start-hit--support" onclick="window.wieOpenSupport('screen-start')">
+        <span data-i18n="btnSupport">Steun</span>
+      </button>
+      <button type="button" class="start-hit start-hit--share" onclick="window.wieShareGame()">
+        <span data-i18n="btnShareGame">Deel</span>
+      </button>
     </div>
 
     <h1 class="start-sr-only">
@@ -3000,44 +3002,6 @@
     const playerNameInput = document.getElementById("player-name-input");
     const nameError = document.getElementById("name-error");
     const btnBeginEl = document.getElementById("btn-begin");
-
-    const START_RING_COLORS = ["blue", "pink", "orange", "green", "yellow"];
-
-    function buildStartCharRing() {
-      const ring = document.getElementById("start-char-ring");
-      if (!ring || !window.WieCharacterArt) return;
-      const names = WieCharacterArt.CARD_NAMES || [];
-      const total = Math.min(12, names.length);
-      ring.innerHTML = "";
-      const orbit = document.createElement("div");
-      orbit.className = "start-char-orbit";
-      for (let i = 0; i < total; i++) {
-        const name = names[i];
-        const slot = document.createElement("div");
-        slot.className = "start-char-slot";
-        slot.style.setProperty("--i", String(i));
-        slot.style.setProperty("--n", String(total));
-        const card = document.createElement("div");
-        card.className =
-          "start-char-card start-char-card--" + START_RING_COLORS[i % START_RING_COLORS.length];
-        card.style.setProperty("--i", String(i));
-        const img = document.createElement("img");
-        img.src = WieCharacterArt.cardAvatarUrl(name);
-        img.alt = "";
-        img.loading = "eager";
-        img.decoding = "async";
-        if (WieCharacterArt.applyImgFilter) WieCharacterArt.applyImgFilter(img);
-        img.addEventListener("error", function () {
-          if (WieCharacterArt.onImageError) WieCharacterArt.onImageError(img, name, null);
-        });
-        card.appendChild(img);
-        slot.appendChild(card);
-        orbit.appendChild(slot);
-      }
-      ring.appendChild(orbit);
-    }
-
-    buildStartCharRing();
 
     function syncMusicButton() {
       /* geen muziekknop op beginscherm */
