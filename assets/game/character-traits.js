@@ -1,40 +1,42 @@
 /**
- * YouTuber-personages — unieke portret-avatars per creator (DiceBear).
+ * YouTuber-personages — echte foto's (Wikimedia CC) waar beschikbaar.
  */
 (function () {
+  const CREATOR_PHOTOS = "assets/creators/";
+
   const ROSTER = [
-    { name: "MrBeast", female: false, seed: "MrBeast", accent: "22c55e,14532d" },
-    { name: "Pokimane", female: true, seed: "Pokimane", accent: "a855f7,581c87" },
-    { name: "PewDiePie", female: false, seed: "PewDiePie", accent: "ef4444,7f1d1d" },
-    { name: "Valkyrae", female: true, seed: "Valkyrae", accent: "f472b6,831843" },
-    { name: "Markiplier", female: false, seed: "Markiplier", accent: "dc2626,450a0a" },
-    { name: "iJustine", female: true, seed: "iJustine", accent: "ec4899,831843" },
-    { name: "Jacksepticeye", female: false, seed: "Jacksepticeye", accent: "22c55e,14532d" },
-    { name: "SSSniperWolf", female: true, seed: "SSSniperWolf", accent: "f97316,7c2d12" },
-    { name: "KSI", female: false, seed: "KSI", accent: "eab308,713f12" },
-    { name: "LaurDIY", female: true, seed: "LaurDIY", accent: "f472b6,9d174d" },
-    { name: "Ninja", female: false, seed: "Ninja", accent: "3b82f6,1e3a8a" },
-    { name: "Emma", female: true, seed: "EmmaChamberlain", accent: "a78bfa,4c1d95" },
-    { name: "Dream", female: false, seed: "Dream", accent: "84cc16,365314" },
-    { name: "Aphmau", female: true, seed: "Aphmau", accent: "c084fc,581c87" },
-    { name: "Vanoss", female: false, seed: "Vanoss", accent: "ef4444,450a0a" },
-    { name: "Jelly", female: true, seed: "JellyYT", accent: "22d3ee,155e75" },
-    { name: "DanTDM", female: false, seed: "DanTDM", accent: "6366f1,312e81" },
-    { name: "Zoella", female: true, seed: "Zoella", accent: "fbcfe8,9d174d" },
-    { name: "Ludwig", female: false, seed: "Ludwig", accent: "fbbf24,78350f" },
-    { name: "Tana", female: true, seed: "TanaMongeau", accent: "fb7185,881337" },
-    { name: "xQc", female: false, seed: "xQc", accent: "facc15,713f12" },
-    { name: "Nikkie", female: true, seed: "NikkieTutorials", accent: "f472b6,831843" },
-    { name: "IShowSpeed", female: false, seed: "IShowSpeed", accent: "ef4444,7f1d1d" },
-    { name: "Wengie", female: true, seed: "Wengie", accent: "f472b6,9d174d" },
-    { name: "Enzo", female: false, seed: "EnzoKnol", accent: "f97316,7c2d12" },
-    { name: "Safiya", female: true, seed: "SafiyaNygaard", accent: "eab308,713f12" },
-    { name: "Gio", female: false, seed: "Gio", accent: "38bdf8,0c4a6e" },
-    { name: "Gibi", female: true, seed: "GibiASMR", accent: "a78bfa,4c1d95" },
-    { name: "Kalvijn", female: false, seed: "Kalvijn", accent: "a855f7,581c87" },
-    { name: "Rosanna", female: true, seed: "RosannaPansino", accent: "f97316,7c2d12" },
-    { name: "MKBHD", female: false, seed: "MKBHD", accent: "ef4444,450a0a" },
-    { name: "Jess", female: true, seed: "Jess", accent: "22c55e,14532d" },
+    { name: "MrBeast", female: false, photo: CREATOR_PHOTOS + "mrbeast.jpg" },
+    { name: "Pokimane", female: true, photo: CREATOR_PHOTOS + "pokimane.jpg" },
+    { name: "PewDiePie", female: false, photo: CREATOR_PHOTOS + "pewdiepie.jpg" },
+    { name: "Valkyrae", female: true, seed: "Valkyrae" },
+    { name: "Markiplier", female: false, photo: CREATOR_PHOTOS + "markiplier.jpg" },
+    { name: "iJustine", female: true, photo: CREATOR_PHOTOS + "ijustine.jpg" },
+    { name: "Jacksepticeye", female: false, photo: CREATOR_PHOTOS + "jacksepticeye.png" },
+    { name: "SSSniperWolf", female: true, seed: "SSSniperWolf" },
+    { name: "KSI", female: false, photo: CREATOR_PHOTOS + "ksi.jpg" },
+    { name: "LaurDIY", female: true, seed: "LaurDIY" },
+    { name: "Ninja", female: false, seed: "Ninja" },
+    { name: "Emma", female: true, seed: "EmmaChamberlain" },
+    { name: "Dream", female: false, seed: "Dream" },
+    { name: "Aphmau", female: true, seed: "Aphmau" },
+    { name: "Vanoss", female: false, seed: "Vanoss" },
+    { name: "Jelly", female: true, seed: "JellyYT" },
+    { name: "DanTDM", female: false, photo: CREATOR_PHOTOS + "dantdm.jpg" },
+    { name: "Zoella", female: true, seed: "Zoella" },
+    { name: "Ludwig", female: false, photo: CREATOR_PHOTOS + "ludwig.jpg" },
+    { name: "Tana", female: true, seed: "TanaMongeau" },
+    { name: "xQc", female: false, seed: "xQc" },
+    { name: "Nikkie", female: true, photo: CREATOR_PHOTOS + "nikkie.jpg" },
+    { name: "IShowSpeed", female: false, seed: "IShowSpeed" },
+    { name: "Wengie", female: true, seed: "Wengie" },
+    { name: "Enzo", female: false, seed: "EnzoKnol" },
+    { name: "Safiya", female: true, seed: "SafiyaNygaard" },
+    { name: "Gio", female: false, seed: "Gio" },
+    { name: "Gibi", female: true, seed: "GibiASMR" },
+    { name: "Kalvijn", female: false, seed: "Kalvijn" },
+    { name: "Rosanna", female: true, photo: CREATOR_PHOTOS + "rosanna.jpg" },
+    { name: "MKBHD", female: false, photo: CREATOR_PHOTOS + "mkbhd.jpg" },
+    { name: "Jess", female: true, seed: "Jess" },
   ];
 
   const CARD_NAMES = ROSTER.map((c) => c.name);
@@ -43,8 +45,8 @@
   ROSTER.forEach((c) => {
     TRAITS[c.name] = {
       female: c.female,
-      seed: c.seed,
-      accent: c.accent,
+      seed: c.seed || c.name,
+      photo: c.photo || null,
     };
   });
 
@@ -53,7 +55,7 @@
       TRAITS[name] || {
         female: false,
         seed: name,
-        accent: "ef4444,1e1b4b",
+        photo: null,
       }
     );
   }
@@ -64,49 +66,53 @@
 
   function cardAvatarUrl(name) {
     const t = getTraits(name);
-    const params = new URLSearchParams();
-    params.set("seed", t.seed || name);
-    params.set("size", "160");
-    params.set("backgroundColor", t.accent || "ef4444,1e1b4b");
-    params.set("backgroundType", "gradientLinear");
-    return "https://api.dicebear.com/9.x/personas/png?" + params.toString();
+    if (t.photo) return t.photo;
+    return cardAvatarFallbackUrl(name);
   }
 
   function cardAvatarFallbackUrl(name) {
     const t = getTraits(name);
     const params = new URLSearchParams();
-    params.set("seed", (t.seed || name) + "-alt");
+    params.set("seed", t.seed || name);
     params.set("size", "160");
     params.set("backgroundColor", "1e1b4b,312e81,4c1d95");
     params.set("backgroundType", "gradientLinear");
-    return "https://api.dicebear.com/9.x/avataaars/png?" + params.toString();
+    return "https://api.dicebear.com/9.x/personas/png?" + params.toString();
   }
 
   function decoratePhotoWrap(photoWrap, name) {
     if (!photoWrap) return;
     const girl = isGirl(name);
+    const t = getTraits(name);
     photoWrap.classList.add(
       "card-photo--portrait",
       "card-photo--creator",
+      t.photo ? "card-photo--real" : "card-photo--avatar",
       girl ? "card-photo--girl" : "card-photo--boy"
     );
   }
 
-  function applyImgFilter(img) {
+  function applyImgFilter(img, name) {
     if (!img) return;
-    img.style.filter = "contrast(1.08) saturate(1.12)";
+    const t = getTraits(name);
+    if (t.photo) {
+      img.style.filter = "contrast(1.05) saturate(1.08)";
+    } else {
+      img.style.filter = "contrast(1.08) saturate(1.12)";
+    }
   }
 
   function onImageError(img, name, photoWrap) {
-    if (!img || img.dataset.fallbackTried === "1") {
-      if (photoWrap && !photoWrap.querySelector(".card-face-svg")) {
-        photoWrap.appendChild(createFallbackFace(name));
-      }
+    if (!img) return;
+    const t = getTraits(name);
+    if (t.photo && img.dataset.fallbackTried !== "1") {
+      img.dataset.fallbackTried = "1";
+      img.src = cardAvatarFallbackUrl(name);
       return;
     }
-    img.dataset.fallbackTried = "1";
-    img.style.display = "";
-    img.src = cardAvatarFallbackUrl(name);
+    if (photoWrap && !photoWrap.querySelector(".card-face-svg")) {
+      photoWrap.appendChild(createFallbackFace(name));
+    }
   }
 
   function createFallbackFace(name) {

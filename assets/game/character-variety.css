@@ -22,6 +22,10 @@
   pointer-events: none;
 }
 
+.card-photo.card-photo--real .card-img {
+  object-position: center 15% !important;
+}
+
 .card-photo.card-photo--portrait {
   background: linear-gradient(180deg, #1e1b4b 0%, #0f0a1e 100%) !important;
   position: relative;
