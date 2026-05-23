@@ -43,9 +43,15 @@
 
   .screen-game-view.turn-player #game-table .game-scene,
   .screen-game-view.phase-question #game-table .game-scene,
-  .screen-game-view.phase-post-switch #game-table .game-scene {
+  .screen-game-view.phase-post-switch #game-table .game-scene,
+  .screen-game-view.phase-flip-active #game-table .game-scene {
     padding-top: calc(env(safe-area-inset-top, 0px) + 58px);
     padding-bottom: max(130px, calc(env(safe-area-inset-bottom, 0px) + 118px));
+  }
+
+  .screen-game-view.phase-flip-active #player-board {
+    position: relative;
+    z-index: 30;
   }
 
   #game-table .board-stand--front {

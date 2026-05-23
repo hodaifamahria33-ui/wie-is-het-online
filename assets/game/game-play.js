@@ -458,22 +458,45 @@
     if (screenGame) screenGame.classList.toggle("phase-post-switch", Boolean(active));
   }
 
+  function setFlipPhaseUi(active) {
+    if (screenGame) screenGame.classList.toggle("phase-flip-active", Boolean(active));
+  }
+
+  let lastBoardTouchMs = 0;
+
+  function resolvePlayerWellFromEvent(e) {
+    const board = document.getElementById("player-board");
+    if (!board || !e.target || !e.target.closest) return null;
+    const well = e.target.closest(".card-well");
+    if (!well || !board.contains(well)) return null;
+    return well;
+  }
+
+  function handleBoardTap(e) {
+    if (e.type === "touchend") {
+      lastBoardTouchMs = Date.now();
+      if (e.cancelable) e.preventDefault();
+    } else if (e.type === "click" && Date.now() - lastBoardTouchMs < 500) {
+      return;
+    }
+    const well = resolvePlayerWellFromEvent(e);
+    if (!well) return;
+    e.preventDefault();
+    e.stopPropagation();
+    refreshWells();
+    const idx = state.playerWells.indexOf(well);
+    if (idx >= 0) onPlayerWellClick(idx);
+  }
+
+  function wirePlayerBoardTap(board) {
+    if (!board || board.dataset.playWired === "1") return;
+    board.dataset.playWired = "1";
+    board.addEventListener("click", handleBoardTap);
+    board.addEventListener("touchend", handleBoardTap, { passive: false });
+  }
+
   function bindWellClickHandlers() {
     refreshWells();
-    state.playerWells.forEach((well, index) => {
-      if (well.dataset.flipBound === "1") return;
-      well.dataset.flipBound = "1";
-      well.addEventListener(
-        "click",
-        (e) => {
-          e.stopPropagation();
-          refreshWells();
-          const idx = state.playerWells.indexOf(well);
-          if (idx >= 0) onPlayerWellClick(idx);
-        },
-        { passive: false }
-      );
-    });
   }
 
   function enableCardFlips() {
@@ -756,6 +779,7 @@
   function beginFlipPhaseAfterQuestion() {
     state.phase = PHASE.POST_ANSWER_FLIP_RUSH;
     setScreenTurn("my");
+    setFlipPhaseUi(true);
     hideQuestionDrawer();
     hideAnswerDrawer();
     hideAnswerReveal();
@@ -770,6 +794,7 @@
       () => {
         if (state.phase === PHASE.POST_ANSWER_FLIP_RUSH) {
           hideFlipPhaseBar();
+          setFlipPhaseUi(false);
           setPostAnswerBoardMode(false);
           clearInteractivity();
           if (state.online && window.WieIsHetOnline) {
@@ -847,6 +872,7 @@
     }
     clearPostAnswerTimers();
     hidePostAnswerPanel();
+    setFlipPhaseUi(false);
     clearInteractivity();
     if (state.online && window.WieIsHetOnline) {
       window.WieIsHetOnline.sendTurnHandoff();
@@ -859,6 +885,7 @@
     clearPostAnswerTimers();
     hidePostAnswerPanel();
     setPostAnswerBoardMode(false);
+    setFlipPhaseUi(false);
     clearInteractivity();
     if (state.online && window.WieIsHetOnline) {
       window.WieIsHetOnline.send({ type: "switchTurn" });
@@ -1180,6 +1207,7 @@
     hideOpponentAnswer();
     hideAnswerReveal();
     hideFlipPhaseBar();
+    setFlipPhaseUi(false);
     state.phase = PHASE.MY_TURN;
     state.flippedThisTurn = false;
     state.askedThisTurn = false;
@@ -1193,6 +1221,7 @@
     hideQuestionPanel();
     hideAnswerReveal();
     hideFlipPhaseBar();
+    setFlipPhaseUi(false);
     state.phase = PHASE.THEIR_TURN;
     state.askedThisTurn = false;
     setScreenTurn("their");
@@ -1638,34 +1667,9 @@
     });
   }
 
-  function handleBoardClick(e) {
-    const board = document.getElementById("player-board");
-    if (!board) return;
-    const well = e.target.closest(".card-well");
-    if (!well || !board.contains(well)) return;
-    e.preventDefault();
-    e.stopPropagation();
-    refreshWells();
-    const idx = state.playerWells.indexOf(well);
-    if (idx >= 0) onPlayerWellClick(idx);
-  }
-
   function wireBoards() {
     refreshWells();
-    const board = document.getElementById("player-board");
-    const gameTable = document.getElementById("game-table");
-    if (board) {
-      if (board.dataset.playWired !== "1") {
-        board.dataset.playWired = "1";
-        board.addEventListener("click", handleBoardClick);
-      }
-    }
-    if (gameTable) {
-      if (gameTable.dataset.playWired !== "1") {
-        gameTable.dataset.playWired = "1";
-        gameTable.addEventListener("click", handleBoardClick);
-      }
-    }
+    wirePlayerBoardTap(document.getElementById("player-board"));
     bindWellClickHandlers();
   }
 
@@ -1708,7 +1712,19 @@
     if (answerDrawer && answerDrawer.dataset.wired !== "1") {
       answerDrawer.dataset.wired = "1";
       answerDrawer.querySelectorAll(".answer-chip").forEach((btn) => {
-        btn.addEventListener("click", () => onAnswerChipClick(btn));
+        let chipTouchMs = 0;
+        const onChip = (e) => {
+          if (e.type === "touchend") {
+            chipTouchMs = Date.now();
+            if (e.cancelable) e.preventDefault();
+            onAnswerChipClick(btn);
+            return;
+          }
+          if (Date.now() - chipTouchMs < 500) return;
+          onAnswerChipClick(btn);
+        };
+        btn.addEventListener("click", onChip);
+        btn.addEventListener("touchend", onChip, { passive: false });
       });
     }
     if (btnToggleQuestionDrawer && btnToggleQuestionDrawer.dataset.wired !== "1") {
@@ -1727,6 +1743,7 @@
 
   function reset() {
     setPostAnswerBoardMode(false);
+    setFlipPhaseUi(false);
     setTurnBadge("hidden");
     state.phase = PHASE.IDLE;
     state.secretIndex = null;

@@ -26,10 +26,16 @@
 }
 
 .question-drawer:not(.hidden) {
-  pointer-events: auto;
+  /* Alleen de sheet vangt tikken — bord blijft bereikbaar erboven */
+  pointer-events: none;
   transform: translateY(0);
   opacity: 1;
   visibility: visible;
+}
+
+.question-drawer:not(.hidden) .question-drawer-sheet,
+.question-drawer:not(.hidden) .question-drawer-handle {
+  pointer-events: auto;
 }
 
 .question-drawer.is-popping:not(.hidden) {
@@ -191,6 +197,7 @@
   transform: translateX(-50%) translateY(0);
   opacity: 1;
   visibility: visible;
+  pointer-events: none;
 }
 
 .flip-phase-label {

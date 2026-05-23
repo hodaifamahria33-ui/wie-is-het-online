@@ -43,13 +43,14 @@
   <link rel="stylesheet" href="assets/game/lobby-screen.css?v=1" />
   <link rel="stylesheet" href="assets/game/code-screen.css?v=3" />
   <link rel="stylesheet" href="assets/game/premium-game.css?v=46" />
-  <link rel="stylesheet" href="assets/game/game-drawers.css?v=45" />
+  <link rel="stylesheet" href="assets/game/game-drawers.css?v=47" />
   <link rel="stylesheet" href="assets/game/countdown-screen.css?v=2" />
   <link rel="stylesheet" href="assets/game/game-hud.css?v=44" />
   <link rel="stylesheet" href="assets/game/game-layout.css?v=56" />
   <link rel="stylesheet" href="assets/game/character-variety.css?v=55" />
   <link rel="stylesheet" href="assets/game/game-extras.css?v=57" />
-  <link rel="stylesheet" href="assets/game/game-mobile.css?v=3" />
+  <link rel="stylesheet" href="assets/game/game-mobile.css?v=6" />
+  <link rel="stylesheet" href="assets/game/orientation-lock.css?v=2" />
   <link rel="stylesheet" href="assets/game/answer-coach.css?v=1" />
   <link rel="stylesheet" href="assets/game/rank-ui.css?v=6" />
   <link rel="stylesheet" href="assets/game/game-play.css?v=54" />
@@ -2325,6 +2326,25 @@
     <div class="game-vignette" aria-hidden="true"></div>
     <span class="glow" aria-hidden="true"></span>
 
+    <div
+      id="orientation-lock"
+      class="orientation-lock hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="orientation-lock-title"
+      aria-hidden="true"
+    >
+      <div class="orientation-lock-inner">
+        <div class="orientation-lock-icon" aria-hidden="true"></div>
+        <h2 id="orientation-lock-title" class="orientation-lock-title" data-i18n="rotatePhoneTitle">
+          Draai je telefoon
+        </h2>
+        <p class="orientation-lock-sub" data-i18n="rotatePhoneSub">
+          Leg je telefoon op de zijkant om te spelen. Zo is er meer ruimte voor het bord.
+        </p>
+      </div>
+    </div>
+
     <section id="game-countdown" class="game-countdown hidden" aria-live="polite">
       <div class="countdown-bg-fx" aria-hidden="true">
         <span class="countdown-spark countdown-spark--1"></span>
@@ -2503,7 +2523,8 @@
   <script src="assets/game/ranked-queue.js?v=1"></script>
   <script src="assets/game/answer-coach.js?v=1"></script>
   <script src="assets/game/stripe-donate.js?v=1"></script>
-  <script src="assets/game/game-play.js?v=57"></script>
+  <script src="assets/game/orientation-lock.js?v=2"></script>
+  <script src="assets/game/game-play.js?v=59"></script>
 
   <script>
     const I18N = {
@@ -2658,6 +2679,9 @@
         btnCopyDone: "✓ Link gekopieerd!",
         btnShareWa: "DEEL VIA WHATSAPP",
         btnStartGame: "START GAME",
+        rotatePhoneTitle: "Draai je telefoon",
+        rotatePhoneSub:
+          "Leg je telefoon op de zijkant om te spelen. Zo is er meer ruimte voor het bord.",
         countdownLabel: "Potje start over",
         countdownGo: "START!",
         btnGiveUp: "OPGEVEN",
@@ -2900,6 +2924,9 @@
         btnCopyDone: "✓ Link copied!",
         btnShareWa: "SHARE ON WHATSAPP",
         btnStartGame: "START GAME",
+        rotatePhoneTitle: "Rotate your phone",
+        rotatePhoneSub:
+          "Turn your phone sideways to play. That gives the board more room.",
         countdownLabel: "Game starts in",
         countdownGo: "GO!",
         btnGiveUp: "GIVE UP",
