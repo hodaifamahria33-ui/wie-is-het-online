@@ -486,11 +486,10 @@
         if (lobbyCode) lobbyCode.textContent = code;
         window.wieShowOnly("screen-lobby");
         window.wieInitLobby("host");
-        if (window.WieIsHetOnline && window.WieIsHetOnline.setupHost) {
-          window.WieIsHetOnline.setupHost(code).catch(function (e) {
-            console.warn("setupHost", e);
-          });
-        }
+      }
+      function showHostError() {
+        if (errEl) errEl.textContent = "Lobby kon niet starten. Probeer opnieuw.";
+        window.wieShowOnly("screen-host");
       }
       if (load) {
         window.wieShowOnly("screen-photo-load");
@@ -498,8 +497,49 @@
         setTimeout(function () {
           load.classList.remove("active");
           load.classList.add("hidden");
-          finish();
+          if (window.WieIsHetOnline && window.WieIsHetOnline.setupHost) {
+            window.WieIsHetOnline.setupHost(code)
+              .then(function () {
+                if (
+                  window.WieIsHetOnline.isHostPeerLive &&
+                  window.WieIsHetOnline.isHostPeerLive()
+                ) {
+                  finish();
+                } else {
+                  if (window.WieIsHetOnline.reset) window.WieIsHetOnline.reset();
+                  showHostError();
+                }
+              })
+              .catch(function (e) {
+                console.warn("setupHost", e);
+                if (window.WieIsHetOnline && window.WieIsHetOnline.reset) {
+                  window.WieIsHetOnline.reset();
+                }
+                showHostError();
+              });
+          } else {
+            finish();
+          }
         }, 1200);
+      } else if (window.WieIsHetOnline && window.WieIsHetOnline.setupHost) {
+        window.WieIsHetOnline.setupHost(code)
+          .then(function () {
+            if (
+              window.WieIsHetOnline.isHostPeerLive &&
+              window.WieIsHetOnline.isHostPeerLive()
+            ) {
+              finish();
+            } else {
+              if (window.WieIsHetOnline.reset) window.WieIsHetOnline.reset();
+              showHostError();
+            }
+          })
+          .catch(function () {
+            if (window.WieIsHetOnline && window.WieIsHetOnline.reset) {
+              window.WieIsHetOnline.reset();
+            }
+            showHostError();
+          });
       } else {
         finish();
       }
@@ -2523,7 +2563,11 @@
   </script>
   <link rel="stylesheet" href="assets/game/game-screen-theme.css?v=6" />
   <script src="assets/game/start-music.js?v=43"></script>
-  <script src="assets/game/online-room.js?v=49"></script>
+  <script>
+    /* Zet signalUrl na deploy: cd workers/online-signal && npx wrangler deploy */
+    window.WIE_ONLINE = { signalUrl: "" };
+  </script>
+  <script src="assets/game/online-room.js?v=51"></script>
   <script src="assets/game/lobby-room.js?v=41"></script>
   <script src="assets/game/character-traits.js?v=58"></script>
   <script src="assets/game/rank-system.js?v=2"></script>
@@ -4233,7 +4277,7 @@
 
     async function runGuestJoinFlow(code) {
       if (joinBusy) return;
-      if (typeof window.Peer !== "function") {
+      if (typeof window.Peer !== "function" && !window.WieIsHetOnline) {
         if (joinError) joinError.textContent = t("joinFailed");
         if (joinedStatus) setJoinedStatus("joinFailed", true);
         return;
@@ -4305,7 +4349,10 @@
         s.includes("conn-closed") ||
         s.includes("no-connection") ||
         s.includes("peer-timeout") ||
-        s.includes("peerjs-missing")
+        s.includes("peerjs-missing") ||
+        s.includes("ws-timeout") ||
+        s.includes("ws-error") ||
+        s.includes("signal-unavailable")
       );
     }
 
