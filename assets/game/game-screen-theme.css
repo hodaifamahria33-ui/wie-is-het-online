@@ -1,8 +1,7 @@
-/* Speelscherm — foto-achtergrond + premium bord & kaarten */
+/* Speelscherm — foto + premium (laatste laag, v3) */
 
 .screen-game-view {
-  background: #0a0614 !important;
-  overflow: hidden;
+  background: #080512 !important;
 }
 
 .screen-game-view .glow {
@@ -10,16 +9,17 @@
 }
 
 .screen-game-view .game-bg-photo {
+  display: block !important;
   position: absolute;
-  inset: -8%;
-  width: 116%;
-  height: 116%;
+  inset: -10%;
+  width: 120%;
+  height: 120%;
   object-fit: cover;
-  object-position: center 40%;
+  object-position: center 38%;
   z-index: 0;
   pointer-events: none;
-  animation: gameBgDrift 28s ease-in-out infinite;
-  filter: saturate(1.08) brightness(0.72);
+  animation: gameBgDrift 26s ease-in-out infinite;
+  filter: saturate(1.1) brightness(0.7) contrast(1.05);
 }
 
 .screen-game-view .game-bg-dim {
@@ -27,249 +27,154 @@
   inset: 0;
   z-index: 1;
   pointer-events: none;
-  background:
-    linear-gradient(180deg, rgba(8, 5, 20, 0.55) 0%, rgba(15, 10, 35, 0.35) 40%, rgba(8, 5, 20, 0.65) 100%);
-  transition: background 0.65s ease;
+  background: linear-gradient(
+    180deg,
+    rgba(8, 5, 20, 0.5) 0%,
+    rgba(15, 10, 35, 0.28) 42%,
+    rgba(8, 5, 20, 0.62) 100%
+  );
+  transition: background 0.55s ease;
 }
 
 .screen-game-view.turn-player .game-bg-dim,
 .screen-game-view.phase-pick-secret .game-bg-dim {
   background:
-    linear-gradient(180deg, rgba(6, 40, 24, 0.5) 0%, rgba(15, 10, 35, 0.25) 45%, rgba(6, 30, 20, 0.55) 100%),
-    radial-gradient(ellipse 90% 60% at 50% 85%, rgba(34, 197, 94, 0.22) 0%, transparent 65%);
+    linear-gradient(180deg, rgba(6, 38, 24, 0.45) 0%, transparent 50%, rgba(6, 28, 18, 0.5) 100%),
+    radial-gradient(ellipse 100% 55% at 50% 90%, rgba(34, 197, 94, 0.2) 0%, transparent 70%);
 }
 
 .screen-game-view.turn-opponent .game-bg-dim {
   background:
-    linear-gradient(180deg, rgba(40, 10, 18, 0.55) 0%, rgba(15, 10, 35, 0.3) 50%, rgba(30, 8, 12, 0.5) 100%),
-    radial-gradient(ellipse 80% 50% at 50% 15%, rgba(239, 68, 68, 0.18) 0%, transparent 60%);
-}
-
-.screen-game-view .game-ambient {
-  z-index: 2;
-  background:
-    radial-gradient(ellipse 70% 45% at 50% 50%, rgba(139, 92, 246, 0.12) 0%, transparent 70%);
-  opacity: 0.9;
-}
-
-.screen-game-view .game-vignette {
-  z-index: 3;
-  box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.55);
+    linear-gradient(180deg, rgba(48, 8, 16, 0.5) 0%, transparent 48%, rgba(28, 6, 12, 0.48) 100%),
+    radial-gradient(ellipse 90% 50% at 50% 8%, rgba(239, 68, 68, 0.16) 0%, transparent 65%);
 }
 
 .screen-game-view.turn-player,
 .screen-game-view.phase-pick-secret,
 .screen-game-view.turn-opponent {
-  background: #0a0614 !important;
+  background: transparent !important;
 }
 
-.screen-game-view.turn-player .game-ambient,
-.screen-game-view.phase-pick-secret .game-ambient {
-  background: radial-gradient(ellipse 60% 40% at 50% 70%, rgba(74, 222, 128, 0.15) 0%, transparent 70%);
+.screen-game-view .game-ambient {
+  z-index: 2;
+  opacity: 0.85;
 }
 
-.screen-game-view.turn-opponent .game-ambient {
-  background: radial-gradient(ellipse 60% 40% at 50% 25%, rgba(248, 113, 113, 0.12) 0%, transparent 70%);
+.screen-game-view .game-vignette {
+  z-index: 3;
+  box-shadow: inset 0 0 90px rgba(0, 0, 0, 0.5);
 }
 
-/* Countdown */
-.screen-game-view .game-countdown {
-  z-index: 25;
-  background: rgba(8, 5, 20, 0.72) !important;
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+#game-table {
+  z-index: 8;
 }
 
-.screen-game-view .countdown-num {
-  font-family: "Fredoka", "Outfit", sans-serif;
-  background: linear-gradient(165deg, #fff 0%, #e9d5ff 50%, #a5b4fc 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-/* Bord — glas / indigo i.p.v. fel rood-blauw */
-#game-table .board-tray--player {
+/* Bord — geen fel blauw/rood meer */
+#game-table .board-tray--player,
+#game-table .board-tray.board-tray--player {
   background: linear-gradient(
     165deg,
-    rgba(67, 56, 202, 0.75) 0%,
-    rgba(49, 46, 129, 0.88) 40%,
-    rgba(30, 27, 75, 0.95) 100%
+    rgba(79, 70, 229, 0.82) 0%,
+    rgba(67, 56, 202, 0.9) 35%,
+    rgba(46, 16, 101, 0.95) 100%
   ) !important;
-  border: 2px solid rgba(167, 139, 250, 0.45) !important;
+  border: 2px solid rgba(196, 181, 253, 0.5) !important;
   box-shadow:
-    0 20px 48px rgba(0, 0, 0, 0.5),
-    0 0 40px rgba(99, 102, 241, 0.2),
-    inset 0 2px 0 rgba(255, 255, 255, 0.2) !important;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+    0 22px 50px rgba(0, 0, 0, 0.55),
+    0 0 48px rgba(99, 102, 241, 0.25),
+    inset 0 2px 0 rgba(255, 255, 255, 0.22) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
-#game-table .board-tray--player .player-board {
-  background: rgba(12, 8, 28, 0.5) !important;
+#game-table .board-tray--player .player-board,
+#game-table .player-board {
+  background: rgba(10, 6, 26, 0.58) !important;
   border-radius: 14px !important;
-  box-shadow: inset 0 4px 20px rgba(0, 0, 0, 0.45) !important;
 }
 
 #game-table .board-base--player {
-  background: linear-gradient(180deg, #3730a3 0%, #1e1b4b 100%) !important;
+  background: linear-gradient(180deg, #4f46e5 0%, #1e1b4b 100%) !important;
 }
 
-#game-table .board-tray--opponent.board-tray--rear {
-  visibility: hidden !important;
-}
-
-/* Kaarten */
 #game-table .card-well {
-  background: rgba(0, 0, 0, 0.35) !important;
+  background: rgba(0, 0, 0, 0.4) !important;
   border-radius: 8px !important;
-  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.4) !important;
 }
 
-#game-table .card-face,
-#game-table .card-back-face {
-  border: 2px solid rgba(255, 255, 255, 0.55) !important;
-  border-radius: 8px 8px 6px 6px !important;
-  background: linear-gradient(180deg, #fafafa 0%, #e8e4f0 100%) !important;
-  box-shadow:
-    0 6px 14px rgba(0, 0, 0, 0.35),
-    inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
+#game-table .card-face {
+  border: 2px solid rgba(255, 255, 255, 0.6) !important;
+  border-radius: 8px !important;
+  background: linear-gradient(180deg, #fafafa 0%, #ede9fe 100%) !important;
 }
 
 #game-table .card-photo.card-photo--boy {
-  background: linear-gradient(165deg, #c7d2fe 0%, #818cf8 45%, #6366f1 100%) !important;
+  background: linear-gradient(160deg, #c7d2fe 0%, #6366f1 100%) !important;
 }
 
 #game-table .card-photo.card-photo--girl {
-  background: linear-gradient(165deg, #fbcfe8 0%, #f472b6 45%, #db2777 100%) !important;
+  background: linear-gradient(160deg, #fbcfe8 0%, #db2777 100%) !important;
 }
 
 #game-table .card-photo:not(.card-photo--boy):not(.card-photo--girl) {
-  background: linear-gradient(165deg, #e9d5ff 0%, #a78bfa 50%, #7c3aed 100%) !important;
+  background: linear-gradient(160deg, #ddd6fe 0%, #7c3aed 100%) !important;
 }
 
 #game-table .card-name {
-  background: rgba(15, 10, 35, 0.88) !important;
-  color: #f8fafc !important;
+  background: rgba(15, 10, 35, 0.92) !important;
+  color: #f1f5f9 !important;
   font-family: "Nunito", "Outfit", sans-serif !important;
-  letter-spacing: 0.06em !important;
   text-transform: uppercase;
-  border-radius: 0 0 5px 5px;
+  letter-spacing: 0.05em;
 }
 
 #game-table .card-tile.is-down .card-face {
-  opacity: 0.35;
-  filter: grayscale(0.85) brightness(0.7);
+  opacity: 0.32 !important;
+  filter: grayscale(0.9) brightness(0.65) !important;
 }
 
-/* Tegenstander / schatkist */
-#game-table .opponent-chest {
-  width: clamp(96px, 16vw, 148px);
-}
-
-#game-table .chest-visual {
-  border-radius: 20px !important;
-  background: linear-gradient(
-    165deg,
-    rgba(49, 46, 129, 0.7) 0%,
-    rgba(30, 27, 75, 0.9) 100%
-  ) !important;
-  border: 2px solid rgba(167, 139, 250, 0.5) !important;
-  box-shadow:
-    0 16px 36px rgba(0, 0, 0, 0.45),
-    0 0 32px rgba(139, 92, 246, 0.25),
-    inset 0 2px 0 rgba(255, 255, 255, 0.15) !important;
-  backdrop-filter: blur(8px);
-  overflow: hidden;
-}
-
-#game-table .chest-visual::before,
-#game-table .chest-visual::after {
-  opacity: 0.35;
+/* Tegenstander-kaart links — cartoon, geen foto */
+#game-table .opponent-chest .chest-visual {
+  background: linear-gradient(165deg, rgba(55, 48, 163, 0.85), rgba(30, 27, 75, 0.95)) !important;
+  border: 2px solid rgba(167, 139, 250, 0.55) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.5), 0 0 28px rgba(139, 92, 246, 0.3) !important;
 }
 
 #game-table .chest-avatar {
-  width: 78% !important;
-  height: 78% !important;
+  border-radius: 12px !important;
   object-fit: cover !important;
-  border-radius: 14px !important;
-  border: 2px solid rgba(255, 255, 255, 0.35);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
 }
 
 #game-table .chest-label {
-  font-family: "Nunito", "Outfit", sans-serif;
-  font-weight: 800;
   color: #e9d5ff !important;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
-  letter-spacing: 0.08em;
+  font-weight: 800;
 }
 
-#game-table .chest-hint {
-  color: rgba(226, 232, 240, 0.85) !important;
-  font-size: 0.72rem;
-}
-
-#game-table .opponent-chest:hover,
-#game-table .opponent-chest.chest-guess-ready {
-  filter: drop-shadow(0 0 22px rgba(251, 191, 36, 0.55));
-}
-
-/* Geheime kaart */
-#secret-card-slot .card-face,
-#game-table .secret-card-slot .card-face {
+#secret-card-slot .card-face {
   box-shadow:
-    0 16px 40px rgba(0, 0, 0, 0.55),
-    0 0 0 3px rgba(251, 191, 36, 0.65),
-    0 0 36px rgba(251, 191, 36, 0.35) !important;
-}
-
-#game-table .secret-card-pedestal {
-  background: linear-gradient(180deg, #6366f1 0%, #312e81 100%) !important;
-}
-
-/* Banners & HUD */
-.screen-game-view .game-turn-banner {
-  font-family: "Nunito", "Outfit", sans-serif;
-  background: rgba(15, 10, 35, 0.72) !important;
-  border: 1px solid rgba(167, 139, 250, 0.4) !important;
-  backdrop-filter: blur(12px);
-  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.4) !important;
-}
-
-.screen-game-view.phase-pick-secret .game-turn-banner {
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.9), rgba(139, 92, 246, 0.9)) !important;
-  border-color: rgba(255, 255, 255, 0.35) !important;
-  box-shadow: 0 8px 28px rgba(99, 102, 241, 0.45) !important;
+    0 14px 36px rgba(0, 0, 0, 0.55),
+    0 0 0 3px rgba(251, 191, 36, 0.7),
+    0 0 32px rgba(251, 191, 36, 0.35) !important;
 }
 
 .screen-game-view .btn-give-up {
   border-radius: 12px !important;
-  background: linear-gradient(135deg, rgba(220, 38, 38, 0.92), rgba(153, 27, 27, 0.95)) !important;
-  border: 1px solid rgba(255, 255, 255, 0.25) !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
-  backdrop-filter: blur(8px);
+  background: linear-gradient(135deg, #ef4444, #991b1b) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
 }
 
-.screen-game-view .game-turn-badge {
-  background: rgba(15, 10, 35, 0.8) !important;
-  border: 1px solid rgba(167, 139, 250, 0.35);
+.screen-game-view .game-turn-banner {
   backdrop-filter: blur(10px);
+  background: rgba(15, 10, 35, 0.75) !important;
+  border: 1px solid rgba(167, 139, 250, 0.4) !important;
 }
 
-.screen-game-view .question-drawer-sheet {
-  background: rgba(22, 14, 48, 0.94) !important;
-  border: 1px solid rgba(167, 139, 250, 0.35);
-  backdrop-filter: blur(16px);
+.screen-game-view.phase-pick-secret .game-turn-banner {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
 }
 
 @keyframes gameBgDrift {
-  0%, 100% { transform: scale(1.05) translate(0, 0); }
-  50% { transform: scale(1.09) translate(-1%, 0.5%); }
-}
-
-@media (max-width: 720px) {
-  .screen-game-view .game-bg-photo {
-    object-position: center 35%;
-  }
+  0%, 100% { transform: scale(1.06) translate(0, 0); }
+  50% { transform: scale(1.1) translate(-1%, 0.5%); }
 }

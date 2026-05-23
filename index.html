@@ -22,13 +22,13 @@
   <link rel="stylesheet" href="assets/game/joined-screen.css?v=2" />
   <link rel="stylesheet" href="assets/game/lobby-screen.css?v=1" />
   <link rel="stylesheet" href="assets/game/code-screen.css?v=2" />
-  <link rel="stylesheet" href="assets/game/premium-game.css?v=45" />
+  <link rel="stylesheet" href="assets/game/premium-game.css?v=46" />
   <link rel="stylesheet" href="assets/game/game-drawers.css?v=44" />
   <link rel="stylesheet" href="assets/game/game-hud.css?v=44" />
-  <link rel="stylesheet" href="assets/game/game-layout.css?v=53" />
+  <link rel="stylesheet" href="assets/game/game-layout.css?v=54" />
   <link rel="stylesheet" href="assets/game/character-variety.css?v=44" />
   <link rel="stylesheet" href="assets/game/game-extras.css?v=55" />
-  <link rel="stylesheet" href="assets/game/game-play.css?v=53" />
+  <link rel="stylesheet" href="assets/game/game-play.css?v=54" />
   <meta name="description" content="wiehasit.com — gratis online Wie-is-het spel. Maak een potje, deel de code, raad het personage met vrienden of tegen de bot." />
   <meta name="keywords" content="wiehasit.com, wie has it, wie is het online, raadspel, gratis spel" />
   <meta property="og:type" content="website" />
@@ -1533,14 +1533,15 @@
         inset 0 -6px 14px rgba(0, 0, 0, 0.2);
     }
 
-    /* Klassiek Wie is het: blauw bord tegenstander */
+    /* Bord — premium paars (zie game-screen-theme.css) */
     .board-tray--opponent {
-      background: linear-gradient(180deg, #4d9bff 0%, #2563eb 28%, #1d4ed8 55%, #1e40af 100%);
+      background: linear-gradient(165deg, rgba(67, 56, 202, 0.8) 0%, rgba(30, 27, 75, 0.95) 100%);
+      border: 2px solid rgba(167, 139, 250, 0.45);
     }
 
-    /* Klassiek Wie is het: rood bord speler */
     .board-tray--player {
-      background: linear-gradient(180deg, #ff6b7a 0%, #e11d48 28%, #be123c 55%, #9f1239 100%);
+      background: linear-gradient(165deg, rgba(67, 56, 202, 0.75) 0%, rgba(30, 27, 75, 0.95) 100%);
+      border: 2px solid rgba(167, 139, 250, 0.45);
     }
 
     .board-tray::after {
@@ -1587,11 +1588,11 @@
     }
 
     .board-tray--opponent .opponent-board-back {
-      background: linear-gradient(180deg, #1e3a5f 0%, #0f2744 100%);
+      background: rgba(12, 8, 28, 0.55);
     }
 
     .board-tray--player .player-board {
-      background: linear-gradient(180deg, #6b1a2a 0%, #450a16 100%);
+      background: rgba(12, 8, 28, 0.5);
     }
 
     .card-well {
@@ -1843,7 +1844,7 @@
     }
 
   </style>
-  <link rel="stylesheet" href="assets/game/game-screen-theme.css?v=2" />
+  <link rel="stylesheet" href="assets/game/game-screen-theme.css?v=3" />
 </head>
 <body>
   <div class="lang-picker">
@@ -2171,7 +2172,7 @@
 
   <!-- Scherm 5: countdown + speeltafel -->
   <main id="screen-game" class="screen screen-game-view hidden">
-    <img class="game-bg-photo" src="assets/game/start-bg.png?v=2" alt="" aria-hidden="true" decoding="async" />
+    <img class="game-bg-photo" src="assets/game/start-bg.png?v=3" alt="" aria-hidden="true" decoding="async" fetchpriority="high" />
     <div class="game-bg-dim" aria-hidden="true"></div>
     <div class="game-ambient" aria-hidden="true"></div>
     <div class="game-vignette" aria-hidden="true"></div>
@@ -2193,11 +2194,7 @@
               <img class="opponent-character" src="assets/game/opponent-character.png?v=3" alt="Tegenstander"
                 onerror="document.getElementById('opponent-head').classList.add('fallback-show')" />
             </div>
-            <div class="opponent-head" id="opponent-head">
-              <img class="opponent-face-img" src="assets/game/opponent-face.png" alt=""
-                onload="document.getElementById('opponent-head').classList.add('has-face')"
-                onerror="this.remove()" />
-            </div>
+            <div class="opponent-head" id="opponent-head" hidden aria-hidden="true"></div>
           </div>
           <div class="board-stack">
             <div class="board-stand board-stand--opponent board-stand--rear" aria-hidden="true">
@@ -2320,6 +2317,7 @@
   </main>
 
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+  <link rel="stylesheet" href="assets/game/game-screen-theme.css?v=3" />
   <script src="assets/game/start-music.js?v=43"></script>
   <script src="assets/game/online-room.js?v=45"></script>
   <script src="assets/game/lobby-room.js?v=40"></script>

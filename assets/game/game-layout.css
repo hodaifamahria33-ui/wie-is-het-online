@@ -201,22 +201,25 @@
 #game-table .board-tray--player {
   background: linear-gradient(
     165deg,
-    #60a5fa 0%,
-    #3b82f6 25%,
-    #2563eb 55%,
-    #1e3a8a 100%
+    rgba(67, 56, 202, 0.78) 0%,
+    rgba(49, 46, 129, 0.9) 45%,
+    rgba(30, 27, 75, 0.95) 100%
   ) !important;
+  border: 2px solid rgba(167, 139, 250, 0.42) !important;
+  box-shadow:
+    0 20px 48px rgba(0, 0, 0, 0.5),
+    0 0 36px rgba(99, 102, 241, 0.18) !important;
 }
 
 #game-table .board-tray--player .player-board {
-  background: linear-gradient(180deg, #0f2847 0%, #071525 100%) !important;
+  background: rgba(12, 8, 28, 0.52) !important;
 }
 
 #game-table .board-base--player {
-  background: linear-gradient(180deg, #1e3a8a 0%, #0f172a 100%) !important;
+  background: linear-gradient(180deg, #4338ca 0%, #1e1b4b 100%) !important;
 }
 
-#game-table .board-tray--opponent {
+#game-table .board-tray--opponent.board-tray--rear {
   background: transparent !important;
   border-color: transparent !important;
   box-shadow: none !important;

@@ -135,28 +135,15 @@
     inset 0 -8px 20px rgba(0, 0, 0, 0.25);
 }
 
-/* Rood = tegenstander (boven) */
-.board-tray--opponent {
-  background: linear-gradient(
-    165deg,
-    #ff6b6b 0%,
-    #ef4444 22%,
-    #dc2626 50%,
-    #b91c1c 78%,
-    #991b1b 100%
-  );
-}
-
-/* Blauw = speler (onder) */
+.board-tray--opponent,
 .board-tray--player {
   background: linear-gradient(
     165deg,
-    #60a5fa 0%,
-    #3b82f6 22%,
-    #2563eb 50%,
-    #1d4ed8 78%,
-    #1e3a8a 100%
-  );
+    rgba(67, 56, 202, 0.78) 0%,
+    rgba(49, 46, 129, 0.9) 45%,
+    rgba(30, 27, 75, 0.95) 100%
+  ) !important;
+  border: 2px solid rgba(167, 139, 250, 0.42) !important;
 }
 
 .board-tray::before {
@@ -202,12 +189,9 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
-.board-tray--opponent .opponent-board-back {
-  background: linear-gradient(180deg, #5c1010 0%, #2d0808 100%);
-}
-
+.board-tray--opponent .opponent-board-back,
 .board-tray--player .player-board {
-  background: linear-gradient(180deg, #0f2847 0%, #071525 100%);
+  background: rgba(12, 8, 28, 0.52) !important;
 }
 
 .card-well {
