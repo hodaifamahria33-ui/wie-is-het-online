@@ -1,5 +1,9 @@
 /* Geanimeerde portretkaarten — gestileerd, geen echte foto's */
 
+.card-photo.card-photo--color {
+  background: linear-gradient(165deg, #7c3aed 0%, #4f46e5 45%, #1e1b4b 100%) !important;
+}
+
 .card-photo.card-photo--illustrated {
   background: linear-gradient(165deg, #4c1d95 0%, #312e81 40%, #1e1b4b 100%) !important;
   position: relative;
@@ -62,13 +66,14 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center 18%;
+  object-position: center 22%;
   display: block;
   position: relative;
   z-index: 2;
-  transform: scale(1.12);
+  transform: scale(1.08);
   transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
   animation: portraitIdle 5s ease-in-out infinite;
+  filter: saturate(1.2) contrast(1.04) brightness(1.05);
 }
 
 @keyframes portraitIdle {
