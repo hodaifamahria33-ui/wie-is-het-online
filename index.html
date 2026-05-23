@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="assets/game/lobby-screen.css?v=1" />
   <link rel="stylesheet" href="assets/game/code-screen.css?v=2" />
   <link rel="stylesheet" href="assets/game/premium-game.css?v=46" />
-  <link rel="stylesheet" href="assets/game/game-drawers.css?v=44" />
+  <link rel="stylesheet" href="assets/game/game-drawers.css?v=45" />
   <link rel="stylesheet" href="assets/game/game-hud.css?v=44" />
   <link rel="stylesheet" href="assets/game/game-layout.css?v=54" />
   <link rel="stylesheet" href="assets/game/character-variety.css?v=51" />
@@ -2269,6 +2269,17 @@
 
     <div id="question-drawer" class="question-drawer hidden" aria-live="polite">
       <div class="question-drawer-sheet">
+        <button
+          type="button"
+          id="btn-toggle-question-drawer"
+          class="question-drawer-handle"
+          aria-expanded="true"
+          aria-controls="question-drawer-body"
+          data-i18n-aria="collapseQuestionDrawer"
+        >
+          <span class="question-drawer-handle-icon" aria-hidden="true"></span>
+        </button>
+        <div id="question-drawer-body" class="question-drawer-body">
         <p class="question-drawer-title" data-i18n="turnBadgeYou">Jouw beurt — stel een vraag</p>
         <p class="question-drawer-label" data-i18n="askQuestionShort">Stel je vraag (tegenstander antwoordt):</p>
         <div id="quick-questions" class="quick-questions" aria-label="Snelle vragen"></div>
@@ -2276,6 +2287,7 @@
           <input type="text" id="question-input" class="question-input" maxlength="100"
             placeholder="Bijv. Is het een jongen?" autocomplete="off" data-i18n-placeholder="questionPlaceholder" />
           <button type="button" id="btn-send-question" class="btn-send-question" data-i18n="btnAsk">Vraag</button>
+        </div>
         </div>
       </div>
     </div>
@@ -2323,7 +2335,7 @@
   <script src="assets/game/online-room.js?v=45"></script>
   <script src="assets/game/lobby-room.js?v=40"></script>
   <script src="assets/game/character-traits.js?v=51"></script>
-  <script src="assets/game/game-play.js?v=50"></script>
+  <script src="assets/game/game-play.js?v=52"></script>
 
   <script>
     const I18N = {
@@ -2424,6 +2436,8 @@
         turnOpponent: "Beurt van de tegenstander",
         askQuestion: "Stel 1 vraag — tegenstander moet antwoorden",
         askQuestionShort: "Stel je vraag (tegenstander antwoordt):",
+        collapseQuestionDrawer: "Vragenpaneel verbergen",
+        expandQuestionDrawer: "Vragenpaneel tonen",
         btnAsk: "Vraag",
         questionPlaceholder: "Bijv. Is het een jongen?",
         waitAnswer: "wacht op antwoord",
@@ -2547,6 +2561,8 @@
         turnOpponent: "Opponent's turn",
         askQuestion: "Ask 1 question — opponent must answer",
         askQuestionShort: "Ask your question (opponent answers):",
+        collapseQuestionDrawer: "Hide question panel",
+        expandQuestionDrawer: "Show question panel",
         btnAsk: "Ask",
         questionPlaceholder: "e.g. Is it a boy?",
         waitAnswer: "waiting for answer",

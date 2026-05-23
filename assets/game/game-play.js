@@ -52,6 +52,7 @@
   let gameActionsPost = null;
   let gameActionsQuestionText = null;
   let questionDrawer = null;
+  let btnToggleQuestionDrawer = null;
   let answerDrawer = null;
   let answerDrawerQuestion = null;
   let flipPhaseBar = null;
@@ -477,10 +478,38 @@
   function hideQuestionDrawer() {
     if (questionDrawer) {
       questionDrawer.classList.add("hidden");
+      questionDrawer.classList.remove("is-collapsed");
       questionDrawer.style.display = "";
     }
     if (screenGame) screenGame.classList.remove("show-question-drawer");
     setQuestionInputEnabled(false);
+  }
+
+  function setQuestionDrawerCollapsed(collapsed) {
+    resolveDrawerNodes();
+    if (!questionDrawer) return;
+    questionDrawer.classList.toggle("is-collapsed", collapsed);
+    if (btnToggleQuestionDrawer) {
+      btnToggleQuestionDrawer.setAttribute("aria-expanded", collapsed ? "false" : "true");
+      btnToggleQuestionDrawer.setAttribute(
+        "aria-label",
+        tFn(collapsed ? "expandQuestionDrawer" : "collapseQuestionDrawer")
+      );
+    }
+    if (collapsed) {
+      setQuestionInputEnabled(false);
+    } else {
+      const canAsk = state.phase === PHASE.MY_TURN && !state.askedThisTurn;
+      setQuestionInputEnabled(canAsk);
+      if (canAsk && questionInput) {
+        window.setTimeout(() => questionInput.focus(), 120);
+      }
+    }
+  }
+
+  function toggleQuestionDrawer() {
+    if (!questionDrawer || questionDrawer.classList.contains("hidden")) return;
+    setQuestionDrawerCollapsed(!questionDrawer.classList.contains("is-collapsed"));
   }
 
   function resolveDrawerNodes() {
@@ -494,6 +523,9 @@
     if (!questionInput) questionInput = document.getElementById("question-input");
     if (!btnSendQuestion) btnSendQuestion = document.getElementById("btn-send-question");
     if (!quickQuestionsEl) quickQuestionsEl = document.getElementById("quick-questions");
+    if (!btnToggleQuestionDrawer) {
+      btnToggleQuestionDrawer = document.getElementById("btn-toggle-question-drawer");
+    }
     if (!turnBadge) turnBadge = document.getElementById("game-turn-badge");
     if (!turnBadgeText) turnBadgeText = document.getElementById("game-turn-badge-text");
   }
@@ -528,7 +560,9 @@
     setTurnBadge("my");
     renderQuickQuestions();
     questionDrawer.classList.remove("hidden");
+    questionDrawer.classList.remove("is-collapsed");
     questionDrawer.style.display = "flex";
+    if (btnToggleQuestionDrawer) btnToggleQuestionDrawer.setAttribute("aria-expanded", "true");
     triggerDrawerPop(questionDrawer);
     const canAsk = state.phase === PHASE.MY_TURN && !state.askedThisTurn;
     setQuestionInputEnabled(canAsk);
@@ -1422,6 +1456,10 @@
       answerDrawer.querySelectorAll(".answer-chip").forEach((btn) => {
         btn.addEventListener("click", () => onAnswerChipClick(btn));
       });
+    }
+    if (btnToggleQuestionDrawer && btnToggleQuestionDrawer.dataset.wired !== "1") {
+      btnToggleQuestionDrawer.dataset.wired = "1";
+      btnToggleQuestionDrawer.addEventListener("click", toggleQuestionDrawer);
     }
   }
 
