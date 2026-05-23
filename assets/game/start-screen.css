@@ -177,7 +177,8 @@ html.start-screen-active body {
 .screen-start .start-bottom {
   position: relative;
   z-index: 6;
-  width: min(100%, 420px);
+  width: 100%;
+  max-width: min(100%, 720px);
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
@@ -235,11 +236,34 @@ html.start-screen-active body {
 }
 
 .screen-start .start-support-bar--inline {
-  position: static !important;
-  margin-top: 0.6rem;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0.45rem;
+  position: absolute !important;
+  left: auto;
+  right: max(0px, env(safe-area-inset-right));
+  bottom: 0;
+  transform: none !important;
+  margin: 0;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+  gap: 0.4rem;
+  width: auto;
+  max-width: calc(100% - 1rem);
+}
+
+.screen-start .start-actions {
+  padding-bottom: 2.75rem;
+}
+
+@media (max-width: 380px) {
+  .screen-start .start-support-bar--inline {
+    flex-wrap: wrap;
+    max-width: min(52vw, 200px);
+    gap: 0.35rem;
+  }
+
+  .screen-start .start-support-btn {
+    padding: 0.38rem 0.55rem;
+    font-size: 0.65rem;
+  }
 }
 
 .screen-start .start-support-btn--install {
