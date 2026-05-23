@@ -36,6 +36,9 @@
     askedThisTurn: false,
     usedQuestions: [],
     botDifficulty: "medium",
+    /** Indices op het bord die nog jouw geheim kunnen zijn (solo-bot). */
+    botSuspects: null,
+    botUsedQuestionIds: [],
   };
 
   const POST_ANSWER_SWITCH_SEC = 10;
@@ -895,6 +898,9 @@
   function onAnswerChipClick(btn) {
     if (state.phase !== PHASE.ANSWER_QUESTION) return;
     const yes = btn.dataset.answer === "yes";
+    if (!state.online && state.pendingQuestion?.id) {
+      narrowBotSuspects(state.pendingQuestion.id, yes);
+    }
     hideQuestionPanel();
     hideOpponentAnswer();
     if (state.online && window.WieIsHetOnline) {
@@ -926,38 +932,92 @@
   ];
 
   const BOT_CONFIG = {
-    easy: { flipDelay: 1900, askDelay: 1500, smartQuestion: false, smartFlip: false, mistakeChance: 0.4 },
-    medium: { flipDelay: 1100, askDelay: 900, smartQuestion: false, smartFlip: false, mistakeChance: 0 },
-    hard: { flipDelay: 850, askDelay: 650, smartQuestion: true, smartFlip: true, mistakeChance: 0 },
+    easy: {
+      flipDelay: 2200,
+      askDelay: 1750,
+      smartQuestion: false,
+      smartFlip: false,
+      flipMistakeChance: 0.55,
+      questionMistakeChance: 0,
+      guessWhenOneLeft: false,
+      guessChance: 0,
+      guessMaxCandidates: 1,
+      guessMissChance: 1,
+    },
+    medium: {
+      flipDelay: 1250,
+      askDelay: 980,
+      smartQuestion: true,
+      smartFlip: true,
+      flipMistakeChance: 0.24,
+      questionMistakeChance: 0.22,
+      guessWhenOneLeft: true,
+      guessChance: 0.14,
+      guessMaxCandidates: 5,
+      guessMissChance: 0.32,
+    },
+    hard: {
+      flipDelay: 680,
+      askDelay: 500,
+      smartQuestion: true,
+      smartFlip: true,
+      flipMistakeChance: 0.04,
+      questionMistakeChance: 0.05,
+      guessWhenOneLeft: true,
+      guessChance: 0.5,
+      guessMaxCandidates: 7,
+      guessMissChance: 0.06,
+    },
   };
 
   function getBotConfig() {
     return BOT_CONFIG[state.botDifficulty] || BOT_CONFIG.medium;
   }
 
-  function getUprightPlayerIndices() {
-    return state.playerWells
-      .map((w, i) => ({ w, i }))
-      .filter(({ w }) => {
-        const tile = w.querySelector(".card-tile");
-        return tile && !tile.classList.contains("is-down");
-      })
-      .map(({ i }) => i);
+  function initBotKnowledge() {
+    if (state.online) return;
+    const n = state.opponentWells.length || cardNames.length || 32;
+    state.botSuspects = [];
+    for (let i = 0; i < n; i++) state.botSuspects.push(i);
+    state.botUsedQuestionIds = [];
+  }
+
+  function getBotSuspectIndices() {
+    if (!state.botSuspects || !state.botSuspects.length) {
+      const n = state.opponentWells.length || cardNames.length || 32;
+      return Array.from({ length: n }, (_, i) => i);
+    }
+    return state.botSuspects.slice();
+  }
+
+  function narrowBotSuspects(questionId, yes) {
+    if (!state.botSuspects || !questionId) return;
+    state.botSuspects = state.botSuspects.filter(
+      (i) => evaluateQuestion(questionId, getSecretName(i)) === yes
+    );
+  }
+
+  function pickCasualQuestion() {
+    return AI_QUESTIONS[Math.floor(Math.random() * AI_QUESTIONS.length)];
   }
 
   function pickSmartQuestion() {
-    const upright = getUprightPlayerIndices();
-    if (upright.length <= 1) {
-      return AI_QUESTIONS[Math.floor(Math.random() * AI_QUESTIONS.length)];
+    const suspects = getBotSuspectIndices();
+    if (suspects.length <= 1) {
+      return pickCasualQuestion();
     }
-    let bestQ = AI_QUESTIONS[0];
+    const fresh = AI_QUESTIONS.filter(
+      (q) => !state.botUsedQuestionIds.includes(q.id)
+    );
+    const pool = fresh.length ? fresh : AI_QUESTIONS;
+    let bestQ = pool[0];
     let bestScore = Infinity;
-    for (const q of AI_QUESTIONS) {
+    for (const q of pool) {
       let yes = 0;
-      for (const i of upright) {
+      for (const i of suspects) {
         if (evaluateQuestion(q.id, getSecretName(i))) yes++;
       }
-      const no = upright.length - yes;
+      const no = suspects.length - yes;
       if (yes === 0 || no === 0) continue;
       const score = Math.abs(yes - no);
       if (score < bestScore) {
@@ -968,14 +1028,45 @@
     return bestQ;
   }
 
+  function aiTryBotGuessWin() {
+    if (state.online || state.phase === PHASE.WON || state.phase === PHASE.LOST) {
+      return false;
+    }
+    const cfg = getBotConfig();
+    const suspects = getBotSuspectIndices();
+    if (!suspects.length || state.secretIndex == null) return false;
+
+    let shouldGuess = false;
+    let target = null;
+
+    if (suspects.length === 1) {
+      shouldGuess = Boolean(cfg.guessWhenOneLeft);
+      target = suspects[0];
+    } else if (suspects.length <= cfg.guessMaxCandidates && Math.random() < cfg.guessChance) {
+      shouldGuess = true;
+      target = suspects[Math.floor(Math.random() * suspects.length)];
+    }
+
+    if (!shouldGuess || target == null) return false;
+    if (Math.random() < cfg.guessMissChance) return false;
+
+    if (target === state.secretIndex) {
+      if (opponentZone) opponentZone.classList.remove("turn-active");
+      showLose(target);
+      return true;
+    }
+    return false;
+  }
+
   function aiAskPlayerQuestion() {
     const cfg = getBotConfig();
-    let pick;
-    if (cfg.smartQuestion && Math.random() > cfg.mistakeChance) {
-      pick = pickSmartQuestion();
-    } else {
-      pick = AI_QUESTIONS[Math.floor(Math.random() * AI_QUESTIONS.length)];
+    const useSmart =
+      cfg.smartQuestion && Math.random() > cfg.questionMistakeChance;
+    const pick = useSmart ? pickSmartQuestion() : pickCasualQuestion();
+    if (!state.botUsedQuestionIds.includes(pick.id)) {
+      state.botUsedQuestionIds.push(pick.id);
     }
+    recordQuestion(pick.text);
     beginAnswerQuestion(pick.text, pick.id);
   }
 
@@ -1003,6 +1094,7 @@
       const pick = upright[Math.floor(Math.random() * upright.length)];
       state.opponentSecretIndex = pick.i;
     }
+    initBotKnowledge();
     setTimeout(beginMyTurn, 700);
   }
 
@@ -1032,6 +1124,7 @@
     if (opponentZone) opponentZone.classList.add("turn-active");
     if (!state.online) {
       const cfg = getBotConfig();
+      if (aiTryBotGuessWin()) return;
       setTimeout(aiOpponentFlip, cfg.flipDelay);
     }
   }
@@ -1041,19 +1134,31 @@
     let candidates = state.opponentWells
       .map((w, i) => ({ w, i }))
       .filter(({ w }) => !w.querySelector(".card-tile.is-down"));
-    if (
-      cfg.smartFlip &&
-      state.opponentSecretIndex != null &&
-      candidates.length > 1 &&
-      Math.random() > cfg.mistakeChance
-    ) {
-      candidates = candidates.filter(({ i }) => i !== state.opponentSecretIndex);
+    const suspects = getBotSuspectIndices();
+
+    if (state.opponentSecretIndex != null && candidates.length > 1) {
+      const withoutOwn = candidates.filter(
+        ({ i }) => i !== state.opponentSecretIndex
+      );
+      if (withoutOwn.length) candidates = withoutOwn;
     }
+
+    if (cfg.smartFlip && suspects.length > 0 && candidates.length > 1) {
+      const eliminable = candidates.filter(({ i }) => !suspects.includes(i));
+      if (eliminable.length && Math.random() > cfg.flipMistakeChance) {
+        candidates = eliminable;
+      } else if (Math.random() < cfg.flipMistakeChance) {
+        const wrong = candidates.filter(({ i }) => suspects.includes(i));
+        if (wrong.length) candidates = wrong;
+      }
+    }
+
     if (candidates.length) {
       const { w } = candidates[Math.floor(Math.random() * candidates.length)];
       flipWell(w, true);
     }
     if (opponentZone) opponentZone.classList.remove("turn-active");
+    if (aiTryBotGuessWin()) return;
     setTimeout(aiAskPlayerQuestion, cfg.askDelay);
   }
 
@@ -1340,6 +1445,8 @@
     state.localSecretReady = false;
     state.remoteSecretReady = false;
     state.usedQuestions = [];
+    state.botSuspects = null;
+    state.botUsedQuestionIds = [];
     clearPostAnswerTimers();
     if (secretSlot) {
       Array.from(secretSlot.children).forEach((child) => {
@@ -1483,6 +1590,8 @@
     state.flippedThisTurn = false;
     state.pendingQuestionText = "";
     state.usedQuestions = [];
+    state.botSuspects = null;
+    state.botUsedQuestionIds = [];
     clearPostAnswerTimers();
     clearInteractivity();
     clearOpponentReveal();

@@ -1,29 +1,51 @@
-/* YouTuber / creator portretkaarten */
+/* Geanimeerde portretkaarten — gestileerd, geen echte foto's */
 
-.card-photo.card-photo--creator {
-  background: linear-gradient(180deg, #1e1b4b 0%, #450a0a 100%) !important;
+.card-photo.card-photo--illustrated {
+  background: linear-gradient(165deg, #4c1d95 0%, #312e81 40%, #1e1b4b 100%) !important;
+  position: relative;
+  overflow: hidden;
 }
 
-.card-photo.card-photo--creator::before {
-  content: "▶";
+.card-photo.card-photo--animated::before {
+  content: "";
   position: absolute;
-  top: 4px;
-  right: 4px;
-  z-index: 2;
-  width: 16px;
-  height: 16px;
-  border-radius: 4px;
-  background: #ef4444;
-  color: #fff;
-  font-size: 8px;
-  line-height: 16px;
-  text-align: center;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+  inset: -40% -20%;
+  z-index: 0;
+  background: radial-gradient(
+    circle at 50% 30%,
+    rgba(167, 139, 250, 0.35) 0%,
+    transparent 55%
+  );
+  animation: portraitGlow 4.5s ease-in-out infinite;
   pointer-events: none;
 }
 
-.card-photo.card-photo--real .card-img {
-  object-position: center 15% !important;
+@keyframes portraitGlow {
+  0%, 100% { opacity: 0.55; transform: translateY(0); }
+  50% { opacity: 1; transform: translateY(-3%); }
+}
+
+.card-photo.card-photo--illustrated::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    transparent 50%,
+    rgba(15, 10, 35, 0.35) 78%,
+    rgba(15, 10, 35, 0.55) 100%
+  );
+  z-index: 1;
+}
+
+.card-photo.card-photo--has-hat::after {
+  box-shadow: inset 0 -20px 24px rgba(0, 0, 0, 0.12);
+}
+
+.card-photo.card-photo--creator::before,
+.card-photo.card-photo--real::before {
+  display: none !important;
 }
 
 .card-photo.card-photo--portrait {
@@ -31,32 +53,32 @@
   position: relative;
 }
 
-.card-photo.card-photo--portrait::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(180deg, transparent 55%, rgba(15, 10, 35, 0.45) 100%);
-  z-index: 1;
-}
-
 .card-photo.card-photo--boy,
 .card-photo.card-photo--girl {
-  background: linear-gradient(180deg, #1e1b4b 0%, #312e81 55%, #0f0a1e 100%) !important;
+  background: linear-gradient(180deg, #312e81 0%, #1e1b4b 55%, #0f0a1e 100%) !important;
 }
 
 .card-photo .card-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center 12%;
+  object-position: center 18%;
   display: block;
-  transform: scale(1.06);
-  transition: transform 0.25s ease;
+  position: relative;
+  z-index: 2;
+  transform: scale(1.12);
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  animation: portraitIdle 5s ease-in-out infinite;
+}
+
+@keyframes portraitIdle {
+  0%, 100% { transform: scale(1.1) translateY(0); }
+  50% { transform: scale(1.14) translateY(-2%); }
 }
 
 .card-well:not(.is-down-slot):hover .card-img {
-  transform: scale(1.1);
+  transform: scale(1.18) translateY(-3%);
+  animation: none;
 }
 
 .card-photo .card-face-svg {
@@ -70,11 +92,12 @@
 }
 
 #game-table .card-face {
-  border: 2px solid rgba(255, 255, 255, 0.55) !important;
+  border: 2px solid rgba(196, 181, 253, 0.55) !important;
   border-radius: 10px !important;
   background: #0f0a1e !important;
   box-shadow:
     0 8px 20px rgba(0, 0, 0, 0.45),
+    0 0 16px rgba(139, 92, 246, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
   overflow: hidden;
 }
@@ -100,4 +123,11 @@
 #secret-card-slot .card-face,
 #secret-card-slot .card-name {
   border-radius: 10px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-photo .card-img,
+  .card-photo.card-photo--animated::before {
+    animation: none;
+  }
 }

@@ -872,21 +872,6 @@
 }
 
 @media (max-width: 900px) {
-  #game-table .player-play-area {
-    flex-wrap: wrap;
-    max-width: 99vw !important;
-  }
-
-  .opponent-chest {
-    order: 1;
-    width: clamp(72px, 22vw, 100px);
-  }
-
-  #game-table .board-stack {
-    order: 2;
-    width: 100%;
-  }
-
   .opponent-answer {
     left: 50%;
     top: auto;
