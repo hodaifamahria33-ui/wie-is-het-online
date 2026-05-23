@@ -237,6 +237,14 @@ html.start-screen-active body {
 .screen-start .start-support-bar--inline {
   position: static !important;
   margin-top: 0.6rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.45rem;
+}
+
+.screen-start .start-support-btn--install {
+  border-color: rgba(251, 191, 36, 0.55);
+  box-shadow: 0 0 18px rgba(251, 191, 36, 0.2);
 }
 
 .screen-start .seo-brand {

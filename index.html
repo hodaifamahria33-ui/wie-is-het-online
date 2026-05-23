@@ -103,7 +103,41 @@
       clearTimeout(window.wieToastTimer);
       window.wieToastTimer = setTimeout(function () {
         el.classList.remove("is-visible");
-      }, 2400);
+      }, 5200);
+    };
+    window.wiePwaInstallPrompt = null;
+    window.addEventListener("beforeinstallprompt", function (e) {
+      e.preventDefault();
+      window.wiePwaInstallPrompt = e;
+      var btn = document.getElementById("btn-install-app");
+      if (btn) btn.classList.remove("is-hidden");
+    });
+    window.addEventListener("appinstalled", function () {
+      window.wiePwaInstallPrompt = null;
+      var btn = document.getElementById("btn-install-app");
+      if (btn) btn.classList.add("is-hidden");
+      window.wieShowToast(window.wieMsg("pwaInstalled"));
+    });
+    window.wieInstallApp = function () {
+      if (window.wiePwaInstallPrompt) {
+        window.wiePwaInstallPrompt.prompt();
+        window.wiePwaInstallPrompt.userChoice.then(function () {
+          window.wiePwaInstallPrompt = null;
+        });
+        return;
+      }
+      var ua = navigator.userAgent || "";
+      var isIOS = /iphone|ipad|ipod/i.test(ua);
+      var isAndroid = /android/i.test(ua);
+      if (isIOS) {
+        window.wieShowToast(window.wieMsg("pwaHintIOS"));
+        return;
+      }
+      if (isAndroid) {
+        window.wieShowToast(window.wieMsg("pwaHintAndroid"));
+        return;
+      }
+      window.wieShowToast(window.wieMsg("pwaHintDesktop"));
     };
     window.wieOpenSupport = function (fromId) {
       window.wieSupportReturnTo = fromId || "screen-start";
@@ -261,7 +295,12 @@
         btnCopyDone: "✓ Link gekopieerd!",
         btnShareWa: "DEEL VIA WHATSAPP",
         btnStartGame: "START GAME",
-        btnBack: "TERUG"
+        btnBack: "TERUG",
+        btnInstallApp: "App",
+        pwaInstalled: "App geïnstalleerd!",
+        pwaHintIOS: "Safari → Deel-knop → Zet op beginscherm",
+        pwaHintAndroid: "Chrome menu ⋮ rechtsboven → App installeren",
+        pwaHintDesktop: "Chrome: ⋮ rechtsboven in de browser → App installeren"
       },
       en: {
         errNameEmpty: "Enter your name (max 16 characters)",
@@ -277,7 +316,12 @@
         btnCopyDone: "✓ Link copied!",
         btnShareWa: "SHARE ON WHATSAPP",
         btnStartGame: "START GAME",
-        btnBack: "BACK"
+        btnBack: "BACK",
+        btnInstallApp: "App",
+        pwaInstalled: "App installed!",
+        pwaHintIOS: "Safari → Share → Add to Home Screen",
+        pwaHintAndroid: "Chrome menu ⋮ top-right → Install app",
+        pwaHintDesktop: "Chrome: ⋮ top-right in the browser → Install app"
       }
     };
     window.wieMsg = function (key) {
@@ -1900,6 +1944,15 @@
             <span aria-hidden="true">📤</span>
             <span data-i18n="btnShareGame">Deel</span>
           </button>
+          <button
+            id="btn-install-app"
+            type="button"
+            class="start-support-btn start-support-btn--install"
+            onclick="window.wieInstallApp()"
+          >
+            <span aria-hidden="true">📲</span>
+            <span data-i18n="btnInstallApp">App</span>
+          </button>
         </nav>
       </div>
     </div>
@@ -2481,6 +2534,11 @@
         btnModeBack: "Terug naar start",
         btnSupport: "Steun",
         btnShareGame: "Deel",
+        btnInstallApp: "App",
+        pwaInstalled: "App geïnstalleerd!",
+        pwaHintIOS: "Safari → Deel-knop → Zet op beginscherm",
+        pwaHintAndroid: "Chrome menu ⋮ rechtsboven → App installeren",
+        pwaHintDesktop: "Chrome: ⋮ rechtsboven in de browser → App installeren",
         btnSupportGame: "Steun het spel ❤️",
         supportKicker: "Steun het spel",
         supportTitle: 'Help <span class="mode-accent">Wie Is Het</span> groeien',
@@ -2717,6 +2775,11 @@
         btnModeBack: "Back to start",
         btnSupport: "Support",
         btnShareGame: "Share",
+        btnInstallApp: "App",
+        pwaInstalled: "App installed!",
+        pwaHintIOS: "Safari → Share → Add to Home Screen",
+        pwaHintAndroid: "Chrome menu ⋮ top-right → Install app",
+        pwaHintDesktop: "Chrome: ⋮ top-right in the browser → Install app",
         btnSupportGame: "Support the game ❤️",
         supportKicker: "Support the game",
         supportTitle: 'Help <span class="mode-accent">Who Is It</span> grow',
