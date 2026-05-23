@@ -560,6 +560,8 @@ html.wie-phone-landscape-game .question-drawer--answer:not(.hidden) {
   justify-content: flex-start;
   width: min(320px, calc(100vw - var(--side-slot) - 20px));
 }
+
+html.wie-phone-landscape-game .flip-phase-bar {
   bottom: max(2px, env(safe-area-inset-bottom));
   padding: 0.35rem 0.75rem;
 }
