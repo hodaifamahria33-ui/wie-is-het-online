@@ -3,7 +3,7 @@
  */
 (function () {
   const PORTRAITS = "assets/portraits/";
-  const AVATAR_CACHE = "yt-likeness-v7-anas";
+  const AVATAR_CACHE = "yt-likeness-v8-anas";
   const REMOTE_STYLE = "adventurer";
   const AVATAR_SIZE = 256;
 

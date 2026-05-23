@@ -30,10 +30,13 @@
   function update() {
     if (!screenGame || !overlay) return;
     const lock = needsRotateLock();
+    const landscapeGame =
+      isGameScreenActive() && isPhoneLike() && !isPortrait();
     screenGame.classList.toggle(LOCK_CLASS, lock);
     overlay.classList.toggle("hidden", !lock);
     overlay.setAttribute("aria-hidden", lock ? "false" : "true");
     document.documentElement.classList.toggle("wie-game-portrait-lock", lock);
+    document.documentElement.classList.toggle("wie-phone-landscape-game", landscapeGame);
   }
 
   function hookShowOnly() {

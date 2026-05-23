@@ -265,3 +265,200 @@
     padding: 5px 6px 6px;
   }
 }
+
+/* ── Telefoon landscape: vol scherm, grote foto's ── */
+html.wie-phone-landscape-game .screen-game-view,
+html.wie-phone-landscape-game #game-table {
+  min-height: 100dvh;
+  min-height: 100svh;
+}
+
+html.wie-phone-landscape-game #game-table {
+  --hud-top: calc(env(safe-area-inset-top, 0px) + 30px);
+  --board-pad-x: max(4px, env(safe-area-inset-left), env(safe-area-inset-right));
+  --game-board-width: min(
+    calc(100vw - var(--board-pad-x) * 2),
+    calc((100dvh - var(--hud-top) - env(safe-area-inset-bottom, 0px) - 4px) * 1.62),
+    calc((100svh - var(--hud-top) - env(safe-area-inset-bottom, 0px) - 4px) * 1.62)
+  );
+  --board-tilt: 0deg;
+  position: absolute;
+  inset: 0;
+}
+
+html.wie-phone-landscape-game #game-table .game-scene {
+  position: absolute;
+  inset: 0;
+  min-height: 0;
+  height: 100%;
+  padding: var(--hud-top) var(--board-pad-x) max(2px, env(safe-area-inset-bottom)) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: hidden !important;
+}
+
+html.wie-phone-landscape-game .screen-game-view.phase-pick-secret #game-table .game-scene,
+html.wie-phone-landscape-game .screen-game-view.turn-player #game-table .game-scene,
+html.wie-phone-landscape-game .screen-game-view.phase-question #game-table .game-scene,
+html.wie-phone-landscape-game .screen-game-view.phase-post-switch #game-table .game-scene,
+html.wie-phone-landscape-game .screen-game-view.phase-flip-active #game-table .game-scene {
+  padding-top: var(--hud-top) !important;
+  padding-bottom: max(2px, env(safe-area-inset-bottom)) !important;
+}
+
+html.wie-phone-landscape-game #game-table .opponent-zone,
+html.wie-phone-landscape-game #game-table .board-stack,
+html.wie-phone-landscape-game #game-table .player-play-area {
+  width: 100% !important;
+  max-width: var(--game-board-width) !important;
+  min-width: 0 !important;
+  margin: 0 auto;
+}
+
+html.wie-phone-landscape-game #game-table .board-stand--front {
+  width: 100% !important;
+  max-width: var(--game-board-width) !important;
+  min-width: 0 !important;
+}
+
+html.wie-phone-landscape-game #game-table .board-tray {
+  padding: 4px 5px 5px;
+  border-radius: 12px;
+  border-width: 2px;
+}
+
+html.wie-phone-landscape-game #game-table .board-base {
+  height: 6px;
+  margin-top: -1px;
+}
+
+html.wie-phone-landscape-game #game-table .opponent-board-back,
+html.wie-phone-landscape-game #game-table .player-board {
+  grid-template-columns: repeat(8, minmax(0, 1fr)) !important;
+  grid-template-rows: repeat(4, minmax(0, 1fr)) !important;
+  gap: 3px !important;
+  padding: 3px 4px 4px !important;
+  width: 100%;
+  aspect-ratio: 8 / 5;
+  max-height: calc(100svh - var(--hud-top) - env(safe-area-inset-bottom) - 6px);
+  max-height: calc(100dvh - var(--hud-top) - env(safe-area-inset-bottom) - 6px);
+  box-sizing: border-box;
+}
+
+html.wie-phone-landscape-game #game-table .card-well {
+  aspect-ratio: auto !important;
+  min-height: 0;
+  height: 100%;
+  border-radius: 3px;
+}
+
+html.wie-phone-landscape-game #game-table .card-tile {
+  inset: 1px !important;
+  transform: none !important;
+}
+
+html.wie-phone-landscape-game #game-table .card-tile.is-down {
+  transform: rotateX(70deg) translateY(5%) !important;
+}
+
+html.wie-phone-landscape-game #game-table .card-face {
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100% !important;
+  border-radius: 5px !important;
+  border-width: 1px !important;
+}
+
+html.wie-phone-landscape-game #game-table .card-photo {
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  display: block;
+  overflow: hidden;
+}
+
+html.wie-phone-landscape-game #game-table .card-photo .card-img {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0;
+  object-fit: cover !important;
+  object-position: center 10% !important;
+  display: block;
+}
+
+html.wie-phone-landscape-game #game-table .card-photo.card-photo--real .card-img {
+  object-position: center 20% !important;
+}
+
+html.wie-phone-landscape-game #game-table .card-name {
+  flex: 0 0 auto;
+  font-size: clamp(0.34rem, 1.5vw, 0.48rem) !important;
+  padding: 1px 2px 2px !important;
+  min-height: 0 !important;
+  line-height: 1.05 !important;
+  hyphens: none !important;
+  word-break: keep-all !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  letter-spacing: 0.03em !important;
+}
+
+html.wie-phone-landscape-game .game-turn-badge {
+  top: max(2px, env(safe-area-inset-top)) !important;
+  font-size: clamp(0.48rem, 2vw, 0.58rem) !important;
+  padding: 0.2rem 0.42rem !important;
+  max-width: calc(100vw - 88px) !important;
+  z-index: 190 !important;
+}
+
+html.wie-phone-landscape-game .screen-game-view .btn-give-up {
+  top: max(2px, env(safe-area-inset-top)) !important;
+  padding: 0.24rem 0.4rem !important;
+  font-size: 0.55rem !important;
+  max-width: 28vw;
+}
+
+html.wie-phone-landscape-game .lang-picker {
+  top: max(2px, env(safe-area-inset-top)) !important;
+}
+
+html.wie-phone-landscape-game .lang-globe {
+  width: 30px;
+  height: 30px;
+  font-size: 0.95rem;
+}
+
+html.wie-phone-landscape-game #game-table .opponent-chest {
+  bottom: max(2px, env(safe-area-inset-bottom)) !important;
+  left: max(4px, env(safe-area-inset-left)) !important;
+  width: clamp(38px, 8.5vh, 50px) !important;
+}
+
+html.wie-phone-landscape-game #secret-card-slot.secret-card-slot,
+html.wie-phone-landscape-game #game-table .secret-card-slot {
+  bottom: max(2px, env(safe-area-inset-bottom)) !important;
+  right: max(4px, env(safe-area-inset-right)) !important;
+  width: clamp(44px, 10vh, 58px) !important;
+}
+
+html.wie-phone-landscape-game .question-drawer:not(.hidden) {
+  padding-bottom: max(2px, env(safe-area-inset-bottom));
+}
+
+html.wie-phone-landscape-game .question-drawer-sheet {
+  padding: 0.65rem 0.6rem 0.55rem;
+  width: min(520px, 98vw);
+}
+
+html.wie-phone-landscape-game .flip-phase-bar {
+  bottom: max(2px, env(safe-area-inset-bottom));
+  padding: 0.35rem 0.75rem;
+}
+
+html.wie-phone-landscape-game .game-turn-banner {
+  top: max(2px, env(safe-area-inset-top)) !important;
+  font-size: clamp(0.55rem, 2.2vw, 0.68rem) !important;
+  padding: 0.28rem 0.5rem !important;
+}
