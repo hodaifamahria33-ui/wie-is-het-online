@@ -3,9 +3,9 @@
  */
 (function () {
   const PEER_PREFIX = "wieishet-";
-  const PEER_TIMEOUT_MS = 25000;
-  const CONN_TIMEOUT_MS = 14000;
-  const HOST_PROBE_MS = 3000;
+  const PEER_TIMEOUT_MS = 28000;
+  const CONN_TIMEOUT_MS = 22000;
+  const HOST_PROBE_MS = 4500;
   const PEER_CLOUD = "https://0.peerjs.com";
   const PEER_PATH = "/peerjs";
   const PEER_KEY = "peerjs";
@@ -31,13 +31,9 @@
     },
   ];
 
+  /** Alleen ICE — PeerJS cloud defaults voor host/path. */
   const PEER_OPTS = {
     debug: 0,
-    host: "0.peerjs.com",
-    port: 443,
-    path: "/",
-    secure: true,
-    key: PEER_KEY,
     config: { iceServers: ICE_SERVERS },
   };
 
@@ -46,6 +42,7 @@
   let role = null;
   let roomCode = null;
   let connected = false;
+  let hostReconnectTimer = null;
   const listeners = new Set();
   const pendingOutbox = [];
 
@@ -68,6 +65,10 @@
     if (typeof window.Peer !== "function") {
       throw new Error("peerjs-missing");
     }
+  }
+
+  function isPeerLive() {
+    return !!(peer && peer.open && !peer.destroyed);
   }
 
   async function probeHostOnline(code) {
@@ -95,6 +96,16 @@
     } finally {
       clearTimeout(timer);
     }
+  }
+
+  async function waitForHostProbe(code, maxMs) {
+    const deadline = Date.now() + (maxMs || 16000);
+    while (Date.now() < deadline) {
+      const probe = await probeHostOnline(code);
+      if (probe === true) return true;
+      await sleep(700);
+    }
+    return false;
   }
 
   function emit(msg) {
@@ -216,8 +227,29 @@
     conn.on("error", (err) => emit({ type: "error", message: String(err) }));
   }
 
+  function clearHostReconnect() {
+    if (hostReconnectTimer) {
+      clearTimeout(hostReconnectTimer);
+      hostReconnectTimer = null;
+    }
+  }
+
+  function scheduleHostReconnect() {
+    if (role !== "host" || !roomCode) return;
+    clearHostReconnect();
+    hostReconnectTimer = window.setTimeout(() => {
+      hostReconnectTimer = null;
+      if (role !== "host" || !roomCode || isPeerLive()) return;
+      createHost(roomCode).catch((e) => {
+        console.warn("host reconnect failed", e);
+        scheduleHostReconnect();
+      });
+    }, 1800);
+  }
+
   function destroyPeer() {
     connected = false;
+    clearHostReconnect();
     pendingOutbox.length = 0;
     if (conn) {
       try {
@@ -273,6 +305,22 @@
     wireConnection(incoming);
   }
 
+  function attachHostPeerHandlers() {
+    if (!peer) return;
+    peer.on("connection", acceptIncoming);
+    peer.on("disconnected", () => {
+      console.warn("host peer disconnected — reconnecting");
+      scheduleHostReconnect();
+    });
+    peer.on("error", (err) => {
+      console.warn("host peer error", err);
+      const type = String(err && err.type ? err.type : "").toLowerCase();
+      if (type === "network" || type === "disconnected" || type === "server-error") {
+        scheduleHostReconnect();
+      }
+    });
+  }
+
   function createHost(code) {
     return new Promise((resolve, reject) => {
       ensurePeerJs();
@@ -285,12 +333,7 @@
       }
       const id = peerId(roomCode);
       peer = new Peer(id, { ...PEER_OPTS });
-
-      peer.on("connection", acceptIncoming);
-
-      peer.on("error", (err) => {
-        console.warn("host peer error", err);
-      });
+      attachHostPeerHandlers();
 
       waitForPeerOpen(peer, PEER_TIMEOUT_MS)
         .then(() => resolve({ role, roomCode }))
@@ -311,12 +354,19 @@
 
       peer = new Peer({ ...PEER_OPTS });
 
+      peer.on("error", (err) => {
+        console.warn("guest peer error", err);
+      });
+
       waitForPeerOpen(peer, PEER_TIMEOUT_MS)
-        .then(() => sleep(300))
+        .then(() => sleep(500))
         .then(() => {
           const targetId = peerId(roomCode);
           return new Promise((res, rej) => {
-            const c = peer.connect(targetId, { reliable: true });
+            const c = peer.connect(targetId, {
+              reliable: true,
+              serialization: "json",
+            });
             if (!c) {
               rej(new Error("no-connection"));
               return;
@@ -356,9 +406,28 @@
     isOnline: () => role === "host" || role === "guest",
     isHost: () => role === "host",
     isGuest: () => role === "guest",
+    isHostPeerLive: () => role === "host" && isPeerLive(),
 
     async setupHost(code) {
-      return createHost(code);
+      const sanitized = sanitizeCode(code);
+      if (!sanitized) throw new Error("empty-code");
+      ensurePeerJs();
+      let lastErr = null;
+      for (let attempt = 0; attempt < 6; attempt++) {
+        try {
+          if (attempt > 0) {
+            destroyPeer();
+            await sleep(900 + attempt * 450);
+          }
+          await createHost(sanitized);
+          if (!isPeerLive()) throw new Error("peer-timeout");
+          return { role: "host", roomCode: sanitized };
+        } catch (e) {
+          lastErr = e;
+          console.warn("setupHost attempt", attempt + 1, e);
+        }
+      }
+      throw lastErr || new Error("peer-error");
     },
 
     async probeHostOnline(code) {
@@ -369,26 +438,12 @@
       const sanitized = sanitizeCode(code);
       if (!sanitized) throw new Error("empty-code");
       ensurePeerJs();
-
-      const maxAttempts = 10;
-      let lastErr = null;
-      for (let attempt = 0; attempt < maxAttempts; attempt++) {
-        try {
-          if (attempt > 0) {
-            destroyPeer();
-            await sleep(900 + attempt * 300);
-          }
-          await joinAsGuest(sanitized);
-          if (!connected || !conn || !conn.open) {
-            throw new Error("lobby-not-found");
-          }
-          return { role: "guest", roomCode: sanitized };
-        } catch (e) {
-          lastErr = mapJoinError(e);
-          console.warn("setupGuest attempt", attempt + 1, lastErr.message);
-        }
+      await waitForHostProbe(sanitized, 18000);
+      await joinAsGuest(sanitized);
+      if (!connected || !conn || !conn.open) {
+        throw new Error("lobby-not-found");
       }
-      throw lastErr || new Error("lobby-not-found");
+      return { role: "guest", roomCode: sanitized };
     },
 
     send,

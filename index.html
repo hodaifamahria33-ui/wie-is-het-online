@@ -2514,9 +2514,16 @@
   </main>
 
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+  <script>
+    if (typeof window.Peer !== "function") {
+      document.write(
+        '<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"><\/script>'
+      );
+    }
+  </script>
   <link rel="stylesheet" href="assets/game/game-screen-theme.css?v=6" />
   <script src="assets/game/start-music.js?v=43"></script>
-  <script src="assets/game/online-room.js?v=48"></script>
+  <script src="assets/game/online-room.js?v=49"></script>
   <script src="assets/game/lobby-room.js?v=41"></script>
   <script src="assets/game/character-traits.js?v=58"></script>
   <script src="assets/game/rank-system.js?v=2"></script>
@@ -4340,7 +4347,7 @@
       setJoinedStatus("joinConnecting", false);
       if (joinError) joinError.textContent = t("joinConnecting");
       if (btnJoinRetry) btnJoinRetry.classList.add("hidden");
-      const maxAttempts = 12;
+      const maxAttempts = 8;
       let lastErr = null;
       for (let attempt = 0; attempt < maxAttempts; attempt++) {
         try {
@@ -4360,9 +4367,11 @@
           console.warn("join attempt", attempt + 1, e);
           if (attempt >= maxAttempts - 1) throw e;
           if (joinError) joinError.textContent = t("joinRetrying");
-          if (joinLoadSub) joinLoadSub.textContent = t("joinRetrying") + " (" + (attempt + 2) + "/" + maxAttempts + ")";
+          if (joinLoadSub) {
+            joinLoadSub.textContent = t("joinRetrying") + " (" + (attempt + 2) + "/" + maxAttempts + ")";
+          }
           setJoinedStatus("joinConnecting", false);
-          await new Promise((r) => setTimeout(r, 1100));
+          await new Promise((r) => setTimeout(r, 1200 + attempt * 350));
         }
       }
       throw lastErr || new Error("join-failed");
@@ -4558,10 +4567,12 @@
     });
 
     onClick("btn-join-back", () => {
+      leaveOnlineSession();
       transition(screenJoin, screenMenu, "transition-in-from-left");
     });
 
     onClick("btn-joined-back", () => {
+      leaveOnlineSession();
       transition(screenJoined, screenMenu, "transition-in-from-left");
     });
 
@@ -4630,29 +4641,39 @@
       if (hostError) hostError.textContent = "";
       sessionMode = "host";
       sessionCode = pot;
-      let hostReadyPromise = Promise.resolve(false);
-      if (window.WieIsHetOnline) {
-        hostReadyPromise = WieIsHetOnline.setupHost(pot)
-          .then(() => true)
-          .catch((e) => {
-            console.warn("setupHost failed", e);
-            return false;
-          });
-      }
+      const hostReadyPromise =
+        window.WieIsHetOnline && WieIsHetOnline.setupHost
+          ? WieIsHetOnline.setupHost(pot)
+          : Promise.reject(new Error("no-online"));
       runJoinLoading(
         pot,
         async () => {
           lobbyCode.textContent = pot;
           busy = false;
-          let hostOnline = false;
           applyLanguage();
+          let hostOnline = false;
           try {
-            hostOnline = await hostReadyPromise;
-          } catch (_) {
+            await hostReadyPromise;
+            hostOnline =
+              WieIsHetOnline.isHostPeerLive && WieIsHetOnline.isHostPeerLive();
+          } catch (e) {
+            console.warn("setupHost failed", e);
             hostOnline = false;
           }
-          if (!hostOnline) sessionMode = "solo";
-          setLobbyHostStatus(hostOnline);
+          if (!hostOnline) {
+            sessionMode = "solo";
+            sessionCode = "";
+            if (WieIsHetOnline) WieIsHetOnline.reset();
+            setLobbyHostStatus(false);
+            screenLobby.classList.add("hidden");
+            screenPhotoLoad.classList.add("hidden");
+            screenHost.classList.remove("hidden");
+            if (hostError) {
+              hostError.textContent = t("lobbyHostFailed");
+            }
+            return;
+          }
+          setLobbyHostStatus(true);
           wireHostLobby();
           screenHost.classList.add("hidden");
           screenHost.classList.remove("transition-out", "transition-active");
