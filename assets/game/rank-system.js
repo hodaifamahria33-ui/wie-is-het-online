@@ -67,6 +67,22 @@
     return tier;
   }
 
+  function getNextTier(tierId) {
+    const i = TIERS.findIndex((t) => t.id === tierId);
+    return i >= 0 && i < TIERS.length - 1 ? TIERS[i + 1] : null;
+  }
+
+  function getTierProgress(rating) {
+    const tier = getTier(rating);
+    const next = getNextTier(tier.id);
+    if (!next) {
+      return { tier, next: null, current: rating, min: tier.min, max: rating, pct: 100 };
+    }
+    const span = next.min - tier.min;
+    const pct = span > 0 ? Math.min(100, Math.max(0, ((rating - tier.min) / span) * 100)) : 0;
+    return { tier, next, current: rating, min: tier.min, max: next.min, pct };
+  }
+
   function tierName(tierId, tFn) {
     const key = "rankTier_" + tierId;
     if (typeof tFn === "function") {
@@ -142,6 +158,8 @@
     loadProfile,
     saveProfile,
     getTier,
+    getNextTier,
+    getTierProgress,
     tierName,
     calcDelta,
     getBotRatingForDifficulty,

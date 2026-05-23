@@ -19,7 +19,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Nunito:wght@600;700;800&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="assets/game/start-screen.css?v=50" />
-  <link rel="stylesheet" href="assets/game/mode-screen.css?v=7" />
+  <link rel="stylesheet" href="assets/game/mode-screen.css?v=8" />
   <link rel="stylesheet" href="assets/game/support-screen.css?v=1" />
   <link rel="stylesheet" href="assets/game/stripe-donate.css?v=1" />
   <link rel="stylesheet" href="assets/game/joined-screen.css?v=2" />
@@ -30,11 +30,11 @@
   <link rel="stylesheet" href="assets/game/countdown-screen.css?v=2" />
   <link rel="stylesheet" href="assets/game/game-hud.css?v=44" />
   <link rel="stylesheet" href="assets/game/game-layout.css?v=56" />
-  <link rel="stylesheet" href="assets/game/character-variety.css?v=54" />
-  <link rel="stylesheet" href="assets/game/game-extras.css?v=56" />
-  <link rel="stylesheet" href="assets/game/game-mobile.css?v=2" />
+  <link rel="stylesheet" href="assets/game/character-variety.css?v=55" />
+  <link rel="stylesheet" href="assets/game/game-extras.css?v=57" />
+  <link rel="stylesheet" href="assets/game/game-mobile.css?v=3" />
   <link rel="stylesheet" href="assets/game/answer-coach.css?v=1" />
-  <link rel="stylesheet" href="assets/game/rank-ui.css?v=1" />
+  <link rel="stylesheet" href="assets/game/rank-ui.css?v=3" />
   <link rel="stylesheet" href="assets/game/game-play.css?v=54" />
   <meta name="description" content="wiehasit.com — gratis online Wie-is-het spel. Maak een potje, deel de code, raad het personage met vrienden of tegen de bot." />
   <meta name="keywords" content="wiehasit.com, wie has it, wie is het online, raadspel, gratis spel" />
@@ -559,6 +559,30 @@
       overflow: hidden;
       font-family: "Segoe UI", system-ui, sans-serif;
       background: #1a0f2e;
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    input,
+    textarea,
+    select,
+    [contenteditable="true"],
+    .name-input,
+    .code-input,
+    .lobby-chat-input,
+    .question-input {
+      -webkit-user-select: text;
+      user-select: text;
+      cursor: text;
+    }
+
+    button,
+    .btn,
+    .mode-choice,
+    .card-well,
+    label[for] {
+      cursor: pointer;
     }
 
     .screen {
@@ -1864,7 +1888,7 @@
     }
 
   </style>
-  <link rel="stylesheet" href="assets/game/game-screen-theme.css?v=5" />
+  <link rel="stylesheet" href="assets/game/game-screen-theme.css?v=6" />
 </head>
 <body>
   <div class="lang-picker">
@@ -2108,27 +2132,43 @@
   </main>
 
   <!-- Ranked hub -->
-  <main id="screen-ranked" class="screen screen-mode-view hidden">
-    <img class="mode-bg-photo" src="assets/game/start-bg.png?v=2" alt="" aria-hidden="true" decoding="async" />
-    <div class="mode-overlay" aria-hidden="true"></div>
+  <main id="screen-ranked" class="screen screen-mode-view screen-ranked-view hidden">
+    <div class="rank-bg-fx" aria-hidden="true">
+      <span class="rank-bg-grid"></span>
+      <span class="rank-bg-glow rank-bg-glow--gold"></span>
+      <span class="rank-bg-glow rank-bg-glow--purple"></span>
+      <span class="rank-bg-spark rank-bg-spark--1"></span>
+      <span class="rank-bg-spark rank-bg-spark--2"></span>
+      <span class="rank-bg-spark rank-bg-spark--3"></span>
+    </div>
     <section class="mode-panel rank-panel content">
-      <p class="mode-kicker" data-i18n="rankKicker">Ranked modus</p>
-      <h2 data-i18n-html="rankTitle">Stijg in <span class="mode-accent">rank</span></h2>
-      <div class="rank-hero">
-        <span id="rank-hero-icon" class="rank-hero-icon" aria-hidden="true">🥇</span>
+      <div class="rank-panel-crown" aria-hidden="true">🏆</div>
+      <p class="mode-kicker rank-kicker" data-i18n="rankKicker">Ranked modus</p>
+      <h2 class="rank-title" data-i18n-html="rankTitle">Stijg in <span class="mode-accent">rank</span></h2>
+      <div id="rank-hero" class="rank-hero rank-hero--silver">
+        <div class="rank-medal-wrap">
+          <span class="rank-medal-ring" aria-hidden="true"></span>
+          <span id="rank-hero-icon" class="rank-hero-icon" aria-hidden="true">🥇</span>
+        </div>
         <p id="rank-hero-tier" class="rank-hero-tier">Goud</p>
         <p id="rank-hero-rating" class="rank-hero-rating">1000 RP</p>
+        <div class="rank-progress">
+          <p id="rank-progress-label" class="rank-progress-label">900 / 1100 RP</p>
+          <div class="rank-progress-track">
+            <div id="rank-progress-fill" class="rank-progress-fill" style="width:50%"></div>
+          </div>
+        </div>
       </div>
       <div class="rank-stats-row">
-        <div class="rank-stat">
+        <div class="rank-stat rank-stat--win">
           <span id="rank-stat-wins" class="rank-stat-val">0</span>
           <span class="rank-stat-label" data-i18n="rankStatWins">W</span>
         </div>
-        <div class="rank-stat">
+        <div class="rank-stat rank-stat--loss">
           <span id="rank-stat-losses" class="rank-stat-val">0</span>
           <span class="rank-stat-label" data-i18n="rankStatLosses">L</span>
         </div>
-        <div class="rank-stat">
+        <div class="rank-stat rank-stat--streak">
           <span id="rank-stat-streak" class="rank-stat-val">0</span>
           <span class="rank-stat-label" data-i18n="rankStatStreak">Streak</span>
         </div>
@@ -2140,25 +2180,33 @@
   </main>
 
   <!-- Ranked queue -->
-  <main id="screen-ranked-queue" class="screen screen-mode-view hidden">
-    <img class="mode-bg-photo" src="assets/game/start-bg.png?v=2" alt="" aria-hidden="true" decoding="async" />
-    <div class="mode-overlay" aria-hidden="true"></div>
-    <section class="mode-panel rank-panel content">
-      <p class="mode-kicker" data-i18n="rankQueueKicker">Ranked matchmaking</p>
-      <h2 data-i18n="rankQueueTitle">Zoeken…</h2>
-      <div class="rank-queue-spinner" aria-hidden="true"></div>
+  <main id="screen-ranked-queue" class="screen screen-mode-view screen-ranked-view hidden">
+    <div class="rank-bg-fx" aria-hidden="true">
+      <span class="rank-bg-grid"></span>
+      <span class="rank-bg-glow rank-bg-glow--gold"></span>
+      <span class="rank-bg-glow rank-bg-glow--purple"></span>
+    </div>
+    <section class="mode-panel rank-panel rank-panel--queue content">
+      <p class="mode-kicker rank-kicker" data-i18n="rankQueueKicker">Ranked matchmaking</p>
+      <h2 class="rank-title" data-i18n="rankQueueTitle">Zoeken…</h2>
+      <div class="rank-queue-spinner-wrap">
+        <div class="rank-queue-spinner" aria-hidden="true"></div>
+      </div>
       <p id="rank-queue-status" class="rank-queue-status" data-i18n="rankQueueSearching">Zoeken naar ranked tegenstander…</p>
       <button id="btn-ranked-cancel" class="btn mode-btn-back back" type="button" data-i18n="btnRankedCancel">Annuleren</button>
     </section>
   </main>
 
   <!-- Rank tiers -->
-  <main id="screen-rank-tiers" class="screen screen-mode-view hidden">
-    <img class="mode-bg-photo" src="assets/game/start-bg.png?v=2" alt="" aria-hidden="true" decoding="async" />
-    <div class="mode-overlay" aria-hidden="true"></div>
-    <section class="mode-panel rank-panel content">
-      <p class="mode-kicker" data-i18n="rankTiersKicker">Rank ladder</p>
-      <h2 data-i18n="rankTiersTitle">Alle ranks</h2>
+  <main id="screen-rank-tiers" class="screen screen-mode-view screen-ranked-view hidden">
+    <div class="rank-bg-fx" aria-hidden="true">
+      <span class="rank-bg-grid"></span>
+      <span class="rank-bg-glow rank-bg-glow--gold"></span>
+      <span class="rank-bg-glow rank-bg-glow--purple"></span>
+    </div>
+    <section class="mode-panel rank-panel rank-panel--tiers content">
+      <p class="mode-kicker rank-kicker" data-i18n="rankTiersKicker">Rank ladder</p>
+      <h2 class="rank-title" data-i18n="rankTiersTitle">Alle ranks</h2>
       <ul id="rank-tier-list" class="rank-tier-list"></ul>
       <button id="btn-rank-tiers-back" class="btn mode-btn-back back" type="button" data-i18n="btnBack">Terug</button>
     </section>
@@ -2346,6 +2394,18 @@
               <div class="board-base board-base--opponent" aria-hidden="true"></div>
             </div>
             <div class="player-play-area">
+              <button type="button" class="opponent-chest" id="opponent-chest" aria-label="Tik om te raden" data-i18n-aria="chestHint">
+                <div class="chest-visual">
+                  <img
+                    class="chest-avatar"
+                    src="https://api.dicebear.com/7.x/avataaars/png?seed=Opponent&size=160"
+                    alt=""
+                  />
+                </div>
+                <span class="chest-label" data-i18n="chestLabel">Tegenstander</span>
+                <span class="chest-hint" data-i18n="chestHint">Tik om te raden</span>
+                <span id="opponent-answer" class="opponent-answer hidden" aria-live="polite"></span>
+              </button>
               <div class="board-stand board-stand--player board-stand--front">
                 <div class="board-tray board-tray--player">
                   <div class="player-board" id="player-board" aria-label="Jouw bord"></div>
@@ -2384,19 +2444,6 @@
     </div>
 
     <button id="btn-give-up" class="btn-give-up" type="button" data-i18n="btnGiveUp" onclick="window.wieGiveUpClick(event)">OPGEVEN</button>
-
-    <button type="button" class="opponent-chest" id="opponent-chest" aria-label="Tik om te raden" data-i18n-aria="chestHint">
-      <div class="chest-visual">
-        <img
-          class="chest-avatar"
-          src="https://api.dicebear.com/7.x/avataaars/png?seed=Opponent&size=160"
-          alt=""
-        />
-      </div>
-      <span class="chest-label" data-i18n="chestLabel">Tegenstander</span>
-      <span class="chest-hint" data-i18n="chestHint">Tik om te raden</span>
-      <span id="opponent-answer" class="opponent-answer hidden" aria-live="polite"></span>
-    </button>
 
     <aside id="secret-card-slot" class="secret-card-slot" aria-label="Jouw geheim personage">
       <div class="secret-card-pedestal" aria-hidden="true"></div>
@@ -2472,12 +2519,12 @@
   </main>
 
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
-  <link rel="stylesheet" href="assets/game/game-screen-theme.css?v=5" />
+  <link rel="stylesheet" href="assets/game/game-screen-theme.css?v=6" />
   <script src="assets/game/start-music.js?v=43"></script>
   <script src="assets/game/online-room.js?v=45"></script>
   <script src="assets/game/lobby-room.js?v=40"></script>
   <script src="assets/game/character-traits.js?v=56"></script>
-  <script src="assets/game/rank-system.js?v=1"></script>
+  <script src="assets/game/rank-system.js?v=2"></script>
   <script src="assets/game/ranked-queue.js?v=1"></script>
   <script src="assets/game/answer-coach.js?v=1"></script>
   <script src="assets/game/stripe-donate.js?v=1"></script>
@@ -2539,6 +2586,8 @@
         rankLoseMsg: "{delta} RP · {tier}",
         rankDrawMsg: "Geen RP-wijziging · {tier}",
         rankBadge: "{icon} {tier} · {rating} RP",
+        rankProgressLabel: "{current} / {next} RP",
+        rankProgressMax: "Max rank · {rating} RP",
         btnModeBack: "Terug naar start",
         btnSupport: "Steun",
         btnShareGame: "Deel",
@@ -2769,6 +2818,8 @@
         rankLoseMsg: "{delta} RP · {tier}",
         rankDrawMsg: "No RP change · {tier}",
         rankBadge: "{icon} {tier} · {rating} RP",
+        rankProgressLabel: "{current} / {next} RP",
+        rankProgressMax: "Max rank · {rating} RP",
         btnModeBack: "Back to start",
         btnSupport: "Support",
         btnShareGame: "Share",
@@ -3410,6 +3461,7 @@
       const profile = WieRank.loadProfile();
       const tier = WieRank.getTier(profile.rating);
       const tierLabel = WieRank.tierName(tier.id, t);
+      const progress = WieRank.getTierProgress(profile.rating);
       const badge = document.getElementById("mode-rank-badge");
       if (badge) {
         badge.textContent = t("rankBadge")
@@ -3418,12 +3470,28 @@
           .replace("{rating}", String(profile.rating));
         badge.classList.remove("hidden");
       }
+      const hero = document.getElementById("rank-hero");
       const heroIcon = document.getElementById("rank-hero-icon");
       const heroTier = document.getElementById("rank-hero-tier");
       const heroRating = document.getElementById("rank-hero-rating");
+      const progressLabel = document.getElementById("rank-progress-label");
+      const progressFill = document.getElementById("rank-progress-fill");
+      if (hero) {
+        hero.className = "rank-hero rank-hero--" + tier.id;
+      }
       if (heroIcon) heroIcon.textContent = tier.icon;
       if (heroTier) heroTier.textContent = tierLabel;
       if (heroRating) heroRating.textContent = profile.rating + " RP";
+      if (progressLabel) {
+        progressLabel.textContent = progress.next
+          ? t("rankProgressLabel")
+              .replace("{current}", String(profile.rating))
+              .replace("{next}", String(progress.max))
+          : t("rankProgressMax").replace("{rating}", String(profile.rating));
+      }
+      if (progressFill) {
+        progressFill.style.width = Math.round(progress.pct) + "%";
+      }
       const winsEl = document.getElementById("rank-stat-wins");
       const lossesEl = document.getElementById("rank-stat-losses");
       const streakEl = document.getElementById("rank-stat-streak");
@@ -3441,6 +3509,7 @@
       WieRank.TIERS.forEach((tier, i) => {
         const next = WieRank.TIERS[i + 1];
         const li = document.createElement("li");
+        li.className = "tier-" + tier.id;
         if (tier.id === current) li.classList.add("is-current");
         const max = next ? next.min - 1 : "∞";
         li.innerHTML =

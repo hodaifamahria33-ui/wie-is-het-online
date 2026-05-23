@@ -87,8 +87,7 @@
     margin: 0 auto;
   }
 
-  /* Schatkist: vast linksonder viewport (buiten 3D-scene) */
-  #screen-game > .opponent-chest,
+  /* Schatkist: vast linksonder viewport op mobiel */
   #game-table .opponent-chest {
     position: fixed !important;
     left: max(10px, env(safe-area-inset-left)) !important;
@@ -108,8 +107,6 @@
     pointer-events: none !important;
   }
 
-  #screen-game > .opponent-chest .chest-label,
-  #screen-game > .opponent-chest .chest-hint,
   #game-table .opponent-chest .chest-label,
   #game-table .opponent-chest .chest-hint {
     display: none;

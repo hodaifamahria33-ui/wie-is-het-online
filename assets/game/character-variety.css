@@ -1,13 +1,16 @@
 /* Geanimeerde portretkaarten — gestileerd, geen echte foto's */
 
-.card-photo.card-photo--color {
+.card-photo.card-photo--color:not(.card-photo--boy):not(.card-photo--girl) {
   background: linear-gradient(165deg, #7c3aed 0%, #4f46e5 45%, #1e1b4b 100%) !important;
 }
 
 .card-photo.card-photo--illustrated {
-  background: linear-gradient(165deg, #4c1d95 0%, #312e81 40%, #1e1b4b 100%) !important;
   position: relative;
   overflow: hidden;
+}
+
+.card-photo.card-photo--illustrated:not(.card-photo--boy):not(.card-photo--girl) {
+  background: linear-gradient(165deg, #4c1d95 0%, #312e81 40%, #1e1b4b 100%) !important;
 }
 
 .card-photo.card-photo--animated::before {
@@ -22,6 +25,22 @@
   );
   animation: portraitGlow 4.5s ease-in-out infinite;
   pointer-events: none;
+}
+
+.card-photo.card-photo--boy.card-photo--animated::before {
+  background: radial-gradient(
+    circle at 50% 30%,
+    rgba(147, 197, 253, 0.5) 0%,
+    transparent 55%
+  );
+}
+
+.card-photo.card-photo--girl.card-photo--animated::before {
+  background: radial-gradient(
+    circle at 50% 30%,
+    rgba(251, 207, 232, 0.55) 0%,
+    transparent 55%
+  );
 }
 
 @keyframes portraitGlow {
@@ -52,14 +71,23 @@
   display: none !important;
 }
 
-.card-photo.card-photo--portrait {
+.card-photo.card-photo--portrait:not(.card-photo--boy):not(.card-photo--girl) {
   background: linear-gradient(180deg, #1e1b4b 0%, #0f0a1e 100%) !important;
   position: relative;
 }
 
+/* Jongen = blauw, meid = roze */
 .card-photo.card-photo--boy,
 .card-photo.card-photo--girl {
-  background: linear-gradient(180deg, #312e81 0%, #1e1b4b 55%, #0f0a1e 100%) !important;
+  position: relative;
+}
+
+.card-photo.card-photo--boy {
+  background: linear-gradient(165deg, #bfdbfe 0%, #3b82f6 42%, #1d4ed8 78%, #1e3a8a 100%) !important;
+}
+
+.card-photo.card-photo--girl {
+  background: linear-gradient(165deg, #fbcfe8 0%, #f472b6 42%, #ec4899 78%, #be185d 100%) !important;
 }
 
 .card-photo .card-img {
@@ -107,6 +135,22 @@
   overflow: hidden;
 }
 
+#game-table .card-face:has(.card-photo--boy) {
+  border-color: rgba(96, 165, 250, 0.7) !important;
+  box-shadow:
+    0 8px 20px rgba(0, 0, 0, 0.45),
+    0 0 16px rgba(59, 130, 246, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+}
+
+#game-table .card-face:has(.card-photo--girl) {
+  border-color: rgba(244, 114, 182, 0.75) !important;
+  box-shadow:
+    0 8px 20px rgba(0, 0, 0, 0.45),
+    0 0 16px rgba(236, 72, 153, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+}
+
 #game-table .card-name {
   background: linear-gradient(180deg, rgba(15, 10, 35, 0.95), rgba(30, 27, 75, 0.98)) !important;
   color: #f8fafc !important;
@@ -118,6 +162,16 @@
   padding: 4px 2px 5px !important;
   border-top: 1px solid rgba(167, 139, 250, 0.35);
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+}
+
+#game-table .card-face:has(.card-photo--boy) .card-name {
+  background: linear-gradient(180deg, rgba(30, 58, 138, 0.96), rgba(29, 78, 216, 0.98)) !important;
+  border-top-color: rgba(147, 197, 253, 0.45);
+}
+
+#game-table .card-face:has(.card-photo--girl) .card-name {
+  background: linear-gradient(180deg, rgba(157, 23, 77, 0.96), rgba(219, 39, 119, 0.98)) !important;
+  border-top-color: rgba(251, 207, 232, 0.45);
 }
 
 #game-table .card-tile.is-down .card-face {

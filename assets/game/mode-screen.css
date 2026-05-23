@@ -1,6 +1,31 @@
 /* Spelmodus, online-menu & bot — bergmeer-stijl als startscherm */
 
 .screen-mode-view,
+.screen-mode-view *,
+.screen-menu-view,
+.screen-menu-view * {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.screen-mode-view input,
+.screen-menu-view input,
+.screen-mode-view textarea,
+.screen-menu-view textarea {
+  -webkit-user-select: text;
+  user-select: text;
+  cursor: text;
+}
+
+.screen-mode-view button,
+.screen-mode-view .mode-choice,
+.screen-menu-view button,
+.screen-menu-view .mode-btn {
+  cursor: pointer;
+}
+
+.screen-mode-view,
 .screen-menu-view {
   background: #0f172a !important;
   overflow: hidden;
