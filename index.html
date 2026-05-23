@@ -392,11 +392,6 @@
     };
     window.wieGoHost = function () {
       if (window.wieApp && window.wieApp.goHost) return window.wieApp.goHost();
-      var chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-      var code = "";
-      for (var i = 0; i < 5; i++) code += chars[Math.floor(Math.random() * chars.length)];
-      var input = document.getElementById("pot-code");
-      if (input) input.value = code;
       window.wieMakePot();
     };
     window.wieGoJoin = function () {
@@ -416,13 +411,12 @@
     };
     window.wieMakePot = function () {
       if (window.wieApp && window.wieApp.makePot) return window.wieApp.makePot();
+      var chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+      var code = "";
+      for (var i = 0; i < 5; i++) code += chars[Math.floor(Math.random() * chars.length)];
       var input = document.getElementById("pot-code");
       var errEl = document.getElementById("host-error");
-      var code = input ? String(input.value).trim() : "";
-      if (!code) {
-        var chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-        for (var i = 0; i < 5; i++) code += chars[Math.floor(Math.random() * chars.length)];
-      }
+      if (input) input.value = code;
       code = code.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 5);
       var load = document.getElementById("screen-photo-load");
       var lobbyCode = document.getElementById("lobby-code");
@@ -4173,15 +4167,12 @@
       transition(screenMenu, screenMode, "transition-in-from-left");
     });
 
-    onClick("btn-host", () => {
-      goHostAndCreatePot();
-    });
-
     onClick("btn-host-back", () => {
       transition(screenHost, screenMenu, "transition-in-from-left");
     });
 
     onClick("btn-lobby-back", () => {
+      leaveOnlineSession();
       transition(screenLobby, screenMenu, "transition-in-from-left");
     });
 
@@ -4342,14 +4333,16 @@
     }
 
     function goHostAndCreatePot() {
+      leaveOnlineSession();
       if (hostError) hostError.textContent = "";
+      if (potCodeInput) potCodeInput.value = "";
+      if (lobbyCode) lobbyCode.textContent = "-----";
       busy = false;
       createHostPot(generateRandomRoomCode());
     }
 
     function doMakePot() {
-      const code = potCodeInput ? potCodeInput.value.trim() : "";
-      createHostPot(code || generateRandomRoomCode());
+      createHostPot(generateRandomRoomCode());
     }
 
     async function doJoinWithCode() {
