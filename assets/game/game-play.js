@@ -384,37 +384,66 @@
     );
   }
 
-  function evaluateCustomQuestion(text, secretName) {
-    const q = String(text || "").toLowerCase().trim();
-    if (!q) return Math.random() > 0.5;
-    if (/jongen|man|mannelijk|zijn het een jongen|heeft hij|\bboy\b|\bmale\b/.test(q)) {
-      return evaluateQuestion("boy", secretName);
+  function normalizeQuestion(text) {
+    return String(text || "")
+      .toLowerCase()
+      .trim()
+      .replace(/[?!.,;:]+/g, "")
+      .replace(/\s+/g, " ");
+  }
+
+  function resolveQuestionIdFromText(text) {
+    const q = normalizeQuestion(text);
+    if (!q) return null;
+
+    for (const item of getAIQuestions()) {
+      if (normalizeQuestion(item.text) === q || normalizeQuestion(item.short) === q) {
+        return item.id;
+      }
     }
-    if (/meisje|vrouw|vrouwelijk|zij|is het een meisje|\bgirl\b|\bfemale\b/.test(q)) {
-      return evaluateQuestion("girl", secretName);
+
+    if (
+      /\b(jongen|jongens|man|mannelijk|kerel|gast|hem|hij|boy|male|guy)\b/.test(q) ||
+      /is het een jongen|zijn het een jongen|is hij/.test(q)
+    ) {
+      return "boy";
     }
-    if (/gaming|gamer|game.?youtuber|speelt games|plays games/.test(q)) {
-      return evaluateQuestion("gaming", secretName);
+    if (
+      /\b(meisje|meisjes|meid|meiden|vrouw|vrouwelijk|dame|haar|zij|girl|female|woman|gal)\b/.test(q) ||
+      /is het een meisje|is het een meid|is ze|is zij|is het een vrouw/.test(q)
+    ) {
+      return "girl";
     }
-    if (/nederlands|dutch|nederland|\bdutch\b/.test(q)) {
-      return evaluateQuestion("dutch", secretName);
+    if (/gaming|gamer|game.?youtuber|speelt games|plays games|stream/.test(q)) {
+      return "gaming";
+    }
+    if (/nederlands|dutch|nederland|\bdutch\b|nederlandse/.test(q)) {
+      return "dutch";
     }
     if (/minecraft|\bmc\b/.test(q)) {
-      return evaluateQuestion("minecraft", secretName);
+      return "minecraft";
     }
-    if (/beauty|make.?up|diy|asmr/.test(q)) {
-      return evaluateQuestion("beauty", secretName);
+    if (/beauty|make.?up|diy|asmr|nagellak/.test(q)) {
+      return "beauty";
     }
     if (/vlog|vlogger|lifestyle/.test(q)) {
-      return evaluateQuestion("vlog", secretName);
+      return "vlog";
     }
     if (/tech|gadget|telefoon|smartphone|\btech\b/.test(q)) {
-      return evaluateQuestion("tech", secretName);
+      return "tech";
     }
-    if (/3 letter|drie letter|kort/.test(q)) return evaluateQuestion("short", secretName);
-    if (/4 letter|lang|langer/.test(q)) return evaluateQuestion("long", secretName);
-    if (/a.?m|begin.*[a-m]/i.test(q)) return evaluateQuestion("a-m", secretName);
-    if (/n.?z|begin.*[n-z]/i.test(q)) return evaluateQuestion("n-z", secretName);
+    if (/3 letter|drie letter|kort/.test(q)) return "short";
+    if (/4 letter|lang|langer|lange naam/.test(q)) return "long";
+    if (/a.?m|begin.*[a-m]/.test(q)) return "a-m";
+    if (/n.?z|begin.*[n-z]/.test(q)) return "n-z";
+    return null;
+  }
+
+  function evaluateCustomQuestion(text, secretName) {
+    const questionId = resolveQuestionIdFromText(text);
+    if (questionId) {
+      return evaluateQuestion(questionId, secretName);
+    }
     return Math.random() > 0.5;
   }
 
@@ -609,7 +638,7 @@
       btn.addEventListener("click", () => {
         if (state.phase !== PHASE.MY_TURN || state.askedThisTurn) return;
         if (questionInput) questionInput.value = q.text;
-        submitPlayerQuestion();
+        submitPlayerQuestion(q.id);
       });
       quickQuestionsEl.appendChild(btn);
     });
@@ -717,13 +746,6 @@
     hideAnswerDrawer();
     hideFlipPhaseBar();
     hideGameActions();
-  }
-
-  function normalizeQuestion(text) {
-    return String(text || "")
-      .toLowerCase()
-      .trim()
-      .replace(/\s+/g, " ");
   }
 
   function isDuplicateQuestion(text) {
@@ -933,7 +955,7 @@
     }, 1600);
   }
 
-  function submitPlayerQuestion() {
+  function submitPlayerQuestion(knownQuestionId) {
     if (state.phase !== PHASE.MY_TURN || !questionInput || state.askedThisTurn) return;
     const questionText = questionInput.value.trim();
     if (!questionText) {
@@ -952,13 +974,17 @@
     if (state.online && window.WieIsHetOnline) {
       state.phase = PHASE.WAIT_ANSWER;
       state.pendingQuestionText = questionText;
-      window.WieIsHetOnline.send({ type: "question", questionId: "custom", questionText });
+      const qId = knownQuestionId || resolveQuestionIdFromText(questionText) || "custom";
+      window.WieIsHetOnline.send({ type: "question", questionId: qId, questionText });
       setBanner('"' + questionText + '" — ' + tFn("waitAnswer"));
       questionInput.value = "";
       return;
     }
     const secretName = getSecretName(state.opponentSecretIndex);
-    const yes = evaluateCustomQuestion(questionText, secretName);
+    const questionId = knownQuestionId || resolveQuestionIdFromText(questionText);
+    const yes = questionId
+      ? evaluateQuestion(questionId, secretName)
+      : evaluateCustomQuestion(questionText, secretName);
     questionInput.value = "";
     finishQuestionAsAsker(yes, questionText);
   }
@@ -967,8 +993,9 @@
     if (state.secretIndex == null || !state.pendingQuestion) return null;
     const secretName = getSecretName(state.secretIndex);
     const pq = state.pendingQuestion;
-    if (pq.id && pq.id !== "custom") {
-      return evaluateQuestion(pq.id, secretName);
+    const questionId = pq.id && pq.id !== "custom" ? pq.id : resolveQuestionIdFromText(pq.text);
+    if (questionId) {
+      return evaluateQuestion(questionId, secretName);
     }
     return evaluateCustomQuestion(pq.text, secretName);
   }
