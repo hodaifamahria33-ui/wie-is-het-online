@@ -18,7 +18,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Nunito:wght@600;700;800&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/game/start-screen.css?v=59" />
+  <link rel="stylesheet" href="assets/game/start-screen.css?v=60" />
   <link rel="stylesheet" href="assets/game/mode-screen.css?v=8" />
   <link rel="stylesheet" href="assets/game/support-screen.css?v=1" />
   <link rel="stylesheet" href="assets/game/stripe-donate.css?v=1" />
@@ -595,11 +595,7 @@
 
     .screen.screen-start,
     #screen-start.screen-start {
-      background: #05030a !important;
-    }
-
-    html.start-screen-active .lang-picker {
-      display: none !important;
+      background: #0a0618 !important;
     }
 
     .screen.hidden { display: none; }
@@ -1906,41 +1902,57 @@
   <!-- Scherm 1: beginscherm -->
   <main id="screen-start" class="screen screen-start">
     <img
-      class="start-bg-photo"
-      src="assets/game/backgrounds/arena-start-bg.png?v=7"
+      id="start-bg-photo"
+      class="start-bg-photo hidden"
+      src=""
       alt=""
       aria-hidden="true"
       decoding="async"
-      fetchpriority="high"
     />
+    <div class="start-overlay" aria-hidden="true"></div>
 
-    <div class="start-tap-layer">
-      <button
-        id="btn-begin"
-        class="start-hit start-hit--begin"
-        type="button"
-        data-i18n-aria="btnBeginAria"
-      >
-        <span class="start-hit-glow" aria-hidden="true"></span>
-        <span data-i18n="btnBegin">START</span>
-      </button>
-      <button type="button" class="start-hit start-hit--support" onclick="window.wieOpenSupport('screen-start')">
-        <span data-i18n="btnSupport">Steun</span>
-      </button>
-      <button type="button" class="start-hit start-hit--share" onclick="window.wieShareGame()">
-        <span data-i18n="btnShareGame">Deel</span>
-      </button>
+    <div class="start-scene">
+      <div class="start-stage">
+        <div id="start-char-ring" class="start-char-ring" aria-hidden="true"></div>
+        <div class="start-hero-hub">
+          <span class="start-bulb" aria-hidden="true">💡</span>
+          <h1 id="start-title" class="start-title start-title--hub">
+            <span class="start-title-main" data-i18n-html="startTitleHtml">Wie <span class="start-word-ben">Ben</span> Ik?</span>
+            <span class="start-title-online" data-i18n="startOnlineBadge">Online</span>
+          </h1>
+        </div>
+      </div>
+
+      <div class="start-bottom">
+        <div class="start-actions">
+          <button
+            id="btn-begin"
+            class="btn-start-begin"
+            type="button"
+            data-i18n="btnBegin"
+            data-i18n-aria="btnBeginAria"
+          >
+            START
+          </button>
+          <p class="start-tagline" data-i18n="startTagline">Raad de verborgen persoon en ontdek wie jij bent!</p>
+        </div>
+        <nav class="start-support-bar start-support-bar--inline" aria-label="Steun en deel">
+          <button type="button" class="start-support-btn" onclick="window.wieOpenSupport('screen-start')">
+            <span aria-hidden="true">❤️</span>
+            <span data-i18n="btnSupport">Steun</span>
+          </button>
+          <button type="button" class="start-support-btn" onclick="window.wieShareGame()">
+            <span aria-hidden="true">📤</span>
+            <span data-i18n="btnShareGame">Deel</span>
+          </button>
+        </nav>
+      </div>
     </div>
-
-    <h1 class="start-sr-only">
-      <span data-i18n-html="startTitleHtml">Wie <span class="start-word-ben">Ben</span> Ik?</span>
-      <span data-i18n="startOnlineBadge">Online</span>
-    </h1>
+    <p class="seo-brand">wiehasit.com</p>
   </main>
 
   <!-- Naam kiezen (na START) -->
   <main id="screen-name" class="screen screen-mode-view screen-name-view hidden">
-    <img class="mode-bg-photo" src="assets/game/backgrounds/arena-start-bg.png?v=3" alt="" aria-hidden="true" decoding="async" />
     <div class="mode-overlay" aria-hidden="true"></div>
     <section class="mode-panel content">
       <p class="mode-kicker" data-i18n="nameKicker">Stap 1</p>
@@ -1972,7 +1984,6 @@
 
   <!-- Keuzescherm: online of bot -->
   <main id="screen-mode" class="screen screen-mode-view hidden">
-    <img class="mode-bg-photo" src="assets/game/backgrounds/arena-start-bg.png?v=3" alt="" aria-hidden="true" decoding="async" />
     <div class="mode-overlay" aria-hidden="true"></div>
     <section class="mode-panel content">
       <p class="mode-kicker" data-i18n="modeKicker">Kies je spel</p>
@@ -2009,7 +2020,6 @@
 
   <!-- Steun / Pro / deel -->
   <main id="screen-support" class="screen screen-mode-view screen-support-view hidden">
-    <img class="mode-bg-photo" src="assets/game/backgrounds/arena-start-bg.png?v=3" alt="" aria-hidden="true" decoding="async" />
     <div class="mode-overlay" aria-hidden="true"></div>
     <section class="support-panel content">
       <p class="support-kicker" data-i18n="supportKicker">Steun het spel</p>
@@ -2037,7 +2047,6 @@
 
   <!-- Bot-moeilijkheid -->
   <main id="screen-bot-diff" class="screen screen-mode-view hidden">
-    <img class="mode-bg-photo" src="assets/game/backgrounds/arena-start-bg.png?v=3" alt="" aria-hidden="true" decoding="async" />
     <div class="mode-overlay" aria-hidden="true"></div>
     <section class="mode-panel content">
       <p class="mode-kicker" data-i18n="botDiffKicker">Solo tegen de bot</p>
@@ -2139,7 +2148,6 @@
 
   <!-- Scherm 2: online menu (host / join) -->
   <main id="screen-menu" class="screen screen-menu screen-menu-view hidden">
-    <img class="mode-bg-photo" src="assets/game/backgrounds/arena-start-bg.png?v=3" alt="" aria-hidden="true" decoding="async" />
     <div class="mode-overlay" aria-hidden="true"></div>
     <section class="mode-panel content menu-content">
       <p class="mode-kicker" data-i18n="menuKicker">Online met vrienden</p>
@@ -3002,6 +3010,44 @@
     const playerNameInput = document.getElementById("player-name-input");
     const nameError = document.getElementById("name-error");
     const btnBeginEl = document.getElementById("btn-begin");
+
+    const START_RING_COLORS = ["blue", "pink", "orange", "green", "yellow"];
+
+    function buildStartCharRing() {
+      const ring = document.getElementById("start-char-ring");
+      if (!ring || !window.WieCharacterArt) return;
+      const names = WieCharacterArt.CARD_NAMES || [];
+      const total = Math.min(12, names.length);
+      ring.innerHTML = "";
+      const orbit = document.createElement("div");
+      orbit.className = "start-char-orbit";
+      for (let i = 0; i < total; i++) {
+        const name = names[i];
+        const slot = document.createElement("div");
+        slot.className = "start-char-slot";
+        slot.style.setProperty("--i", String(i));
+        slot.style.setProperty("--n", String(total));
+        const card = document.createElement("div");
+        card.className =
+          "start-char-card start-char-card--" + START_RING_COLORS[i % START_RING_COLORS.length];
+        card.style.setProperty("--i", String(i));
+        const img = document.createElement("img");
+        img.src = WieCharacterArt.cardAvatarUrl(name);
+        img.alt = "";
+        img.loading = "eager";
+        img.decoding = "async";
+        if (WieCharacterArt.applyImgFilter) WieCharacterArt.applyImgFilter(img);
+        img.addEventListener("error", function () {
+          if (WieCharacterArt.onImageError) WieCharacterArt.onImageError(img, name, null);
+        });
+        card.appendChild(img);
+        slot.appendChild(card);
+        orbit.appendChild(slot);
+      }
+      ring.appendChild(orbit);
+    }
+
+    buildStartCharRing();
 
     function syncMusicButton() {
       /* geen muziekknop op beginscherm */

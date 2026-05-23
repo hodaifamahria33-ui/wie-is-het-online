@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <defs>
+    <radialGradient id="spot" cx="50%" cy="38%" r="55%">
+      <stop offset="0%" stop-color="#fbbf24" stop-opacity="0.28"/>
+      <stop offset="40%" stop-color="#b45309" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#0a0612" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="curt" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#3b0764" stop-opacity="0.95"/>
+      <stop offset="18%" stop-color="#3b0764" stop-opacity="0"/>
+      <stop offset="82%" stop-color="#3b0764" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#3b0764" stop-opacity="0.95"/>
+    </linearGradient>
+    <linearGradient id="stage" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1e1b4b"/>
+      <stop offset="100%" stop-color="#0f0a1a"/>
+    </linearGradient>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#stage)"/>
+  <rect width="1920" height="1080" fill="url(#curt)"/>
+  <rect width="1920" height="1080" fill="url(#spot)"/>
+  <path d="M0 720 Q960 640 1920 720 L1920 1080 L0 1080 Z" fill="#0a0612" opacity="0.7"/>
+  <ellipse cx="960" cy="720" rx="640" ry="50" fill="#f59e0b" opacity="0.15"/>
+  <rect x="860" y="0" width="200" height="1080" fill="#fbbf24" opacity="0.04"/>
+  <circle cx="960" cy="360" r="3" fill="#fde68a" opacity="0.9"/>
+</svg>
