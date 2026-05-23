@@ -106,29 +106,34 @@
 }
 
 #game-table .card-face {
-  border: 2px solid rgba(255, 255, 255, 0.6) !important;
-  border-radius: 8px !important;
-  background: linear-gradient(180deg, #fafafa 0%, #ede9fe 100%) !important;
+  border: 2px solid rgba(255, 255, 255, 0.55) !important;
+  border-radius: 10px !important;
+  background: #0f0a1e !important;
+  overflow: hidden;
+  box-shadow:
+    0 8px 20px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
 }
 
-#game-table .card-photo.card-photo--boy {
-  background: linear-gradient(160deg, #c7d2fe 0%, #6366f1 100%) !important;
-}
-
+#game-table .card-photo.card-photo--portrait,
+#game-table .card-photo.card-photo--boy,
 #game-table .card-photo.card-photo--girl {
-  background: linear-gradient(160deg, #fbcfe8 0%, #db2777 100%) !important;
+  background: linear-gradient(180deg, #1e1b4b 0%, #312e81 55%, #0f0a1e 100%) !important;
 }
 
-#game-table .card-photo:not(.card-photo--boy):not(.card-photo--girl) {
-  background: linear-gradient(160deg, #ddd6fe 0%, #7c3aed 100%) !important;
+#game-table .card-photo .card-img {
+  object-fit: cover !important;
+  object-position: center 12% !important;
 }
 
 #game-table .card-name {
-  background: rgba(15, 10, 35, 0.92) !important;
-  color: #f1f5f9 !important;
+  background: linear-gradient(180deg, rgba(15, 10, 35, 0.95), rgba(30, 27, 75, 0.98)) !important;
+  color: #f8fafc !important;
   font-family: "Nunito", "Outfit", sans-serif !important;
+  font-weight: 800 !important;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
+  border-top: 1px solid rgba(167, 139, 250, 0.35);
 }
 
 #game-table .card-tile.is-down .card-face {

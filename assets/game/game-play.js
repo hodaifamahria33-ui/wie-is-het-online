@@ -76,9 +76,23 @@
   let cardNames = [];
 
   const MALE_NAMES =
-    /^(Max|Tom|Ben|Noah|Jack|Lucas|Daan|Sam|Finn|Tim|Ole|Raj|Erik|Jay|Fox|Ian)$/i;
+    /^(Bram|Mo|Stijn|Tygo|Cas|Samir|Mees|Gijs|Pim|Bo|Dex|Teun|Quinn|Jip|Ravi|Ollie)$/i;
   const FEMALE_NAMES =
-    /^(Anne|Lisa|Sara|Emma|Mila|Fleur|Evi|Nina|Lynn|Zoe|Ivy|Amy|Kim|Lea|Joy|Rio)$/i;
+    /^(Saar|Faye|Nora|Iris|Lieke|Roos|Yara|Tessa|Esra|Kim|Noor|Zoë|Maya|Lina|Evi|Demi)$/i;
+
+  function isMaleCharacter(name) {
+    if (window.WieCharacterArt && typeof WieCharacterArt.isGirl === "function") {
+      return !WieCharacterArt.isGirl(name);
+    }
+    return MALE_NAMES.test(String(name).trim());
+  }
+
+  function isFemaleCharacter(name) {
+    if (window.WieCharacterArt && typeof WieCharacterArt.isGirl === "function") {
+      return WieCharacterArt.isGirl(name);
+    }
+    return FEMALE_NAMES.test(String(name).trim());
+  }
 
   function setBanner(text) {
     if (!turnBanner) return;
@@ -375,9 +389,9 @@
     const n = secretName.trim();
     switch (questionId) {
       case "boy":
-        return MALE_NAMES.test(n);
+        return isMaleCharacter(n);
       case "girl":
-        return FEMALE_NAMES.test(n);
+        return isFemaleCharacter(n);
       case "short":
         return n.length <= 3;
       case "long":

@@ -1,196 +1,137 @@
 /**
- * Personages via DiceBear Avataaars — volledig gezicht (ogen, neus, mond).
- * Geen CSS-overlays meer bovenop de foto.
+ * Personages — realistische portretfoto's + leuke namen.
  */
 (function () {
-  const HAIR = {
-    blonde: "d6b370",
-    brown: "724133",
-    black: "2c1b18",
-    red: "c93305",
-    auburn: "a55728",
-  };
+  const ROSTER = [
+    { name: "Bram", female: false, glasses: false, hair: "brown" },
+    { name: "Saar", female: true, glasses: true, hair: "blonde" },
+    { name: "Mo", female: false, glasses: false, hair: "black" },
+    { name: "Faye", female: true, glasses: false, hair: "auburn" },
+    { name: "Stijn", female: false, glasses: true, hair: "brown" },
+    { name: "Nora", female: true, glasses: false, hair: "black" },
+    { name: "Tygo", female: false, glasses: false, hair: "blonde" },
+    { name: "Iris", female: true, glasses: true, hair: "brown" },
+    { name: "Cas", female: false, glasses: false, hair: "black" },
+    { name: "Lieke", female: true, glasses: false, hair: "blonde" },
+    { name: "Samir", female: false, glasses: true, hair: "black" },
+    { name: "Roos", female: true, glasses: false, hair: "red" },
+    { name: "Mees", female: false, glasses: false, hair: "brown" },
+    { name: "Yara", female: true, glasses: true, hair: "black" },
+    { name: "Gijs", female: false, glasses: false, hair: "blonde" },
+    { name: "Tessa", female: true, glasses: false, hair: "brown" },
+    { name: "Pim", female: false, glasses: true, hair: "brown" },
+    { name: "Esra", female: true, glasses: false, hair: "black" },
+    { name: "Bo", female: false, glasses: false, hair: "blonde" },
+    { name: "Kim", female: true, glasses: true, hair: "black" },
+    { name: "Dex", female: false, glasses: false, hair: "brown" },
+    { name: "Noor", female: true, glasses: false, hair: "auburn" },
+    { name: "Teun", female: false, glasses: true, hair: "brown" },
+    { name: "Zoë", female: true, glasses: false, hair: "blonde" },
+    { name: "Quinn", female: false, glasses: false, hair: "black" },
+    { name: "Maya", female: true, glasses: true, hair: "brown" },
+    { name: "Jip", female: false, glasses: false, hair: "blonde" },
+    { name: "Lina", female: true, glasses: false, hair: "black" },
+    { name: "Ravi", female: false, glasses: true, hair: "black" },
+    { name: "Evi", female: true, glasses: false, hair: "red" },
+    { name: "Ollie", female: false, glasses: false, hair: "brown" },
+    { name: "Demi", female: true, glasses: true, hair: "blonde" },
+  ];
 
-  const SHIRT = {
-    blue: "5199e4",
-    red: "ff5c5c",
-    green: "a7ffc4",
-    yellow: "ffffb1",
-    purple: "b1e2ff",
-    orange: "ffdeb5",
-    teal: "65c9ff",
-    pink: "ff488e",
-    navy: "25557c",
-    coral: "ffafb9",
-    lavender: "d1d4f9",
-    mint: "a7ffc4",
-  };
+  const CARD_NAMES = ROSTER.map((c) => c.name);
 
-  /** top = haar of hoed (avataaars), accessories = bril */
-  const TRAITS = {
-    Anne: { hair: "blonde", shirt: "pink", glasses: true, top: "longHair" },
-    Max: { hair: "brown", shirt: "blue", glasses: false, top: "shortFlat" },
-    Tom: { hair: "black", shirt: "red", glasses: true, top: "theCaesar" },
-    Lisa: { hair: "auburn", shirt: "teal", glasses: false, top: "bob" },
-    Ben: { hair: "brown", shirt: "green", glasses: false, top: "hat", hatColor: "1e40af" },
-    Sara: { hair: "blonde", shirt: "purple", glasses: true, top: "straight01" },
-    Noah: { hair: "black", shirt: "blue", glasses: false, top: "winterHat1", hatColor: "5b21b6" },
-    Emma: { hair: "blonde", shirt: "yellow", glasses: true, top: "curly" },
-    Jack: { hair: "brown", shirt: "orange", glasses: false, top: "hat", hatColor: "2563eb" },
-    Mila: { hair: "black", shirt: "pink", glasses: true, top: "bun" },
-    Lucas: { hair: "brown", shirt: "blue", glasses: false, top: "shortWaved" },
-    Fleur: { hair: "red", shirt: "green", glasses: true, top: "frida" },
-    Daan: { hair: "blonde", shirt: "navy", glasses: false, top: "winterHat02", hatColor: "7c3aed" },
-    Evi: { hair: "brown", shirt: "coral", glasses: true, top: "longButNotTooLong" },
-    Sam: { hair: "black", shirt: "red", glasses: false, top: "shaggy" },
-    Nina: { hair: "auburn", shirt: "lavender", glasses: true, top: "straight02" },
-    Finn: { hair: "blonde", shirt: "blue", glasses: false, top: "winterHat03", hatColor: "0d9488" },
-    Lynn: { hair: "brown", shirt: "mint", glasses: true, top: "miaWallace" },
-    Tim: { hair: "black", shirt: "orange", glasses: false, top: "hat", hatColor: "dc2626" },
-    Zoe: { hair: "blonde", shirt: "teal", glasses: true, top: "bigHair" },
-    Ole: { hair: "brown", shirt: "yellow", glasses: false, top: "shortRound" },
-    Ivy: { hair: "red", shirt: "blue", glasses: true, top: "curvy" },
-    Raj: { hair: "black", shirt: "green", glasses: false, top: "shortCurly" },
-    Amy: { hair: "blonde", shirt: "red", glasses: true, top: "straightAndStrand" },
-    Erik: { hair: "brown", shirt: "navy", glasses: false, top: "hat", hatColor: "1e3a8a" },
-    Kim: { hair: "black", shirt: "pink", glasses: true, top: "winterHat04", hatColor: "ec4899" },
-    Jay: { hair: "brown", shirt: "purple", glasses: false, top: "theCaesarAndSidePart" },
-    Lea: { hair: "auburn", shirt: "blue", glasses: true, top: "dreads01" },
-    Fox: { hair: "red", shirt: "orange", glasses: false, top: "hat", hatColor: "ea580c" },
-    Joy: { hair: "blonde", shirt: "green", glasses: true, top: "fro" },
-    Ian: { hair: "black", shirt: "teal", glasses: false, top: "winterHat1", hatColor: "334155" },
-    Rio: { hair: "brown", shirt: "coral", glasses: true, top: "shavedSides" },
-  };
-
-  const SKIN = ["ffdbb4", "edb98a", "d08b5b", "ae5d29", "f8d25c"];
-
-  const MALE_NAMES =
-    /^(Max|Tom|Ben|Noah|Jack|Lucas|Daan|Sam|Finn|Tim|Ole|Raj|Erik|Jay|Fox|Ian)$/i;
-  const FEMALE_NAMES =
-    /^(Anne|Lisa|Sara|Emma|Mila|Fleur|Evi|Nina|Lynn|Zoe|Ivy|Amy|Kim|Lea|Joy|Rio)$/i;
-
-  const BG_BOY = "93c5fd,b6e3f4";
-  const BG_GIRL = "fbcfe8,f9a8d4";
-  const CSS_BOY = "#bfdbfe";
-  const CSS_GIRL = "#fbcfe8";
-
-  function isGirl(name) {
-    const n = String(name || "").trim();
-    if (FEMALE_NAMES.test(n)) return true;
-    if (MALE_NAMES.test(n)) return false;
-    return true;
-  }
+  const TRAITS = {};
+  ROSTER.forEach((c) => {
+    TRAITS[c.name] = {
+      hair: c.hair,
+      glasses: c.glasses,
+      female: c.female,
+    };
+  });
 
   function getTraits(name) {
     return (
       TRAITS[name] || {
         hair: "brown",
-        shirt: "blue",
         glasses: false,
-        top: "shortFlat",
+        female: false,
       }
     );
   }
 
-  function skinForName(name) {
+  function isGirl(name) {
+    const t = getTraits(name);
+    return !!t.female;
+  }
+
+  function portraitIndex(name) {
     let h = 0;
-    for (let i = 0; i < name.length; i++) h = (h + name.charCodeAt(i) * (i + 1)) % SKIN.length;
-    return SKIN[h];
+    for (let i = 0; i < name.length; i++) {
+      h = (h * 31 + name.charCodeAt(i)) >>> 0;
+    }
+    return h % 99;
   }
 
   function cardAvatarUrl(name) {
-    const t = getTraits(name);
+    const idx = portraitIndex(name);
+    const folder = isGirl(name) ? "women" : "men";
+    return `https://randomuser.me/api/portraits/${folder}/${idx}.jpg`;
+  }
+
+  function cardAvatarFallbackUrl(name) {
     const params = new URLSearchParams();
     params.set("seed", name);
-    params.set("size", "128");
-    params.set("backgroundColor", isGirl(name) ? BG_GIRL : BG_BOY);
+    params.set("size", "160");
+    params.set("backgroundColor", "1e1b4b,312e81,4c1d95");
     params.set("backgroundType", "gradientLinear");
-    params.set("eyes", "default");
-    params.set("eyebrows", "default");
-    params.set("mouth", "smile");
-    params.set("nose", "default");
-    params.set("hairColor", HAIR[t.hair] || HAIR.brown);
-    params.set("clothesColor", SHIRT[t.shirt] || SHIRT.blue);
-    params.set("clothing", "shirtCrewNeck");
-    params.set("skinColor", skinForName(name));
-    params.set("top", t.top || "shortFlat");
-    params.set("topProbability", "100");
-    params.set("facialHairProbability", "0");
-    if (t.hatColor) params.set("hatColor", t.hatColor);
-    if (t.glasses) {
-      params.set("accessories", "prescription01");
-      params.set("accessoriesProbability", "100");
-    } else {
-      params.set("accessoriesProbability", "0");
-    }
-    return "https://api.dicebear.com/9.x/avataaars/png?" + params.toString();
+    return "https://api.dicebear.com/9.x/personas/png?" + params.toString();
   }
 
   function decoratePhotoWrap(photoWrap, name) {
     if (!photoWrap) return;
     const girl = isGirl(name);
-    photoWrap.classList.add("card-photo--gender", girl ? "card-photo--girl" : "card-photo--boy");
-    photoWrap.style.backgroundColor = girl ? CSS_GIRL : CSS_BOY;
+    photoWrap.classList.add("card-photo--portrait", girl ? "card-photo--girl" : "card-photo--boy");
   }
 
   function applyImgFilter(img) {
-    if (img) img.style.filter = "";
+    if (!img) return;
+    img.style.filter = "contrast(1.06) saturate(1.05)";
+  }
+
+  function onImageError(img, name, photoWrap) {
+    if (!img || img.dataset.fallbackTried === "1") {
+      if (photoWrap && !photoWrap.querySelector(".card-face-svg")) {
+        photoWrap.appendChild(createFallbackFace(name));
+      }
+      return;
+    }
+    img.dataset.fallbackTried = "1";
+    img.style.display = "";
+    img.src = cardAvatarFallbackUrl(name);
   }
 
   function createFallbackFace(name) {
-    const t = getTraits(name);
-    const hair = HAIR[t.hair] || HAIR.brown;
-    const shirt = SHIRT[t.shirt] || SHIRT.blue;
-    const skin = skinForName(name);
-    const bg = isGirl(name) ? CSS_GIRL : CSS_BOY;
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     svg.setAttribute("viewBox", "0 0 100 120");
     svg.setAttribute("class", "card-face-svg");
     svg.setAttribute("aria-hidden", "true");
+    const bg = isGirl(name) ? "#fbcfe8" : "#bfdbfe";
     svg.innerHTML =
       '<rect width="100" height="120" fill="' +
       bg +
       '"/>' +
-      '<rect x="0" y="78" width="100" height="42" fill="#' +
-      shirt +
-      '"/>' +
-      '<ellipse cx="50" cy="52" rx="32" ry="36" fill="#' +
-      skin +
-      '"/>' +
-      '<ellipse cx="50" cy="58" rx="26" ry="28" fill="#' +
-      skin +
-      '"/>' +
-      '<path d="M50 62 L50 72" stroke="#c4956a" stroke-width="2.5" stroke-linecap="round"/>' +
-      '<path d="M42 78 Q50 84 58 78" fill="none" stroke="#b45309" stroke-width="2" stroke-linecap="round"/>' +
-      '<circle cx="38" cy="50" r="4" fill="#1e293b"/>' +
-      '<circle cx="62" cy="50" r="4" fill="#1e293b"/>' +
-      '<circle cx="39" cy="49" r="1.2" fill="#fff"/>' +
-      '<circle cx="63" cy="49" r="1.2" fill="#fff"/>' +
-      '<path d="M32 44 Q50 28 68 44" fill="none" stroke="#' +
-      hair +
-      '" stroke-width="8" stroke-linecap="round"/>' +
-      '<path d="M28 40 Q50 18 72 40 L68 48 Q50 32 32 48 Z" fill="#' +
-      hair +
-      '"/>';
-    if (t.glasses) {
-      svg.innerHTML +=
-        '<rect x="28" y="46" width="18" height="10" rx="3" fill="none" stroke="#1e293b" stroke-width="2"/>' +
-        '<rect x="54" y="46" width="18" height="10" rx="3" fill="none" stroke="#1e293b" stroke-width="2"/>' +
-        '<path d="M46 51 H54" stroke="#1e293b" stroke-width="2"/>';
-    }
+      '<circle cx="50" cy="48" r="22" fill="#f5d0b8"/>' +
+      '<text x="50" y="105" text-anchor="middle" font-size="14" fill="#1e1b4b" font-family="sans-serif" font-weight="700">' +
+      String(name).slice(0, 6) +
+      "</text>";
     return svg;
   }
 
-  function onImageError(img, name, photoWrap) {
-    img.style.display = "none";
-    if (photoWrap.querySelector(".card-face-svg")) return;
-    photoWrap.appendChild(createFallbackFace(name));
-  }
-
   window.WieCharacterArt = {
+    CARD_NAMES,
     getTraits,
     isGirl,
     cardAvatarUrl,
+    cardAvatarFallbackUrl,
     decoratePhotoWrap,
     applyImgFilter,
     createFallbackFace,
