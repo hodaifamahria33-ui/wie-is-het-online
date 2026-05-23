@@ -1,15 +1,13 @@
 /* Beginscherm — schone UI, achtergrond kies je later */
 .screen.screen-start,
 #screen-start.screen-start {
-  background:
-    radial-gradient(ellipse 70% 55% at 50% 38%, rgba(124, 58, 237, 0.22) 0%, transparent 62%),
-    linear-gradient(180deg, #0a0618 0%, #12082a 45%, #0f172a 100%) !important;
+  background: #0f0a1a !important;
   overflow: hidden;
 }
 
 html.start-screen-active,
 html.start-screen-active body {
-  background: #0a0618 !important;
+  background: #0f0a1a !important;
 }
 
 .screen-start .start-bg-photo {
@@ -33,7 +31,7 @@ html.start-screen-active body {
   inset: 0;
   z-index: 1;
   pointer-events: none;
-  background: linear-gradient(180deg, rgba(8, 4, 18, 0.35) 0%, transparent 30%, rgba(8, 4, 18, 0.45) 100%);
+  background: linear-gradient(180deg, rgba(15, 10, 26, 0.25) 0%, transparent 28%, rgba(15, 10, 26, 0.35) 100%);
 }
 
 .screen-start .start-scene {
