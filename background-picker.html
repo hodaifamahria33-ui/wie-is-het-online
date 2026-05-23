@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kies achtergrond — Wie Is Het</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: #0a0612;
+      color: #f8fafc;
+      padding: 24px 16px 40px;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 8px;
+      font-size: clamp(1.4rem, 4vw, 2rem);
+    }
+    p.sub {
+      text-align: center;
+      color: rgba(226, 232, 240, 0.75);
+      margin-bottom: 28px;
+      max-width: 540px;
+      margin-left: auto;
+      margin-right: auto;
+      line-height: 1.5;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+      gap: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .opt {
+      border: 2px solid rgba(251, 191, 36, 0.25);
+      border-radius: 18px;
+      overflow: hidden;
+      background: #12082a;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .opt:hover {
+      border-color: rgba(251, 191, 36, 0.7);
+      transform: translateY(-3px);
+    }
+    .opt img {
+      display: block;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+    }
+    .opt figcaption {
+      padding: 14px 16px 16px;
+    }
+    .opt strong {
+      display: block;
+      color: #fde68a;
+      font-size: 1.05rem;
+      margin-bottom: 6px;
+    }
+    .opt span {
+      display: block;
+      font-size: 0.9rem;
+      color: rgba(226, 232, 240, 0.8);
+      line-height: 1.45;
+    }
+    .tag {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 0.35rem 0.65rem;
+      border-radius: 999px;
+      background: rgba(251, 191, 36, 0.15);
+      border: 1px solid rgba(251, 191, 36, 0.35);
+      color: #fde68a;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+  </style>
+</head>
+<body>
+  <h1>Kies je achtergrond</h1>
+  <p class="sub">Zeg welke optie je wilt (1, 2, 3 of 4). Dan zet ik hem live op het startscherm en de menu’s.</p>
+  <div class="grid">
+    <figure class="opt">
+      <img src="assets/game/backgrounds/bg-option-1-galaxy.png" alt="Optie 1 Galaxy" />
+      <figcaption>
+        <strong>Optie 1 — Galaxy</strong>
+        <span>Paars ruimte-thema met sterren en vraagtekens. Past bij je mockup/storyboard.</span>
+        <span class="tag">Aanbevolen</span>
+      </figcaption>
+    </figure>
+    <figure class="opt">
+      <img src="assets/game/backgrounds/bg-option-2-neon-gaming.png" alt="Optie 2 Neon gaming" />
+      <figcaption>
+        <strong>Optie 2 — Neon Gaming</strong>
+        <span>Donker met oranje/goud licht — YouTuber/gaming vibe, energiek.</span>
+      </figcaption>
+    </figure>
+    <figure class="opt">
+      <img src="assets/game/backgrounds/bg-option-3-fantasy-lake.png" alt="Optie 3 Fantasy lake" />
+      <figcaption>
+        <strong>Optie 3 — Fantasy Lake</strong>
+        <span>Meer/bergen maar dan illustrated — minder saai dan echte foto, wel rustig.</span>
+      </figcaption>
+    </figure>
+    <figure class="opt">
+      <img src="assets/game/backgrounds/bg-option-4-arena.png" alt="Optie 4 Arena" />
+      <figcaption>
+        <strong>Optie 4 — Arena</strong>
+        <span>Competitive ranked-sfeer, paars/goud spotlights — past bij ranked modus.</span>
+      </figcaption>
+    </figure>
+  </div>
+</body>
+</html>
