@@ -21,6 +21,7 @@
   <link rel="stylesheet" href="assets/game/start-screen.css?v=50" />
   <link rel="stylesheet" href="assets/game/mode-screen.css?v=7" />
   <link rel="stylesheet" href="assets/game/support-screen.css?v=1" />
+  <link rel="stylesheet" href="assets/game/stripe-donate.css?v=1" />
   <link rel="stylesheet" href="assets/game/joined-screen.css?v=2" />
   <link rel="stylesheet" href="assets/game/lobby-screen.css?v=1" />
   <link rel="stylesheet" href="assets/game/code-screen.css?v=2" />
@@ -58,10 +59,29 @@
   <script>
     document.documentElement.style.backgroundColor = "#d4f1ff";
     document.documentElement.classList.add("start-screen-active");
-  /** Donatie / Pro — pas donateUrl aan naar jouw Ko-fi of Buy Me a Coffee link */
+  /**
+   * Donaties — Stripe TEST (sandbox): geen KVK, geen echt geld.
+   * 1) Maak gratis account: https://dashboard.stripe.com/register
+   * 2) Zet "Testmodus" AAN in Stripe Dashboard
+   * 3) Maak Payment Links: Producten → Payment links → + Create (€3, €5, €10)
+   * 4) Plak test-links hieronder in paymentLinks
+   * Live + KVK: pas later mode: "live" en paymentLinkLive invullen
+   */
     window.WIE_MONETIZE = {
-      donateUrl: "https://ko-fi.com/wiehasit",
+      mode: "test",
       gameUrl: "https://hodaifamahria33-ui.github.io/wie-is-het-online/",
+      donateUrl: "",
+      stripe: {
+        forceSimulate: true,
+        amounts: [3, 5, 10],
+        paymentLinkTest: "",
+        paymentLinkLive: "",
+        paymentLinks: {
+          // "3": "https://buy.stripe.com/test_xxxxx",
+          // "5": "https://buy.stripe.com/test_xxxxx",
+          // "10": "https://buy.stripe.com/test_xxxxx",
+        },
+      },
     };
     window.wieSupportReturnTo = "screen-start";
     window.wieShowToast = function (msg) {
@@ -85,10 +105,9 @@
       window.wieShowScreen("screen-support", window.wieSupportReturnTo || "screen-start");
     };
     window.wieDonate = function () {
-      var url =
-        (window.WIE_MONETIZE && window.WIE_MONETIZE.donateUrl) ||
-        "https://ko-fi.com/";
-      window.open(url, "_blank", "noopener,noreferrer");
+      if (window.WieStripeDonate && window.WieStripeDonate.donate) {
+        return window.WieStripeDonate.donate();
+      }
     };
     window.wieShareGame = function () {
       if (window.wieApp && window.wieApp.shareGame) return window.wieApp.shareGame();
@@ -2038,6 +2057,7 @@
       <p class="support-kicker" data-i18n="supportKicker">Steun het spel</p>
       <h2 data-i18n-html="supportTitle">Help <span class="mode-accent">Wie Is Het</span> groeien</h2>
       <p class="support-sub" data-i18n="supportSub">Gratis spelen blijft altijd mogelijk. Met jouw steun kunnen we servers, nieuwe thema's en betere bots bouwen.</p>
+      <p class="support-stripe-info" data-i18n="stripeSupportInfo">🧪 Testbetaling via Stripe — geen KVK nodig. Gebruik testkaart 4242 4242 4242 4242. Echt geld pas als je live gaat.</p>
       <div class="support-pro-card">
         <span class="support-pro-badge" data-i18n="supportProBadge">Binnenkort</span>
         <p class="support-pro-title" data-i18n="supportProTitle">Wie Is Het Pro</p>
@@ -2384,6 +2404,7 @@
   <script src="assets/game/online-room.js?v=45"></script>
   <script src="assets/game/lobby-room.js?v=40"></script>
   <script src="assets/game/character-traits.js?v=54"></script>
+  <script src="assets/game/stripe-donate.js?v=1"></script>
   <script src="assets/game/game-play.js?v=53"></script>
 
   <script>
@@ -2427,6 +2448,21 @@
         btnShareGameWa: "Deel via WhatsApp",
         btnSupportBack: "Terug",
         supportNote: "Donaties zijn vrijwillig. Bedankt dat je het spel speelt!",
+        stripeSupportInfo:
+          "🧪 Testbetaling via Stripe — geen KVK nodig. Testkaart: 4242 4242 4242 4242. Echt geld pas als je live gaat.",
+        stripeTestBadge: "Testmodus — geen echt geld",
+        stripeTestExplain:
+          "Dit werkt als een echte betaling (Stripe sandbox). KVK hoef je pas in te vullen als je live gaat met echt geld.",
+        stripeChooseAmount: "Kies een bedrag",
+        stripePay: "Betalen",
+        stripeCancel: "Annuleren",
+        stripeCard: "Kaartnummer",
+        stripeExpiry: "MM/JJ",
+        stripeCvc: "CVC",
+        stripeTestCardHint: "Testkaart: 4242 4242 4242 4242 · elk verloop · elke CVC",
+        stripeSuccess: "Testbetaling gelukt! Bedankt ❤️ (geen echt geld)",
+        stripeInvalidCard: "Gebruik de testkaart 4242 4242 4242 4242",
+        stripeRedirecting: "Doorsturen naar Stripe test-checkout…",
         shareGameCopied: "Link gekopieerd — deel met vrienden!",
         botDiffKicker: "Solo tegen de bot",
         botDiffSub: "Hoe slim moet de tegenstander zijn?",
@@ -2569,6 +2605,21 @@
         btnShareGameWa: "Share via WhatsApp",
         btnSupportBack: "Back",
         supportNote: "Donations are optional. Thanks for playing!",
+        stripeSupportInfo:
+          "🧪 Stripe test payment — no business registration needed. Test card: 4242 4242 4242 4242. Real money only when you go live.",
+        stripeTestBadge: "Test mode — no real money",
+        stripeTestExplain:
+          "Works like a real payment (Stripe sandbox). Business/KVK only when you go live.",
+        stripeChooseAmount: "Choose an amount",
+        stripePay: "Pay",
+        stripeCancel: "Cancel",
+        stripeCard: "Card number",
+        stripeExpiry: "MM/YY",
+        stripeCvc: "CVC",
+        stripeTestCardHint: "Test card: 4242 4242 4242 4242 · any expiry · any CVC",
+        stripeSuccess: "Test payment successful! Thanks ❤️ (no real money)",
+        stripeInvalidCard: "Use test card 4242 4242 4242 4242",
+        stripeRedirecting: "Redirecting to Stripe test checkout…",
         shareGameCopied: "Link copied — share with friends!",
         botDiffKicker: "Solo vs bot",
         botDiffSub: "How tough should your opponent be?",
