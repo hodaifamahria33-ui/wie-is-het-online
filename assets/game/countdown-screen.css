@@ -1,0 +1,362 @@
+/* Countdown / loading — cinematic start */
+
+.game-countdown {
+  position: absolute;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse 120% 80% at 50% 120%, rgba(239, 68, 68, 0.12) 0%, transparent 55%),
+    radial-gradient(ellipse 90% 60% at 20% 0%, rgba(139, 92, 246, 0.35) 0%, transparent 50%),
+    radial-gradient(ellipse 70% 50% at 85% 15%, rgba(59, 130, 246, 0.2) 0%, transparent 45%),
+    linear-gradient(165deg, #0a0618 0%, #1a1035 35%, #120a24 100%);
+}
+
+.game-countdown.hidden {
+  display: none !important;
+}
+
+.countdown-bg-fx {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.countdown-bg-fx::before {
+  content: "";
+  position: absolute;
+  inset: -50%;
+  background: conic-gradient(
+    from 0deg at 50% 50%,
+    transparent 0deg,
+    rgba(167, 139, 250, 0.08) 60deg,
+    transparent 120deg,
+    rgba(239, 68, 68, 0.06) 180deg,
+    transparent 240deg,
+    rgba(96, 165, 250, 0.08) 300deg,
+    transparent 360deg
+  );
+  animation: countdownSweep 8s linear infinite;
+}
+
+@keyframes countdownSweep {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.countdown-spark {
+  position: absolute;
+  border-radius: 50%;
+  background: #fff;
+  opacity: 0;
+  animation: countdownSpark 3s ease-in-out infinite;
+}
+
+.countdown-spark--1 { width: 3px; height: 3px; left: 12%; top: 22%; animation-delay: 0s; }
+.countdown-spark--2 { width: 2px; height: 2px; left: 78%; top: 18%; animation-delay: 0.4s; }
+.countdown-spark--3 { width: 4px; height: 4px; left: 88%; top: 62%; animation-delay: 0.9s; }
+.countdown-spark--4 { width: 2px; height: 2px; left: 8%; top: 70%; animation-delay: 1.2s; }
+.countdown-spark--5 { width: 3px; height: 3px; left: 45%; top: 8%; animation-delay: 1.6s; }
+.countdown-spark--6 { width: 2px; height: 2px; left: 55%; top: 88%; animation-delay: 2.1s; }
+
+@keyframes countdownSpark {
+  0%, 100% { opacity: 0; transform: scale(0.5); }
+  50% { opacity: 0.85; transform: scale(1.4); }
+}
+
+.countdown-orbit-ring {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(580px, 92vw);
+  height: min(580px, 92vw);
+  margin-left: calc(min(580px, 92vw) / -2);
+  margin-top: calc(min(580px, 92vw) / -2);
+  border-radius: 50%;
+  border: 1px dashed rgba(167, 139, 250, 0.22);
+  animation: countdownRingPulse 2.5s ease-in-out infinite;
+}
+
+.countdown-orbit-ring::after {
+  content: "";
+  position: absolute;
+  inset: 12%;
+  border-radius: 50%;
+  border: 1px solid rgba(239, 68, 68, 0.15);
+}
+
+@keyframes countdownRingPulse {
+  0%, 100% { opacity: 0.45; transform: scale(0.98); }
+  50% { opacity: 1; transform: scale(1.02); }
+}
+
+.countdown-photos {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.countdown-polaroid {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  padding: 5px 5px 22px;
+  background: linear-gradient(180deg, #fff 0%, #f1f5f9 100%);
+  border-radius: 10px;
+  box-shadow:
+    0 18px 45px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(255, 255, 255, 0.5),
+    0 0 28px rgba(139, 92, 246, 0.25);
+  transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) rotate(var(--rot));
+  opacity: 0;
+  animation:
+    countdownPhotoIn 0.65s cubic-bezier(0.22, 1.2, 0.36, 1) forwards,
+    countdownBob 3.2s ease-in-out 0.65s infinite;
+}
+
+.countdown-polaroid::before {
+  content: "▶";
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 8px;
+  line-height: 18px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+.countdown-polaroid img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 6px;
+  background: #1e1b4b;
+}
+
+.countdown-polaroid-name {
+  position: absolute;
+  left: 50%;
+  bottom: 5px;
+  transform: translateX(-50%);
+  max-width: 92%;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: rgba(15, 10, 35, 0.88);
+  color: #f8fafc;
+  font-size: 0.52rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.countdown-polaroid.cp1 { width: 92px; height: 112px; --x: -230px; --y: -75px; --rot: -12deg; animation-delay: 0s, 0.65s; }
+.countdown-polaroid.cp2 { width: 86px; height: 106px; --x: 220px; --y: -90px; --rot: 14deg; animation-delay: 0.07s, 0.72s; }
+.countdown-polaroid.cp3 { width: 80px; height: 100px; --x: -200px; --y: 100px; --rot: 8deg; animation-delay: 0.14s, 0.79s; }
+.countdown-polaroid.cp4 { width: 84px; height: 104px; --x: 210px; --y: 92px; --rot: -10deg; animation-delay: 0.1s, 0.75s; }
+.countdown-polaroid.cp5 { width: 76px; height: 94px; --x: -45px; --y: -165px; --rot: 6deg; animation-delay: 0.18s, 0.83s; }
+.countdown-polaroid.cp6 { width: 78px; height: 96px; --x: 55px; --y: 158px; --rot: -8deg; animation-delay: 0.05s, 0.7s; }
+.countdown-polaroid.cp7 { width: 72px; height: 90px; --x: -290px; --y: 25px; --rot: 16deg; animation-delay: 0.16s, 0.81s; }
+.countdown-polaroid.cp8 { width: 74px; height: 92px; --x: 280px; --y: 15px; --rot: -14deg; animation-delay: 0.12s, 0.77s; }
+
+@keyframes countdownPhotoIn {
+  0% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) rotate(var(--rot)) scale(0.35);
+    filter: blur(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) rotate(var(--rot)) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes countdownBob {
+  0%, 100% {
+    transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) rotate(var(--rot));
+  }
+  50% {
+    transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y) - 14px)) rotate(calc(var(--rot) + 3deg));
+  }
+}
+
+.countdown-center {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.75rem 2.25rem 1.5rem;
+  min-width: min(320px, 88vw);
+  border-radius: 28px;
+  background: linear-gradient(
+    165deg,
+    rgba(30, 27, 75, 0.92) 0%,
+    rgba(15, 10, 35, 0.88) 100%
+  );
+  border: 2px solid rgba(167, 139, 250, 0.45);
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.55),
+    0 0 80px rgba(139, 92, 246, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  animation: countdownCardIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes countdownCardIn {
+  from {
+    opacity: 0;
+    transform: scale(0.88) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.countdown-center::before {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: 30px;
+  padding: 3px;
+  background: linear-gradient(135deg, #ef4444, #a855f7, #3b82f6, #ef4444);
+  background-size: 300% 300%;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: countdownBorderGlow 4s ease infinite;
+  z-index: -1;
+  opacity: 0.75;
+}
+
+@keyframes countdownBorderGlow {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.countdown-kicker {
+  margin: 0 0 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgba(248, 113, 113, 0.95);
+}
+
+.countdown-label {
+  margin: 0 0 0.5rem;
+  color: rgba(226, 232, 240, 0.9);
+  font-size: clamp(0.95rem, 2.5vw, 1.2rem);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.countdown-num-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.2em;
+  height: 1.1em;
+}
+
+.countdown-num-glow {
+  position: absolute;
+  inset: -20%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(167, 139, 250, 0.55) 0%, transparent 70%);
+  animation: countdownGlowPulse 1s ease-in-out infinite;
+}
+
+@keyframes countdownGlowPulse {
+  0%, 100% { transform: scale(0.9); opacity: 0.6; }
+  50% { transform: scale(1.15); opacity: 1; }
+}
+
+.countdown-num {
+  position: relative;
+  margin: 0;
+  font-size: clamp(4.5rem, 16vw, 7.5rem);
+  font-weight: 900;
+  line-height: 1;
+  background: linear-gradient(180deg, #fff 20%, #c4b5fd 55%, #a78bfa 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 30px rgba(139, 92, 246, 0.8));
+}
+
+.countdown-num.pop {
+  animation: countPop 0.5s cubic-bezier(0.22, 1.45, 0.36, 1);
+}
+
+.countdown-num.is-go {
+  font-size: clamp(2.2rem, 10vw, 3.8rem);
+  letter-spacing: 0.12em;
+  background: linear-gradient(180deg, #fef08a 0%, #f97316 50%, #ef4444 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+@keyframes countPop {
+  0% { transform: scale(0.4); opacity: 0.2; }
+  55% { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.countdown-dots {
+  display: flex;
+  gap: 10px;
+  margin-top: 1rem;
+}
+
+.countdown-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(148, 163, 184, 0.35);
+  transition: transform 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
+}
+
+.countdown-dot.is-active {
+  background: linear-gradient(180deg, #f472b6, #a855f7);
+  box-shadow: 0 0 14px rgba(167, 139, 250, 0.8);
+  transform: scale(1.25);
+}
+
+.countdown-dot.is-done {
+  background: #22c55e;
+  box-shadow: 0 0 10px rgba(34, 197, 94, 0.6);
+}
+
+@media (max-width: 640px) {
+  .countdown-polaroid.cp1 { --x: -140px; --y: -55px; width: 72px; height: 88px; }
+  .countdown-polaroid.cp2 { --x: 135px; --y: -60px; width: 68px; height: 84px; }
+  .countdown-polaroid.cp3 { --x: -125px; --y: 70px; width: 64px; height: 80px; }
+  .countdown-polaroid.cp4 { --x: 130px; --y: 65px; width: 66px; height: 82px; }
+  .countdown-polaroid.cp5 { --x: -20px; --y: -120px; width: 60px; height: 76px; }
+  .countdown-polaroid.cp6 { --x: 25px; --y: 115px; width: 62px; height: 78px; }
+  .countdown-polaroid.cp7,
+  .countdown-polaroid.cp8 {
+    opacity: 0.85;
+    transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) rotate(var(--rot)) scale(0.85);
+  }
+}

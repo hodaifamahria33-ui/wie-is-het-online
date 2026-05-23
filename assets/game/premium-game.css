@@ -32,23 +32,6 @@
   box-shadow: inset 0 0 120px rgba(0, 0, 0, 0.65);
 }
 
-.game-countdown {
-  background: radial-gradient(ellipse at center, rgba(30, 20, 60, 0.92) 0%, rgba(5, 3, 12, 0.98) 72%);
-  backdrop-filter: blur(8px);
-}
-
-.countdown-label {
-  color: rgba(226, 220, 255, 0.9);
-  font-weight: 600;
-  letter-spacing: 0.04em;
-}
-
-.countdown-num {
-  text-shadow:
-    0 0 50px rgba(139, 92, 246, 0.9),
-    0 4px 24px rgba(0, 0, 0, 0.5);
-}
-
 .game-table {
   z-index: 3;
   --game-board-width: min(99vw, min(calc(96vh * 2.1), 960px));

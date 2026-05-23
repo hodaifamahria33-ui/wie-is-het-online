@@ -25,6 +25,7 @@
   <link rel="stylesheet" href="assets/game/code-screen.css?v=2" />
   <link rel="stylesheet" href="assets/game/premium-game.css?v=46" />
   <link rel="stylesheet" href="assets/game/game-drawers.css?v=45" />
+  <link rel="stylesheet" href="assets/game/countdown-screen.css?v=2" />
   <link rel="stylesheet" href="assets/game/game-hud.css?v=44" />
   <link rel="stylesheet" href="assets/game/game-layout.css?v=54" />
   <link rel="stylesheet" href="assets/game/character-variety.css?v=51" />
@@ -1279,100 +1280,8 @@
       background: radial-gradient(ellipse, rgba(139, 92, 246, 0.25) 0%, transparent 65%);
     }
 
-    .game-countdown {
-      position: absolute;
-      inset: 0;
-      z-index: 20;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      background: radial-gradient(ellipse at center, rgba(45, 31, 92, 0.95) 0%, rgba(15, 10, 35, 0.98) 70%);
-    }
-
-    .game-countdown.hidden { display: none; }
-
-    .countdown-photos {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      overflow: hidden;
-    }
-
-    .countdown-polaroid {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      padding: 6px 6px 18px;
-      background: #fff;
-      border-radius: 8px;
-      box-shadow: 0 14px 40px rgba(0, 0, 0, 0.45);
-      transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) rotate(var(--rot));
-      opacity: 0;
-      animation:
-        countdownPhotoIn 0.55s cubic-bezier(0.34, 1.2, 0.64, 1) forwards,
-        countdownBob 2.8s ease-in-out 0.55s infinite;
-    }
-
-    .countdown-polaroid img {
-      display: block;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      border-radius: 4px;
-      background: #e2e8f0;
-    }
-
-    .countdown-polaroid.cp1 { width: 88px; height: 108px; --x: -220px; --y: -70px; --rot: -10deg; animation-delay: 0s, 0.55s; }
-    .countdown-polaroid.cp2 { width: 82px; height: 102px; --x: 210px; --y: -85px; --rot: 12deg; animation-delay: 0.08s, 0.63s; }
-    .countdown-polaroid.cp3 { width: 76px; height: 96px; --x: -190px; --y: 95px; --rot: 7deg; animation-delay: 0.16s, 0.71s; }
-    .countdown-polaroid.cp4 { width: 80px; height: 100px; --x: 200px; --y: 88px; --rot: -8deg; animation-delay: 0.12s, 0.67s; }
-    .countdown-polaroid.cp5 { width: 72px; height: 90px; --x: -40px; --y: -155px; --rot: 5deg; animation-delay: 0.2s, 0.75s; }
-    .countdown-polaroid.cp6 { width: 74px; height: 92px; --x: 50px; --y: 150px; --rot: -6deg; animation-delay: 0.1s, 0.65s; }
-    .countdown-polaroid.cp7 { width: 68px; height: 86px; --x: -280px; --y: 20px; --rot: 14deg; animation-delay: 0.18s, 0.73s; }
-    .countdown-polaroid.cp8 { width: 70px; height: 88px; --x: 270px; --y: 10px; --rot: -11deg; animation-delay: 0.14s, 0.69s; }
-
-    @keyframes countdownPhotoIn {
-      0% { opacity: 0; transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) rotate(var(--rot)) scale(0.4); }
-      100% { opacity: 1; transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) rotate(var(--rot)) scale(1); }
-    }
-
-    @keyframes countdownBob {
-      0%, 100% { transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) rotate(var(--rot)); }
-      50% { transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y) - 10px)) rotate(calc(var(--rot) + 2deg)); }
-    }
-
-    .countdown-center {
-      position: relative;
-      z-index: 2;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .countdown-label {
-      color: rgba(200, 190, 255, 0.85);
-      font-size: clamp(1rem, 2.5vw, 1.35rem);
-      font-weight: 600;
-      margin-bottom: 1rem;
-    }
-
-    .countdown-num {
-      font-size: clamp(5rem, 18vw, 9rem);
-      font-weight: 800;
-      color: #fff;
-      text-shadow: 0 0 40px rgba(139, 92, 246, 0.8);
-      line-height: 1;
-    }
-
-    .countdown-num.pop {
-      animation: countPop 0.45s cubic-bezier(0.34, 1.5, 0.64, 1);
-    }
-
-    @keyframes countPop {
-      0% { transform: scale(0.5); opacity: 0.3; }
-      60% { transform: scale(1.12); opacity: 1; }
-      100% { transform: scale(1); opacity: 1; }
+    .game-countdown:not(.hidden) {
+      display: flex !important;
     }
 
     .game-table {
@@ -1382,12 +1291,9 @@
       --game-board-width: min(99vw, min(calc(96vh * 2.1), 960px));
     }
 
-    .game-countdown:not(.hidden) {
-      display: flex !important;
-      z-index: 100;
+    .game-table.hidden {
+      display: none;
     }
-
-    .game-table.hidden { display: none; }
 
     .game-scene {
       position: absolute;
@@ -2180,10 +2086,28 @@
     <span class="glow" aria-hidden="true"></span>
 
     <section id="game-countdown" class="game-countdown hidden" aria-live="polite">
+      <div class="countdown-bg-fx" aria-hidden="true">
+        <span class="countdown-spark countdown-spark--1"></span>
+        <span class="countdown-spark countdown-spark--2"></span>
+        <span class="countdown-spark countdown-spark--3"></span>
+        <span class="countdown-spark countdown-spark--4"></span>
+        <span class="countdown-spark countdown-spark--5"></span>
+        <span class="countdown-spark countdown-spark--6"></span>
+        <div class="countdown-orbit-ring"></div>
+      </div>
       <div class="countdown-photos" id="countdown-photos" aria-hidden="true"></div>
       <div class="countdown-center">
+        <p class="countdown-kicker">wiehasit.com</p>
         <p class="countdown-label" data-i18n="countdownLabel">Potje start over</p>
-        <p id="countdown-num" class="countdown-num">3</p>
+        <div class="countdown-num-wrap">
+          <span class="countdown-num-glow" aria-hidden="true"></span>
+          <p id="countdown-num" class="countdown-num">3</p>
+        </div>
+        <div class="countdown-dots" id="countdown-dots" aria-hidden="true">
+          <span class="countdown-dot" data-step="3"></span>
+          <span class="countdown-dot" data-step="2"></span>
+          <span class="countdown-dot" data-step="1"></span>
+        </div>
       </div>
     </section>
 
@@ -2937,6 +2861,17 @@
       }
     }
 
+    function updateCountdownDots(n) {
+      const dots = document.querySelectorAll("#countdown-dots .countdown-dot");
+      dots.forEach((dot) => {
+        const step = parseInt(dot.getAttribute("data-step"), 10);
+        dot.classList.remove("is-active", "is-done");
+        if (n > 0 && step === n) dot.classList.add("is-active");
+        if (n > 0 && step > n) dot.classList.add("is-done");
+        if (n === 0) dot.classList.add("is-done");
+      });
+    }
+
     function buildCountdownPhotos() {
       const container = document.getElementById("countdown-photos");
       if (!container) return;
@@ -2950,7 +2885,15 @@
         img.src = cardAvatarUrl(name);
         img.alt = name;
         img.loading = "eager";
-        art.appendChild(img);
+        if (window.WieCharacterArt) {
+          img.onerror = function () {
+            WieCharacterArt.onImageError(this, name, null);
+          };
+        }
+        const label = document.createElement("span");
+        label.className = "countdown-polaroid-name";
+        label.textContent = name;
+        art.append(img, label);
         container.appendChild(art);
       });
     }
@@ -2999,12 +2942,16 @@
       gameCountdown.style.display = "flex";
       if (gameTable) gameTable.classList.add("hidden");
       countdownNum.textContent = String(COUNTDOWN_SEC);
+      updateCountdownDots(COUNTDOWN_SEC);
       let n = COUNTDOWN_SEC;
       function tick() {
-        countdownNum.textContent = n > 0 ? String(n) : t("countdownGo");
+        const isGo = n <= 0;
+        countdownNum.textContent = isGo ? t("countdownGo") : String(n);
+        countdownNum.classList.toggle("is-go", isGo);
         countdownNum.classList.remove("pop");
         void countdownNum.offsetWidth;
         countdownNum.classList.add("pop");
+        updateCountdownDots(n > 0 ? n : 0);
         if (n > 0) {
           n--;
           countdownTimeout = setTimeout(tick, 1000);
