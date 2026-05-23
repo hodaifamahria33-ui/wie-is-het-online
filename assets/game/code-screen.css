@@ -151,8 +151,16 @@
   letter-spacing: 0.1em;
   text-transform: uppercase;
   cursor: pointer;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
   transition: transform 0.16s ease, box-shadow 0.16s ease, filter 0.16s ease;
   -webkit-tap-highlight-color: transparent;
+}
+
+.screen-code-view .join-form {
+  display: block;
+  width: 100%;
 }
 
 .screen-code-view .code-btn--primary {

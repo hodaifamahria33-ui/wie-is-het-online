@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="assets/game/stripe-donate.css?v=1" />
   <link rel="stylesheet" href="assets/game/joined-screen.css?v=5" />
   <link rel="stylesheet" href="assets/game/lobby-screen.css?v=1" />
-  <link rel="stylesheet" href="assets/game/code-screen.css?v=2" />
+  <link rel="stylesheet" href="assets/game/code-screen.css?v=3" />
   <link rel="stylesheet" href="assets/game/premium-game.css?v=46" />
   <link rel="stylesheet" href="assets/game/game-drawers.css?v=45" />
   <link rel="stylesheet" href="assets/game/countdown-screen.css?v=2" />
@@ -492,22 +492,13 @@
     };
     window.wieJoinWithCode = function () {
       if (window.wieApp && window.wieApp.joinWithCode) return window.wieApp.joinWithCode();
-      var input = document.getElementById("join-code");
-      var errEl = document.getElementById("join-error");
-      var code = input ? String(input.value).trim() : "";
-      if (!code) {
-        if (errEl) errEl.textContent = window.wieMsg("errJoinEmpty");
+      var form = document.getElementById("join-form");
+      if (form && form.requestSubmit) {
+        form.requestSubmit();
         return;
       }
-      code = code.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 5);
-      var tries = 0;
-      (function waitApp() {
-        if (window.wieApp && window.wieApp.joinWithCode) {
-          window.wieApp.joinWithCode();
-          return;
-        }
-        if (++tries < 120) setTimeout(waitApp, 50);
-      })();
+      var btn = document.getElementById("btn-join-game");
+      if (btn) btn.click();
     };
   </script>
   <style>
@@ -2156,9 +2147,11 @@
       <p class="code-kicker" data-i18n="joinKicker">Meedoen</p>
       <h2 data-i18n-html="joinTitle">Vul de <span class="code-accent">code</span> in</h2>
       <p class="code-hint" data-i18n="joinHint">Vraag je vriend om de 5-letterige code</p>
-      <input id="join-code" class="code-input" type="text" maxlength="5" placeholder="FUN42" autocomplete="off" autocapitalize="characters" />
-      <p id="join-error" class="code-error error"></p>
-      <button id="btn-join-game" class="code-btn code-btn--primary" type="button" data-i18n="btnJoinGame">Meedoen</button>
+      <form id="join-form" class="join-form" novalidate action="#">
+        <input id="join-code" class="code-input" type="text" maxlength="5" placeholder="FUN42" autocomplete="off" autocapitalize="characters" enterkeyhint="go" inputmode="text" />
+        <p id="join-error" class="code-error error"></p>
+        <button id="btn-join-game" class="code-btn code-btn--primary" type="submit" data-i18n="btnJoinGame">Meedoen</button>
+      </form>
       <button id="btn-join-back" class="code-btn code-btn-back back" type="button" data-i18n="btnBack" onclick="window.wieShowScreen('screen-join','screen-menu')">Terug</button>
     </section>
   </main>
@@ -3152,6 +3145,21 @@
       if (el) el.addEventListener("click", handler);
     }
 
+    function bindTap(id, handler) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.addEventListener(
+        "touchend",
+        (e) => {
+          e.preventDefault();
+          const input = document.getElementById("join-code");
+          if (input && document.activeElement === input) input.blur();
+          handler(e);
+        },
+        { passive: false }
+      );
+    }
+
     const screenBotDiff = document.getElementById("screen-bot-diff");
     const screenMenu = document.getElementById("screen-menu");
     const screenHost = document.getElementById("screen-host");
@@ -3882,6 +3890,20 @@
         filterCode(joinCodeInput);
         if (joinError) joinError.textContent = "";
       });
+      joinCodeInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          doJoinWithCode();
+        }
+      });
+    }
+
+    const joinForm = document.getElementById("join-form");
+    if (joinForm) {
+      joinForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        doJoinWithCode();
+      });
     }
 
     const joinLoadTitle = document.getElementById("join-load-title");
@@ -4034,6 +4056,7 @@
       if (joinBusy) return;
       if (typeof window.Peer !== "function") {
         if (joinError) joinError.textContent = t("joinFailed");
+        if (joinedStatus) setJoinedStatus("joinFailed", true);
         return;
       }
       const c = String(code || "")
@@ -4357,6 +4380,7 @@
     document.addEventListener("wieishet-play-again", playAgainFromEnd);
 
     onClick("btn-join-menu", () => {
+      joinBusy = false;
       if (joinError) joinError.textContent = "";
       transition(screenMenu, screenJoin, "transition-in-from-right");
     });
@@ -4483,7 +4507,11 @@
 
     onClick("btn-make-pot", doMakePot);
 
-    onClick("btn-join-game", () => doJoinWithCode());
+    bindTap("btn-join-game", () => {
+      const form = document.getElementById("join-form");
+      if (form && form.requestSubmit) form.requestSubmit();
+      else doJoinWithCode();
+    });
 
     function doStartGame() {
       if (startingGame) return;
@@ -4605,6 +4633,7 @@
       goMode: goToModeChoice,
       goHost: goHostAndCreatePot,
       goJoin() {
+        joinBusy = false;
         if (joinError) joinError.textContent = "";
         busy = false;
         transition(screenMenu, screenJoin, "transition-in-from-right");
