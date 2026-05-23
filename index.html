@@ -2567,7 +2567,7 @@
     /* Zet signalUrl na deploy: cd workers/online-signal && npx wrangler deploy */
     window.WIE_ONLINE = { signalUrl: "" };
   </script>
-  <script src="assets/game/online-room.js?v=51"></script>
+  <script src="assets/game/online-room.js?v=52"></script>
   <script src="assets/game/lobby-room.js?v=41"></script>
   <script src="assets/game/character-traits.js?v=58"></script>
   <script src="assets/game/rank-system.js?v=2"></script>
@@ -4358,6 +4358,7 @@
     }
 
     let joinBusy = false;
+    let hostPotBusy = false;
 
     async function connectGuestOnce(code) {
       const c = code.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 5);
