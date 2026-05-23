@@ -77,8 +77,90 @@
 
 .secret-card-slot {
   transition:
-    opacity 0.5s cubic-bezier(0.34, 1.2, 0.64, 1),
-    transform 0.5s cubic-bezier(0.34, 1.2, 0.64, 1);
+    opacity 0.45s cubic-bezier(0.34, 1.2, 0.64, 1),
+    transform 0.45s cubic-bezier(0.34, 1.2, 0.64, 1),
+    width 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    top 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    left 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    right 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    bottom 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Fase 1: groot in het midden */
+.secret-card-slot.is-reveal:not(.is-shrink) {
+  top: 50% !important;
+  left: 50% !important;
+  right: auto !important;
+  bottom: auto !important;
+  width: min(52vw, 62vh) !important;
+  max-width: 300px;
+  z-index: 360 !important;
+  transform: translate(-50%, -50%) scale(1) !important;
+  opacity: 1 !important;
+  animation: secretCardHeroIn 0.88s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes secretCardHeroIn {
+  0% {
+    transform: translate(-50%, -50%) scale(0.18);
+    opacity: 0;
+    filter: blur(6px);
+  }
+  55% {
+    transform: translate(-50%, -50%) scale(1.07);
+    opacity: 1;
+    filter: blur(0);
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+/* Fase 2: krimpt naar zijkant */
+.secret-card-slot.is-reveal.is-shrink {
+  animation: secretCardShrinkToSlot 0.62s cubic-bezier(0.45, 0, 0.22, 1) forwards;
+}
+
+@keyframes secretCardShrinkToSlot {
+  0% {
+    top: 50% !important;
+    left: 50% !important;
+    right: auto !important;
+    bottom: auto !important;
+    width: min(52vw, 62vh) !important;
+    max-width: 300px;
+    transform: translate(-50%, -50%) scale(1) !important;
+    opacity: 1;
+  }
+  100% {
+    top: auto !important;
+    left: auto !important;
+    right: max(10px, env(safe-area-inset-right)) !important;
+    bottom: max(72px, calc(env(safe-area-inset-bottom, 0px) + 64px)) !important;
+    width: clamp(76px, 20vw, 132px) !important;
+    max-width: none;
+    transform: scale(1) !important;
+    opacity: 1;
+  }
+}
+
+.screen-game-view.secret-reveal-active::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 355;
+  background: rgba(4, 8, 22, 0.62);
+  pointer-events: none;
+  animation: secretRevealDim 1.1s ease forwards;
+}
+
+@keyframes secretRevealDim {
+  0% { opacity: 0; }
+  25% { opacity: 1; }
+  70% { opacity: 1; }
+  100% { opacity: 0; }
 }
 
 .secret-card-slot .card-face {

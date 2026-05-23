@@ -274,12 +274,14 @@ html.wie-phone-landscape-game #game-table {
 }
 
 html.wie-phone-landscape-game #game-table {
-  --hud-top: calc(env(safe-area-inset-top, 0px) + 30px);
-  --board-pad-x: max(4px, env(safe-area-inset-left), env(safe-area-inset-right));
+  --side-slot: clamp(58px, 15vh, 80px);
+  --hud-top: calc(env(safe-area-inset-top, 0px) + 24px);
+  --board-pad-left: calc(var(--side-slot) + max(6px, env(safe-area-inset-left)));
+  --board-pad-right: calc(var(--side-slot) + max(6px, env(safe-area-inset-right)));
   --game-board-width: min(
-    calc(100vw - var(--board-pad-x) * 2),
-    calc((100dvh - var(--hud-top) - env(safe-area-inset-bottom, 0px) - 4px) * 1.62),
-    calc((100svh - var(--hud-top) - env(safe-area-inset-bottom, 0px) - 4px) * 1.62)
+    calc(100vw - var(--board-pad-left) - var(--board-pad-right)),
+    calc((100dvh - var(--hud-top) - env(safe-area-inset-bottom, 0px) - 6px) * 1.82),
+    calc((100svh - var(--hud-top) - env(safe-area-inset-bottom, 0px) - 6px) * 1.82)
   );
   --board-tilt: 0deg;
   position: absolute;
@@ -291,7 +293,7 @@ html.wie-phone-landscape-game #game-table .game-scene {
   inset: 0;
   min-height: 0;
   height: 100%;
-  padding: var(--hud-top) var(--board-pad-x) max(2px, env(safe-area-inset-bottom)) !important;
+  padding: var(--hud-top) var(--board-pad-right) max(4px, env(safe-area-inset-bottom)) var(--board-pad-left) !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -323,9 +325,12 @@ html.wie-phone-landscape-game #game-table .board-stand--front {
 }
 
 html.wie-phone-landscape-game #game-table .board-tray {
-  padding: 4px 5px 5px;
-  border-radius: 12px;
+  padding: 5px 6px 6px;
+  border-radius: 14px;
   border-width: 2px;
+  box-shadow:
+    0 8px 28px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
 html.wie-phone-landscape-game #game-table .board-base {
@@ -337,12 +342,12 @@ html.wie-phone-landscape-game #game-table .opponent-board-back,
 html.wie-phone-landscape-game #game-table .player-board {
   grid-template-columns: repeat(8, minmax(0, 1fr)) !important;
   grid-template-rows: repeat(4, minmax(0, 1fr)) !important;
-  gap: 3px !important;
-  padding: 3px 4px 4px !important;
+  gap: 4px !important;
+  padding: 4px 5px 5px !important;
   width: 100%;
   aspect-ratio: 8 / 5;
-  max-height: calc(100svh - var(--hud-top) - env(safe-area-inset-bottom) - 6px);
-  max-height: calc(100dvh - var(--hud-top) - env(safe-area-inset-bottom) - 6px);
+  max-height: calc(100svh - var(--hud-top) - env(safe-area-inset-bottom) - 8px);
+  max-height: calc(100dvh - var(--hud-top) - env(safe-area-inset-bottom) - 8px);
   box-sizing: border-box;
 }
 
@@ -393,10 +398,10 @@ html.wie-phone-landscape-game #game-table .card-photo.card-photo--real .card-img
 
 html.wie-phone-landscape-game #game-table .card-name {
   flex: 0 0 auto;
-  font-size: clamp(0.34rem, 1.5vw, 0.48rem) !important;
-  padding: 1px 2px 2px !important;
+  font-size: clamp(0.38rem, 1.65vw, 0.52rem) !important;
+  padding: 2px 2px 3px !important;
   min-height: 0 !important;
-  line-height: 1.05 !important;
+  line-height: 1.08 !important;
   hyphens: none !important;
   word-break: keep-all !important;
   white-space: nowrap !important;
@@ -431,28 +436,130 @@ html.wie-phone-landscape-game .lang-globe {
 }
 
 html.wie-phone-landscape-game #game-table .opponent-chest {
-  bottom: max(2px, env(safe-area-inset-bottom)) !important;
-  left: max(4px, env(safe-area-inset-left)) !important;
-  width: clamp(38px, 8.5vh, 50px) !important;
+  bottom: max(6px, env(safe-area-inset-bottom)) !important;
+  left: max(6px, env(safe-area-inset-left)) !important;
+  width: clamp(52px, 13vh, 72px) !important;
+  z-index: 42 !important;
+  filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.45));
+}
+
+html.wie-phone-landscape-game #game-table .opponent-chest .chest-visual {
+  border-radius: 14px !important;
 }
 
 html.wie-phone-landscape-game #secret-card-slot.secret-card-slot,
 html.wie-phone-landscape-game #game-table .secret-card-slot {
-  bottom: max(2px, env(safe-area-inset-bottom)) !important;
-  right: max(4px, env(safe-area-inset-right)) !important;
-  width: clamp(44px, 10vh, 58px) !important;
+  bottom: max(6px, env(safe-area-inset-bottom)) !important;
+  right: max(6px, env(safe-area-inset-right)) !important;
+  width: clamp(68px, 15vh, 96px) !important;
+  z-index: 42 !important;
+}
+
+html.wie-phone-landscape-game #secret-card-slot .card-face,
+html.wie-phone-landscape-game #game-table .secret-card-slot .card-face {
+  border-radius: 10px !important;
+  box-shadow:
+    0 10px 28px rgba(0, 0, 0, 0.5),
+    0 0 0 3px rgba(251, 191, 36, 0.85),
+    0 0 24px rgba(251, 191, 36, 0.45) !important;
+}
+
+html.wie-phone-landscape-game #secret-card-slot .card-name,
+html.wie-phone-landscape-game #game-table .secret-card-slot .card-name {
+  font-size: clamp(0.42rem, 1.8vw, 0.58rem) !important;
+  font-weight: 800;
+}
+
+/* Landscape reveal: eindpositie rechtsonder */
+html.wie-phone-landscape-game .secret-card-slot.is-reveal:not(.is-shrink) {
+  width: min(58vw, 72vh) !important;
+  max-width: 340px;
+}
+
+@keyframes secretCardShrinkToSlotLandscape {
+  0% {
+    top: 50% !important;
+    left: 50% !important;
+    right: auto !important;
+    bottom: auto !important;
+    width: min(58vw, 72vh) !important;
+    max-width: 340px;
+    transform: translate(-50%, -50%) scale(1) !important;
+    opacity: 1;
+  }
+  100% {
+    top: auto !important;
+    left: auto !important;
+    right: max(6px, env(safe-area-inset-right)) !important;
+    bottom: max(6px, env(safe-area-inset-bottom)) !important;
+    width: clamp(68px, 15vh, 96px) !important;
+    max-width: none;
+    transform: scale(1) !important;
+    opacity: 1;
+  }
+}
+
+html.wie-phone-landscape-game .secret-card-slot.is-reveal.is-shrink {
+  animation: secretCardShrinkToSlotLandscape 0.62s cubic-bezier(0.45, 0, 0.22, 1) forwards;
 }
 
 html.wie-phone-landscape-game .question-drawer:not(.hidden) {
-  padding-bottom: max(2px, env(safe-area-inset-bottom));
+  left: max(6px, env(safe-area-inset-left));
+  right: auto;
+  justify-content: flex-start;
+  width: min(360px, calc(100vw - var(--side-slot) - 20px));
+  padding: 0 0 max(4px, env(safe-area-inset-bottom));
 }
 
 html.wie-phone-landscape-game .question-drawer-sheet {
-  padding: 0.65rem 0.6rem 0.55rem;
-  width: min(520px, 98vw);
+  padding: 0.55rem 0.6rem 0.5rem;
+  width: 100%;
+  border-radius: 16px 16px 14px 14px;
 }
 
-html.wie-phone-landscape-game .flip-phase-bar {
+html.wie-phone-landscape-game .question-drawer:not(.hidden).is-collapsed {
+  transform: translateY(calc(100% - 2.6rem));
+}
+
+html.wie-phone-landscape-game .question-drawer-title {
+  font-size: clamp(0.72rem, 2.2vw, 0.82rem);
+  margin-bottom: 0.2rem;
+}
+
+html.wie-phone-landscape-game .question-drawer-label {
+  font-size: clamp(0.62rem, 1.9vw, 0.72rem);
+  margin-bottom: 0.45rem;
+}
+
+html.wie-phone-landscape-game .quick-questions {
+  gap: 0.28rem;
+}
+
+html.wie-phone-landscape-game .quick-questions .quick-q-btn {
+  font-size: 0.62rem;
+  padding: 0.28rem 0.42rem;
+}
+
+html.wie-phone-landscape-game .question-input-row {
+  gap: 0.35rem;
+}
+
+html.wie-phone-landscape-game .question-input {
+  font-size: 0.72rem;
+  padding: 0.38rem 0.5rem;
+}
+
+html.wie-phone-landscape-game .btn-send-question {
+  font-size: 0.72rem;
+  padding: 0.38rem 0.65rem;
+}
+
+html.wie-phone-landscape-game .question-drawer--answer:not(.hidden) {
+  left: max(6px, env(safe-area-inset-left));
+  right: auto;
+  justify-content: flex-start;
+  width: min(320px, calc(100vw - var(--side-slot) - 20px));
+}
   bottom: max(2px, env(safe-area-inset-bottom));
   padding: 0.35rem 0.75rem;
 }

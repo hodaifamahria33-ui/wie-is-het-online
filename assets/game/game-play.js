@@ -258,12 +258,22 @@
     const face = well.querySelector(".card-face");
     if (!face) return;
     secretSlot.appendChild(face.cloneNode(true));
-    secretSlot.classList.remove("is-reveal");
+    secretSlot.classList.remove("is-reveal", "is-shrink");
     secretSlot.classList.add("visible");
     void secretSlot.offsetWidth;
     secretSlot.classList.add("is-reveal");
-    window.setTimeout(() => secretSlot.classList.remove("is-reveal"), 750);
-    if (screenGame) screenGame.classList.add("has-secret-visible");
+    if (screenGame) {
+      screenGame.classList.add("has-secret-visible", "secret-reveal-active");
+    }
+    const heroMs = document.documentElement.classList.contains("wie-phone-landscape-game")
+      ? 1100
+      : 900;
+    const shrinkMs = 650;
+    window.setTimeout(() => secretSlot.classList.add("is-shrink"), heroMs);
+    window.setTimeout(() => {
+      secretSlot.classList.remove("is-reveal", "is-shrink");
+      if (screenGame) screenGame.classList.remove("secret-reveal-active");
+    }, heroMs + shrinkMs + 80);
     hideBanner();
   }
 
@@ -1659,7 +1669,7 @@
       });
       secretSlot.classList.remove("visible");
     }
-    if (screenGame) screenGame.classList.remove("has-secret-visible");
+    if (screenGame) screenGame.classList.remove("has-secret-visible", "secret-reveal-active");
     if (winOverlay) {
       winOverlay.classList.add("hidden");
       winOverlay.classList.remove("active", "lose");
@@ -1804,7 +1814,7 @@
       });
       secretSlot.classList.remove("visible");
     }
-    if (screenGame) screenGame.classList.remove("has-secret-visible");
+    if (screenGame) screenGame.classList.remove("has-secret-visible", "secret-reveal-active");
     hideEndOverlay();
   }
 
