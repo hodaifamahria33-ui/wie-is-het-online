@@ -3,15 +3,20 @@
  */
 (function () {
   const PEER_PREFIX = "wieishet-";
-  const PEER_TIMEOUT_MS = 22000;
-  const CONN_TIMEOUT_MS = 3500;
-  const HOST_PROBE_MS = 1800;
+  const PEER_TIMEOUT_MS = 28000;
+  const CONN_TIMEOUT_MS = 14000;
+  const HOST_PROBE_MS = 2500;
   const PEER_CLOUD = "https://0.peerjs.com";
   const PEER_PATH = "/peerjs";
   const PEER_KEY = "peerjs";
 
   const PEER_OPTS = {
     debug: 0,
+    host: "0.peerjs.com",
+    port: 443,
+    path: "/",
+    secure: true,
+    key: PEER_KEY,
     config: {
       iceServers: [
         { urls: "stun:stun.l.google.com:19302" },
@@ -40,7 +45,11 @@
     return PEER_PREFIX + sanitizeCode(code);
   }
 
-  /** PeerJS cloud: 404 = host niet online → snelle "verkeerde code". */
+  function sleep(ms) {
+    return new Promise((r) => setTimeout(r, ms));
+  }
+
+  /** Alleen hint — 404 betekent niet altijd dat host offline is. */
   async function probeHostOnline(code) {
     const id = peerId(code);
     const url =
@@ -238,6 +247,10 @@
         wireConnection(incoming);
       });
 
+      peer.on("error", (err) => {
+        console.warn("host peer error", err);
+      });
+
       waitForPeerOpen(peer, PEER_TIMEOUT_MS)
         .then(() => resolve({ role, roomCode }))
         .catch(reject);
@@ -310,11 +323,28 @@
     },
 
     async setupGuest(code) {
-      const probe = await probeHostOnline(code);
-      if (probe === false) {
-        throw new Error("lobby-not-found");
+      const sanitized = sanitizeCode(code);
+      if (!sanitized) throw new Error("empty-code");
+
+      const maxAttempts = 14;
+      let lastErr = null;
+      for (let attempt = 0; attempt < maxAttempts; attempt++) {
+        try {
+          destroyPeer();
+          await joinAsGuest(sanitized);
+          if (!connected || !conn || !conn.open) {
+            throw new Error("lobby-not-found");
+          }
+          return { role: "guest", roomCode: sanitized };
+        } catch (e) {
+          lastErr = mapJoinError(e);
+          console.warn("setupGuest attempt", attempt + 1, lastErr.message);
+          if (attempt < maxAttempts - 1) {
+            await sleep(1600 + attempt * 350);
+          }
+        }
       }
-      return joinAsGuest(code);
+      throw lastErr || new Error("lobby-not-found");
     },
 
     send,

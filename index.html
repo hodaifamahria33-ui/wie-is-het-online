@@ -2452,7 +2452,7 @@
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
   <link rel="stylesheet" href="assets/game/game-screen-theme.css?v=6" />
   <script src="assets/game/start-music.js?v=43"></script>
-  <script src="assets/game/online-room.js?v=45"></script>
+  <script src="assets/game/online-room.js?v=46"></script>
   <script src="assets/game/lobby-room.js?v=40"></script>
   <script src="assets/game/character-traits.js?v=56"></script>
   <script src="assets/game/rank-system.js?v=2"></script>
@@ -2589,6 +2589,9 @@
         lobbyKicker: "Host lobby",
         lobbyTitle: 'Je potje is<span class="accent">klaar!</span>',
         lobbyHint: "Deel deze code of link — vrienden joinen via Meedoen met code",
+        lobbyHostReady: "Online — vrienden kunnen nu joinen met deze code",
+        lobbyHostFailed: "Geen verbinding. Ga terug en start opnieuw een potje.",
+        joinRetrying: "Zoeken naar host… (even geduld)",
         lobbyPlayersTitle: "In je potje",
         lobbyChatTitle: "Chat",
         lobbyChatPlaceholder: "Typ een bericht…",
@@ -2821,6 +2824,9 @@
         lobbyKicker: "Host lobby",
         lobbyTitle: 'Your game is<span class="accent">ready!</span>',
         lobbyHint: "Share this code or link — friends join via Join with code",
+        lobbyHostReady: "Online — friends can join with this code now",
+        lobbyHostFailed: "No connection. Go back and start a new game.",
+        joinRetrying: "Looking for host… (please wait)",
         lobbyPlayersTitle: "In your game",
         lobbyChatTitle: "Chat",
         lobbyChatPlaceholder: "Type a message…",
@@ -3945,13 +3951,16 @@
       }
       screenPhotoLoad.classList.remove("hidden");
       requestAnimationFrame(() => screenPhotoLoad.classList.add("active"));
-      setTimeout(() => {
+      setTimeout(async () => {
         screenPhotoLoad.classList.remove("active");
-        setTimeout(() => {
-          screenPhotoLoad.classList.add("hidden");
-          if (joinedCode) joinedCode.textContent = c || code.toUpperCase();
-          onDone();
-        }, 280);
+        await new Promise((r) => setTimeout(r, 280));
+        screenPhotoLoad.classList.add("hidden");
+        if (joinedCode) joinedCode.textContent = c || code.toUpperCase();
+        try {
+          await Promise.resolve(onDone());
+        } catch (err) {
+          console.warn("runJoinLoading onDone", err);
+        }
       }, PHOTO_LOAD_MS);
     }
 
@@ -3996,12 +4005,20 @@
       }
     }
 
+    function setLobbyHostStatus(online) {
+      const el = document.getElementById("lobby-hint");
+      if (!el) return;
+      el.textContent = t(online ? "lobbyHostReady" : "lobbyHostFailed");
+      el.classList.toggle("error", !online);
+    }
+
     async function connectGuestWithRetry(code) {
       const c = code.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 5);
       if (!c || !window.WieIsHetOnline) throw new Error("no-online");
       setJoinedStatus("joinConnecting", false);
+      if (joinError) joinError.textContent = t("joinConnecting");
       if (btnJoinRetry) btnJoinRetry.classList.add("hidden");
-      const maxAttempts = 20;
+      const maxAttempts = 16;
       let lastErr = null;
       for (let attempt = 0; attempt < maxAttempts; attempt++) {
         try {
@@ -4018,11 +4035,8 @@
         } catch (e) {
           lastErr = e;
           console.warn("join attempt", attempt + 1, e);
-          if (isLobbyNotFound(e)) {
-            WieIsHetOnline.reset();
-            throw e;
-          }
           if (attempt >= maxAttempts - 1) throw e;
+          if (joinError) joinError.textContent = t("joinRetrying");
           setJoinedStatus("joinConnecting", false);
           await new Promise((r) => setTimeout(r, 1800));
         }
@@ -4306,22 +4320,24 @@
       if (hostError) hostError.textContent = "";
       runJoinLoading(
         pot,
-        () => {
+        async () => {
           lobbyCode.textContent = pot;
           sessionMode = "host";
           sessionCode = pot;
           busy = false;
+          let hostOnline = false;
           applyLanguage();
           if (window.WieIsHetOnline) {
-            WieIsHetOnline.setupHost(sessionCode)
-              .then(() => wireHostLobby())
-              .catch(() => {
-                sessionMode = "solo";
-                wireHostLobby();
-              });
-          } else {
-            wireHostLobby();
+            try {
+              await WieIsHetOnline.setupHost(sessionCode);
+              hostOnline = true;
+            } catch (e) {
+              console.warn("setupHost failed", e);
+              sessionMode = "solo";
+            }
           }
+          setLobbyHostStatus(hostOnline);
+          wireHostLobby();
           screenHost.classList.add("hidden");
           screenHost.classList.remove("transition-out", "transition-active");
           screenLobby.classList.remove("hidden");
@@ -4357,7 +4373,7 @@
       if (btnJoin) btnJoin.disabled = true;
       if (joinError) joinError.textContent = t("joinConnecting");
       try {
-        const c = await connectGuestOnce(code);
+        const c = await connectGuestWithRetry(code);
         sessionMode = "guest";
         sessionCode = c;
         if (joinError) joinError.textContent = "";
@@ -4375,7 +4391,9 @@
         console.warn("join failed", e);
         if (window.WieIsHetOnline) WieIsHetOnline.reset();
         sessionMode = "solo";
-        if (joinError) joinError.textContent = t("joinWrongCode");
+        if (joinError) {
+          joinError.textContent = isLobbyNotFound(e) ? t("joinWrongCode") : t("joinFailed");
+        }
         screenJoin.classList.remove("hidden");
       } finally {
         joinBusy = false;
