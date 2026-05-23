@@ -2,13 +2,14 @@
  * PWA service worker — GitHub Pages friendly (repo subpath).
  * Network-first for HTML; cache same-origin assets for faster reload / basic offline shell.
  */
-const CACHE_NAME = "wieishet-pwa-v3";
+const CACHE_NAME = "wieishet-pwa-v4";
 const PRECACHE = [
   "./",
   "./index.html",
   "./manifest.json",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
+  "./assets/game/join-bg.png",
 ];
 
 function isSameOrigin(url) {

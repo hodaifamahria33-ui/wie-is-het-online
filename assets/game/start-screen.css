@@ -1,3 +1,111 @@
+/* App openen (PWA) — korte splash met foto */
+.app-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: #0a1628;
+  opacity: 1;
+  transition: opacity 0.35s ease;
+}
+
+.app-splash.hidden {
+  display: none !important;
+  pointer-events: none !important;
+}
+
+.app-splash.app-splash--out {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.app-splash-bg {
+  position: absolute;
+  inset: -8%;
+  width: 116%;
+  height: 116%;
+  object-fit: cover;
+  object-position: center center;
+  z-index: 0;
+  pointer-events: none;
+  animation: appSplashBgDrift 18s ease-in-out infinite;
+}
+
+.app-splash-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 80% 55% at 50% 42%, rgba(6, 78, 59, 0.42) 0%, transparent 72%),
+    linear-gradient(180deg, rgba(8, 12, 28, 0.5) 0%, rgba(10, 22, 40, 0.72) 100%);
+}
+
+.app-splash-scene {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 24px;
+}
+
+.app-splash-bulb {
+  font-size: clamp(2.2rem, 8vw, 3rem);
+  filter: drop-shadow(0 0 20px rgba(251, 191, 36, 0.9));
+  margin-bottom: 0.5rem;
+}
+
+.app-splash-title {
+  margin: 0;
+  font-family: "Fredoka", "Outfit", sans-serif;
+  font-size: clamp(2rem, 9vw, 3rem);
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 4px 24px rgba(0, 0, 0, 0.55);
+}
+
+.app-splash-sub {
+  margin: 0.2rem 0 1rem;
+  font-family: "Nunito", "Outfit", sans-serif;
+  font-size: clamp(0.85rem, 3.5vw, 1rem);
+  font-weight: 800;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgba(153, 246, 228, 0.95);
+}
+
+.app-splash-bar {
+  width: min(220px, 62vw);
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  overflow: hidden;
+}
+
+.app-splash-bar-fill {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #5eead4, #2dd4bf, #fbbf24);
+  animation: appSplashBar 1.35s ease-out forwards;
+}
+
+@keyframes appSplashBgDrift {
+  0%, 100% { transform: scale(1.05) translate(0, 0); }
+  50% { transform: scale(1.1) translate(-1%, 0.6%); }
+}
+
+@keyframes appSplashBar {
+  to { width: 100%; }
+}
+
 /* Beginscherm — schone UI, achtergrond kies je later */
 .screen.screen-start,
 #screen-start.screen-start {

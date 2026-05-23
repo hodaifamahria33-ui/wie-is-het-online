@@ -3,6 +3,20 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <style id="app-boot-style">
+    html.app-booting main.screen {
+      visibility: hidden !important;
+      pointer-events: none !important;
+    }
+    html.app-booting #screen-app-splash {
+      display: flex !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+  </style>
+  <script>
+    document.documentElement.classList.add("app-booting");
+  </script>
   <title>wiehasit.com — online Wie-is-het spel</title>
   <meta name="application-name" content="wiehasit.com" />
   <meta name="apple-mobile-web-app-title" content="wiehasit" />
@@ -21,7 +35,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Nunito:wght@600;700;800&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/game/start-screen.css?v=64" />
+  <link rel="stylesheet" href="assets/game/start-screen.css?v=65" />
   <link rel="stylesheet" href="assets/game/mode-screen.css?v=8" />
   <link rel="stylesheet" href="assets/game/support-screen.css?v=1" />
   <link rel="stylesheet" href="assets/game/stripe-donate.css?v=1" />
@@ -1889,6 +1903,24 @@
   <link rel="stylesheet" href="assets/game/game-screen-theme.css?v=6" />
 </head>
 <body>
+  <main id="screen-app-splash" class="app-splash" aria-live="polite">
+    <img
+      class="app-splash-bg"
+      src="assets/game/join-bg.png?v=2"
+      alt=""
+      aria-hidden="true"
+      decoding="async"
+      fetchpriority="high"
+    />
+    <div class="app-splash-overlay" aria-hidden="true"></div>
+    <div class="app-splash-scene">
+      <span class="app-splash-bulb" aria-hidden="true">💡</span>
+      <p class="app-splash-title">Wie Ben Ik?</p>
+      <p class="app-splash-sub" data-i18n="appSplashSub">Online</p>
+      <div class="app-splash-bar" aria-hidden="true"><span class="app-splash-bar-fill"></span></div>
+    </div>
+  </main>
+
   <div class="lang-picker">
     <button id="btn-lang" class="lang-globe" type="button" aria-label="Taal kiezen" aria-expanded="false" aria-haspopup="true">🌍</button>
     <div id="lang-menu" class="lang-menu hidden" role="menu">
@@ -2587,6 +2619,7 @@
         btnMakePot: "Potje maken",
         loadingTitle: "Potje wordt gemaakt…",
         loadingSub: "Foto's worden geladen",
+        appSplashSub: "Online",
         joinLoadTitle: "Je zit erbij!",
         joinLoadSub: "Lobby wordt geladen…",
         joinConnectingTitle: "Meedoen…",
@@ -2828,6 +2861,7 @@
         btnMakePot: "Create game",
         loadingTitle: "Creating your game…",
         loadingSub: "Loading photos",
+        appSplashSub: "Online",
         joinLoadTitle: "You're in!",
         joinLoadSub: "Loading lobby…",
         joinConnectingTitle: "Joining…",
@@ -3031,6 +3065,8 @@
 
     applyLanguage();
 
+    const screenAppSplash = document.getElementById("screen-app-splash");
+    const APP_SPLASH_MS = 1500;
     const screenStart = document.getElementById("screen-start");
     const screenName = document.getElementById("screen-name");
     const screenMode = document.getElementById("screen-mode");
@@ -3787,8 +3823,51 @@
       }
     }
 
+    function hideAppSplash() {
+      document.documentElement.classList.remove("app-booting");
+      if (!screenAppSplash) return;
+      screenAppSplash.classList.add("app-splash--out");
+      window.setTimeout(() => {
+        screenAppSplash.classList.add("hidden");
+        screenAppSplash.classList.remove("app-splash--out");
+      }, 340);
+    }
+
+    function isInstalledApp() {
+      return (
+        window.matchMedia("(display-mode: standalone)").matches ||
+        window.matchMedia("(display-mode: fullscreen)").matches ||
+        window.navigator.standalone === true
+      );
+    }
+
+    function runAppLaunchSplash(done) {
+      if (!isInstalledApp()) {
+        hideAppSplash();
+        done();
+        return;
+      }
+      const img = screenAppSplash && screenAppSplash.querySelector(".app-splash-bg");
+      const started = Date.now();
+      const finish = () => {
+        const wait = Math.max(0, APP_SPLASH_MS - (Date.now() - started));
+        window.setTimeout(() => {
+          hideAppSplash();
+          done();
+        }, wait);
+      };
+      if (img && !img.complete) {
+        img.addEventListener("load", finish, { once: true });
+        img.addEventListener("error", finish, { once: true });
+        window.setTimeout(finish, APP_SPLASH_MS + 800);
+      } else {
+        finish();
+      }
+    }
+
     function ensureStartScreenVisible() {
       if (sessionMode === "guest" || sessionMode === "host") return;
+      hideAppSplash();
       if (window.wieSetStartBg) window.wieSetStartBg(true);
       clearCountdown();
       busy = false;
@@ -4461,33 +4540,38 @@
 
     cleanLegacyUrlParams();
 
-    const linkCode = joinCodeFromUrl();
-    if (linkCode.length >= 4) {
-      if (getSavedPlayerName()) {
-        joinViaLink(linkCode);
-      } else {
-        pendingJoinCode = linkCode;
-        busy = false;
-        document.querySelectorAll("main.screen").forEach((el) => {
-          el.classList.remove(
-            "transition-out",
-            "transition-active",
-            "transition-in-from-right",
-            "transition-in-from-left"
-          );
-          if (el === screenName) el.classList.remove("hidden");
-          else el.classList.add("hidden");
-        });
-        if (window.wieSetStartBg) window.wieSetStartBg(false);
-        if (playerNameInput) {
-          playerNameInput.value = "";
-          if (nameError) nameError.textContent = "";
-          setTimeout(() => playerNameInput.focus(), 200);
+    function bootAppAfterSplash() {
+      const linkCode = joinCodeFromUrl();
+      if (linkCode.length >= 4) {
+        if (getSavedPlayerName()) {
+          joinViaLink(linkCode);
+        } else {
+          pendingJoinCode = linkCode;
+          busy = false;
+          document.querySelectorAll("main.screen").forEach((el) => {
+            el.classList.remove(
+              "transition-out",
+              "transition-active",
+              "transition-in-from-right",
+              "transition-in-from-left"
+            );
+            if (el === screenName) el.classList.remove("hidden");
+            else el.classList.add("hidden");
+          });
+          if (window.wieSetStartBg) window.wieSetStartBg(false);
+          if (playerNameInput) {
+            playerNameInput.value = "";
+            if (nameError) nameError.textContent = "";
+            setTimeout(() => playerNameInput.focus(), 200);
+          }
         }
+      } else {
+        ensureStartScreenVisible();
       }
-    } else {
-      ensureStartScreenVisible();
+      applyLanguage();
     }
+
+    runAppLaunchSplash(bootAppAfterSplash);
 
     window.addEventListener("pageshow", (event) => {
       if (event.persisted) ensureStartScreenVisible();
