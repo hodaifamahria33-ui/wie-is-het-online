@@ -18,7 +18,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Nunito:wght@600;700;800&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/game/start-screen.css?v=52" />
+  <link rel="stylesheet" href="assets/game/start-screen.css?v=53" />
   <link rel="stylesheet" href="assets/game/mode-screen.css?v=8" />
   <link rel="stylesheet" href="assets/game/support-screen.css?v=1" />
   <link rel="stylesheet" href="assets/game/stripe-donate.css?v=1" />
@@ -1911,7 +1911,10 @@
         <div id="start-char-ring" class="start-char-ring" aria-hidden="true"></div>
         <div class="start-hero-hub">
           <span class="start-bulb" aria-hidden="true">💡</span>
-          <h1 id="start-title" class="start-title start-title--hub" data-i18n-html="startTitleHtml">Wie <span class="start-word-ben">Ben</span> Ik?</h1>
+          <h1 id="start-title" class="start-title start-title--hub">
+            <span class="start-title-main" data-i18n-html="startTitleHtml">Wie <span class="start-word-ben">Ben</span> Ik</span>
+            <span class="start-title-online" data-i18n="startOnlineBadge">Online</span>
+          </h1>
         </div>
       </div>
 
@@ -2464,8 +2467,8 @@
   <script>
     const I18N = {
       nl: {
-        startTitleHtml: 'Wie <span class="start-word-ben">Ben</span> Ik?',
-        startOnlineBadge: "ONLINE",
+        startTitleHtml: 'Wie <span class="start-word-ben">Ben</span> Ik',
+        startOnlineBadge: "Online",
         startTagline: "Raad de verborgen persoon en ontdek wie jij bent!",
         startNameLabel: "Jouw naam in het spel",
         btnBegin: "START",
@@ -2696,8 +2699,8 @@
         langAria: "Taal kiezen"
       },
       en: {
-        startTitleHtml: 'Who <span class="start-word-ben">Am</span> I?',
-        startOnlineBadge: "ONLINE",
+        startTitleHtml: 'Who <span class="start-word-ben">Am</span> I',
+        startOnlineBadge: "Online",
         startTagline: "Guess the hidden person and discover who you are!",
         startNameLabel: "Your name in the game",
         btnBegin: "START",

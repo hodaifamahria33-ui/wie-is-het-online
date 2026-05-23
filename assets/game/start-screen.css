@@ -214,7 +214,29 @@ html.start-screen-active body {
 }
 
 .screen-start .start-title--hub {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
   font-size: clamp(1.9rem, 8.5vw, 3.25rem) !important;
+}
+
+.screen-start .start-title-main {
+  display: block;
+  line-height: 1.05;
+}
+
+.screen-start .start-title-online {
+  display: block;
+  font-size: clamp(1rem, 4.8vw, 1.55rem);
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  background: linear-gradient(165deg, #e9d5ff 0%, #c084fc 35%, #a855f7 70%, #7c3aed 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 16px rgba(168, 85, 247, 0.55));
 }
 
 .screen-start .start-actions {
