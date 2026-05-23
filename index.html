@@ -18,7 +18,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Nunito:wght@600;700;800&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/game/start-screen.css?v=53" />
+  <link rel="stylesheet" href="assets/game/start-screen.css?v=54" />
   <link rel="stylesheet" href="assets/game/mode-screen.css?v=8" />
   <link rel="stylesheet" href="assets/game/support-screen.css?v=1" />
   <link rel="stylesheet" href="assets/game/stripe-donate.css?v=1" />
@@ -1912,7 +1912,7 @@
         <div class="start-hero-hub">
           <span class="start-bulb" aria-hidden="true">💡</span>
           <h1 id="start-title" class="start-title start-title--hub">
-            <span class="start-title-main" data-i18n-html="startTitleHtml">Wie <span class="start-word-ben">Ben</span> Ik</span>
+            <span class="start-title-main" data-i18n-html="startTitleHtml">Wie <span class="start-word-ben">Ben</span> Ik?</span>
             <span class="start-title-online" data-i18n="startOnlineBadge">Online</span>
           </h1>
         </div>
@@ -2467,7 +2467,7 @@
   <script>
     const I18N = {
       nl: {
-        startTitleHtml: 'Wie <span class="start-word-ben">Ben</span> Ik',
+        startTitleHtml: 'Wie <span class="start-word-ben">Ben</span> Ik?',
         startOnlineBadge: "Online",
         startTagline: "Raad de verborgen persoon en ontdek wie jij bent!",
         startNameLabel: "Jouw naam in het spel",
@@ -2699,7 +2699,7 @@
         langAria: "Taal kiezen"
       },
       en: {
-        startTitleHtml: 'Who <span class="start-word-ben">Am</span> I',
+        startTitleHtml: 'Who <span class="start-word-ben">Am</span> I?',
         startOnlineBadge: "Online",
         startTagline: "Guess the hidden person and discover who you are!",
         startNameLabel: "Your name in the game",
@@ -3004,6 +3004,8 @@
 
     applyLanguage();
 
+    const START_RING_COLORS = ["blue", "pink", "orange", "green", "yellow"];
+
     function buildStartCharRing() {
       const ring = document.getElementById("start-char-ring");
       if (!ring || !window.WieCharacterArt) return;
@@ -3020,21 +3022,15 @@
         slot.style.setProperty("--n", String(total));
         const card = document.createElement("div");
         card.className =
-          "start-char-card " +
-          (WieCharacterArt.isGirl(name) ? "start-char-card--girl" : "start-char-card--boy");
+          "start-char-card start-char-card--" + START_RING_COLORS[i % START_RING_COLORS.length];
         card.style.setProperty("--i", String(i));
-        const upright = document.createElement("div");
-        upright.className = "start-char-upright";
-        upright.style.setProperty("--i", String(i));
-        upright.style.setProperty("--n", String(total));
         const img = document.createElement("img");
         img.src = WieCharacterArt.cardAvatarUrl(name);
         img.alt = "";
         img.loading = "lazy";
         img.decoding = "async";
         card.appendChild(img);
-        upright.appendChild(card);
-        slot.appendChild(upright);
+        slot.appendChild(card);
         orbit.appendChild(slot);
       }
       ring.appendChild(orbit);

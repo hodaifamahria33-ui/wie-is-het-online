@@ -23,8 +23,9 @@
   z-index: 1;
   pointer-events: none;
   background:
-    radial-gradient(ellipse 55% 50% at 50% 42%, rgba(88, 28, 135, 0.18) 0%, transparent 65%),
-    linear-gradient(180deg, rgba(8, 4, 18, 0.45) 0%, transparent 32%, rgba(8, 4, 18, 0.55) 100%);
+    radial-gradient(ellipse 70% 55% at 50% 38%, rgba(124, 58, 237, 0.28) 0%, transparent 62%),
+    radial-gradient(ellipse 90% 40% at 50% 100%, rgba(88, 28, 135, 0.35) 0%, transparent 55%),
+    linear-gradient(180deg, rgba(8, 4, 18, 0.35) 0%, transparent 28%, rgba(8, 4, 18, 0.62) 100%);
 }
 
 html.start-screen-active,
@@ -58,15 +59,15 @@ html.start-screen-active body {
 .screen-start .start-stage {
   position: relative;
   flex: 1 1 auto;
-  width: min(100%, 680px);
-  min-height: min(58vh, 480px);
-  max-height: 72vh;
+  width: min(100%, 720px);
+  min-height: min(62vh, 520px);
+  max-height: 76vh;
   margin: 0 auto;
 }
 
 .screen-start .start-char-ring {
-  --orbit-r: min(36vw, 205px);
-  --ring-spin: 42s;
+  --orbit-r: min(40vw, 228px);
+  --ring-spin: 26s;
   position: absolute;
   inset: 0;
   pointer-events: none;
@@ -78,11 +79,13 @@ html.start-screen-active body {
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  width: calc(var(--orbit-r) * 2 + 80px);
-  height: calc(var(--orbit-r) * 2 + 80px);
+  width: calc(var(--orbit-r) * 2 + 72px);
+  height: calc(var(--orbit-r) * 2 + 72px);
   border-radius: 50%;
-  border: 2px solid rgba(251, 191, 36, 0.2);
-  box-shadow: 0 0 40px rgba(124, 58, 237, 0.25);
+  border: 2px solid rgba(251, 191, 36, 0.28);
+  box-shadow:
+    0 0 48px rgba(124, 58, 237, 0.35),
+    inset 0 0 30px rgba(124, 58, 237, 0.12);
   pointer-events: none;
 }
 
@@ -98,31 +101,45 @@ html.start-screen-active body {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: clamp(52px, 11.5vw, 76px);
-  height: clamp(64px, 14vw, 92px);
+  width: clamp(48px, 10.5vw, 70px);
+  height: clamp(58px, 12.5vw, 84px);
   transform: translate(-50%, -50%) rotate(var(--angle)) translateY(calc(-1 * var(--orbit-r)));
-}
-
-.screen-start .start-char-upright {
-  width: 100%;
-  height: 100%;
-  transform: rotate(calc(-1 * var(--angle)));
-  animation: startRingSpin var(--ring-spin) linear infinite reverse;
 }
 
 .screen-start .start-char-card {
   width: 100%;
   height: 100%;
-  border-radius: 12px;
+  border-radius: 11px;
   overflow: hidden;
-  border: 2px solid rgba(251, 191, 36, 0.5);
+  border: 2px solid rgba(255, 255, 255, 0.35);
   box-shadow:
-    0 8px 22px rgba(0, 0, 0, 0.45),
-    0 0 14px rgba(251, 191, 36, 0.15);
+    0 6px 18px rgba(0, 0, 0, 0.42),
+    0 0 10px rgba(255, 255, 255, 0.08);
   animation: startCharFloat 4.8s ease-in-out infinite;
   animation-delay: calc(var(--i) * -0.38s);
 }
 
+.screen-start .start-char-card--blue {
+  background: linear-gradient(180deg, #bfdbfe 0%, #2563eb 100%);
+}
+
+.screen-start .start-char-card--pink {
+  background: linear-gradient(180deg, #fbcfe8 0%, #ec4899 100%);
+}
+
+.screen-start .start-char-card--orange {
+  background: linear-gradient(180deg, #fed7aa 0%, #f97316 100%);
+}
+
+.screen-start .start-char-card--green {
+  background: linear-gradient(180deg, #bbf7d0 0%, #22c55e 100%);
+}
+
+.screen-start .start-char-card--yellow {
+  background: linear-gradient(180deg, #fef08a 0%, #eab308 100%);
+}
+
+/* legacy aliases */
 .screen-start .start-char-card--boy {
   background: linear-gradient(180deg, #bfdbfe 0%, #2563eb 100%);
 }
@@ -213,30 +230,35 @@ html.start-screen-active body {
   filter: drop-shadow(0 0 18px rgba(251, 146, 60, 0.55));
 }
 
-.screen-start .start-title--hub {
+.screen-start .start-title.start-title--hub {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.15rem;
-  font-size: clamp(1.9rem, 8.5vw, 3.25rem) !important;
+  gap: 0.12rem;
+  font-size: clamp(2rem, 9.5vw, 3.45rem) !important;
+  background: none;
+  -webkit-background-clip: unset;
+  background-clip: unset;
+  color: #fff;
+  filter: drop-shadow(0 2px 0 rgba(120, 53, 15, 0.35))
+    drop-shadow(0 6px 20px rgba(0, 0, 0, 0.35));
 }
 
 .screen-start .start-title-main {
   display: block;
-  line-height: 1.05;
+  line-height: 1.02;
+  color: #fff;
+  white-space: nowrap;
 }
 
 .screen-start .start-title-online {
   display: block;
-  font-size: clamp(1rem, 4.8vw, 1.55rem);
+  font-size: clamp(0.95rem, 4.2vw, 1.35rem);
   font-weight: 800;
-  letter-spacing: 0.22em;
+  letter-spacing: 0.24em;
   text-transform: uppercase;
-  background: linear-gradient(165deg, #e9d5ff 0%, #c084fc 35%, #a855f7 70%, #7c3aed 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  filter: drop-shadow(0 0 16px rgba(168, 85, 247, 0.55));
+  color: rgba(255, 255, 255, 0.92);
+  text-shadow: 0 0 18px rgba(168, 85, 247, 0.65);
 }
 
 .screen-start .start-actions {
@@ -464,12 +486,12 @@ html.start-screen-active body {
 
 @media (max-width: 520px) {
   .screen-start .start-char-ring {
-    --orbit-r: min(34vw, 155px);
+    --orbit-r: min(38vw, 168px);
   }
 
   .screen-start .start-char-slot {
-    width: clamp(46px, 13vw, 62px);
-    height: clamp(58px, 16vw, 78px);
+    width: clamp(42px, 12vw, 58px);
+    height: clamp(52px, 14vw, 72px);
   }
 
   .screen-start .start-stage {
@@ -484,12 +506,12 @@ html.start-screen-active body {
 
 @media (min-width: 900px) {
   .screen-start .start-char-ring {
-    --orbit-r: 220px;
+    --orbit-r: 238px;
   }
 
   .screen-start .start-stage {
-    width: min(100%, 760px);
-    min-height: min(65vh, 560px);
+    width: min(100%, 800px);
+    min-height: min(68vh, 580px);
   }
 }
 
@@ -498,7 +520,6 @@ html.start-screen-active body {
   .screen-start .start-title,
   .screen-start .btn-start-begin,
   .screen-start .start-char-orbit,
-  .screen-start .start-char-upright,
   .screen-start .start-char-card {
     animation: none;
   }
