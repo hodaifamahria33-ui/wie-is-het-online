@@ -32,13 +32,9 @@
     },
   ];
 
+  /** Alleen ICE — PeerJS cloud defaults (host/path/key) werken het best op mobiel. */
   const PEER_OPTS = {
     debug: 0,
-    host: "0.peerjs.com",
-    port: 443,
-    path: "/peerjs",
-    secure: true,
-    key: PEER_KEY,
     config: { iceServers: ICE_SERVERS },
   };
 

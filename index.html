@@ -2250,7 +2250,7 @@
       <p class="code-hint" data-i18n="hostHint">Automatisch gegenereerd — deel met vrienden</p>
       <input id="pot-code" class="code-input code-input--readonly" type="text" maxlength="5" readonly aria-readonly="true" autocomplete="off" />
       <p id="host-error" class="code-error error"></p>
-      <button id="btn-make-pot" class="code-btn code-btn--primary" type="button" data-i18n="btnMakePot" onclick="window.wieMakePot()">Potje maken</button>
+      <button id="btn-make-pot" class="code-btn code-btn--primary" type="button" data-i18n="btnMakePot">Potje maken</button>
       <button id="btn-host-back" class="code-btn code-btn-back back" type="button" data-i18n="btnBack" onclick="window.wieShowScreen('screen-host','screen-menu')">Terug</button>
     </section>
   </main>
@@ -4039,6 +4039,7 @@
     }
 
     function leaveOnlineSession() {
+      hostPotBusy = false;
       if (onlineGameUnsub) {
         onlineGameUnsub();
         onlineGameUnsub = null;
@@ -4675,7 +4676,11 @@
       return code;
     }
 
+    let joinBusy = false;
+    let hostPotBusy = false;
+
     function createHostPot(rawCode) {
+      if (hostPotBusy) return;
       const pot = String(rawCode || "")
         .toUpperCase()
         .replace(/[^A-Z0-9]/g, "")
@@ -4686,6 +4691,7 @@
       }
       if (potCodeInput) potCodeInput.value = pot;
       if (hostError) hostError.textContent = "";
+      hostPotBusy = true;
       sessionMode = "host";
       sessionCode = pot;
       const hostReadyPromise =
@@ -4703,10 +4709,16 @@
             await hostReadyPromise;
             hostOnline =
               WieIsHetOnline.isHostPeerLive && WieIsHetOnline.isHostPeerLive();
+            if (!hostOnline) {
+              await new Promise((r) => setTimeout(r, 400));
+              hostOnline =
+                WieIsHetOnline.isHostPeerLive && WieIsHetOnline.isHostPeerLive();
+            }
           } catch (e) {
             console.warn("setupHost failed", e);
             hostOnline = false;
           }
+          hostPotBusy = false;
           if (!hostOnline) {
             sessionMode = "solo";
             sessionCode = "";
@@ -4733,6 +4745,7 @@
     }
 
     function goHostAndCreatePot() {
+      if (hostPotBusy) return;
       leaveOnlineSession();
       if (hostError) hostError.textContent = "";
       if (potCodeInput) potCodeInput.value = "";
@@ -4742,6 +4755,7 @@
     }
 
     function doMakePot() {
+      if (hostPotBusy) return;
       createHostPot(generateRandomRoomCode());
     }
 
