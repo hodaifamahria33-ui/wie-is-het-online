@@ -2415,7 +2415,7 @@
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
   <link rel="stylesheet" href="assets/game/game-screen-theme.css?v=6" />
   <script src="assets/game/start-music.js?v=43"></script>
-  <script src="assets/game/online-room.js?v=47"></script>
+  <script src="assets/game/online-room.js?v=48"></script>
   <script src="assets/game/lobby-room.js?v=41"></script>
   <script src="assets/game/character-traits.js?v=56"></script>
   <script src="assets/game/rank-system.js?v=2"></script>
@@ -3092,11 +3092,8 @@
       if (pendingJoinCode) {
         const code = pendingJoinCode;
         pendingJoinCode = null;
-        transition(screenName, screenJoin, "transition-in-from-right");
-        setTimeout(() => {
-          if (joinCodeInput) joinCodeInput.value = code;
-          doJoinWithCode();
-        }, TRANSITION_MS + 80);
+        if (screenName) screenName.classList.add("hidden");
+        runGuestJoinFlow(code);
         return;
       }
       busy = false;
@@ -4035,6 +4032,10 @@
 
     async function runGuestJoinFlow(code) {
       if (joinBusy) return;
+      if (typeof window.Peer !== "function") {
+        if (joinError) joinError.textContent = t("joinFailed");
+        return;
+      }
       const c = String(code || "")
         .toUpperCase()
         .replace(/[^A-Z0-9]/g, "")
@@ -4100,7 +4101,9 @@
         s.includes("not found") ||
         s.includes("conn-timeout") ||
         s.includes("conn-closed") ||
-        s.includes("no-connection")
+        s.includes("no-connection") ||
+        s.includes("peer-timeout") ||
+        s.includes("peerjs-missing")
       );
     }
 
@@ -4142,7 +4145,7 @@
       setJoinedStatus("joinConnecting", false);
       if (joinError) joinError.textContent = t("joinConnecting");
       if (btnJoinRetry) btnJoinRetry.classList.add("hidden");
-      const maxAttempts = 8;
+      const maxAttempts = 12;
       let lastErr = null;
       for (let attempt = 0; attempt < maxAttempts; attempt++) {
         try {
@@ -4424,24 +4427,30 @@
       }
       if (potCodeInput) potCodeInput.value = pot;
       if (hostError) hostError.textContent = "";
+      sessionMode = "host";
+      sessionCode = pot;
+      let hostReadyPromise = Promise.resolve(false);
+      if (window.WieIsHetOnline) {
+        hostReadyPromise = WieIsHetOnline.setupHost(pot)
+          .then(() => true)
+          .catch((e) => {
+            console.warn("setupHost failed", e);
+            return false;
+          });
+      }
       runJoinLoading(
         pot,
         async () => {
           lobbyCode.textContent = pot;
-          sessionMode = "host";
-          sessionCode = pot;
           busy = false;
           let hostOnline = false;
           applyLanguage();
-          if (window.WieIsHetOnline) {
-            try {
-              await WieIsHetOnline.setupHost(sessionCode);
-              hostOnline = true;
-            } catch (e) {
-              console.warn("setupHost failed", e);
-              sessionMode = "solo";
-            }
+          try {
+            hostOnline = await hostReadyPromise;
+          } catch (_) {
+            hostOnline = false;
           }
+          if (!hostOnline) sessionMode = "solo";
           setLobbyHostStatus(hostOnline);
           wireHostLobby();
           screenHost.classList.add("hidden");

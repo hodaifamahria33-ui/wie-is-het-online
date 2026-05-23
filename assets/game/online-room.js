@@ -3,12 +3,33 @@
  */
 (function () {
   const PEER_PREFIX = "wieishet-";
-  const PEER_TIMEOUT_MS = 20000;
-  const CONN_TIMEOUT_MS = 10000;
-  const HOST_PROBE_MS = 2500;
+  const PEER_TIMEOUT_MS = 25000;
+  const CONN_TIMEOUT_MS = 14000;
+  const HOST_PROBE_MS = 3000;
   const PEER_CLOUD = "https://0.peerjs.com";
   const PEER_PATH = "/peerjs";
   const PEER_KEY = "peerjs";
+
+  const ICE_SERVERS = [
+    { urls: "stun:stun.l.google.com:19302" },
+    { urls: "stun:stun1.l.google.com:19302" },
+    { urls: "stun:stun.cloudflare.com:3478" },
+    {
+      urls: "turn:openrelay.metered.ca:80?transport=tcp",
+      username: "openrelayproject",
+      credential: "openrelayproject",
+    },
+    {
+      urls: "turn:openrelay.metered.ca:443?transport=tcp",
+      username: "openrelayproject",
+      credential: "openrelayproject",
+    },
+    {
+      urls: "turn:openrelay.metered.ca:443",
+      username: "openrelayproject",
+      credential: "openrelayproject",
+    },
+  ];
 
   const PEER_OPTS = {
     debug: 0,
@@ -17,13 +38,7 @@
     path: "/",
     secure: true,
     key: PEER_KEY,
-    config: {
-      iceServers: [
-        { urls: "stun:stun.l.google.com:19302" },
-        { urls: "stun:stun1.l.google.com:19302" },
-        { urls: "stun:stun.cloudflare.com:3478" },
-      ],
-    },
+    config: { iceServers: ICE_SERVERS },
   };
 
   let peer = null;
@@ -49,7 +64,12 @@
     return new Promise((r) => setTimeout(r, ms));
   }
 
-  /** Alleen hint — 404 betekent niet altijd dat host offline is. */
+  function ensurePeerJs() {
+    if (typeof window.Peer !== "function") {
+      throw new Error("peerjs-missing");
+    }
+  }
+
   async function probeHostOnline(code) {
     const id = peerId(code);
     const url =
@@ -121,12 +141,17 @@
     const msg = String(err && err.message ? err.message : err || "").toLowerCase();
     if (
       type === "peer-unavailable" ||
+      type === "network" ||
+      type === "disconnected" ||
       msg.includes("lobby-not-found") ||
       msg.includes("unavailable") ||
       msg.includes("could not connect") ||
       msg.includes("not found") ||
       msg.includes("conn-timeout") ||
-      msg.includes("conn-closed")
+      msg.includes("conn-closed") ||
+      msg.includes("peer-timeout") ||
+      msg.includes("peer-error") ||
+      msg.includes("no-connection")
     ) {
       return new Error("lobby-not-found");
     }
@@ -172,6 +197,11 @@
   }
 
   function wireConnection(c) {
+    if (conn && conn !== c) {
+      try {
+        conn.close();
+      } catch (_) {}
+    }
     conn = c;
     conn.on("open", () => {
       connected = true;
@@ -214,19 +244,38 @@
         return;
       }
       const timeout = setTimeout(() => reject(new Error("peer-timeout")), ms);
-      peerInstance.once("open", () => {
+      const onOpen = () => {
         clearTimeout(timeout);
+        cleanup();
         resolve();
-      });
-      peerInstance.once("error", (err) => {
+      };
+      const onError = (err) => {
         clearTimeout(timeout);
+        cleanup();
         reject(err || new Error("peer-error"));
-      });
+      };
+      function cleanup() {
+        peerInstance.off("open", onOpen);
+        peerInstance.off("error", onError);
+      }
+      peerInstance.on("open", onOpen);
+      peerInstance.on("error", onError);
     });
+  }
+
+  function acceptIncoming(incoming) {
+    if (conn && conn.open) {
+      try {
+        incoming.close();
+      } catch (_) {}
+      return;
+    }
+    wireConnection(incoming);
   }
 
   function createHost(code) {
     return new Promise((resolve, reject) => {
+      ensurePeerJs();
       destroyPeer();
       role = "host";
       roomCode = sanitizeCode(code);
@@ -237,15 +286,7 @@
       const id = peerId(roomCode);
       peer = new Peer(id, { ...PEER_OPTS });
 
-      peer.on("connection", (incoming) => {
-        if (conn && conn.open) {
-          try {
-            incoming.close();
-          } catch (_) {}
-          return;
-        }
-        wireConnection(incoming);
-      });
+      peer.on("connection", acceptIncoming);
 
       peer.on("error", (err) => {
         console.warn("host peer error", err);
@@ -259,6 +300,7 @@
 
   function joinAsGuest(code) {
     return new Promise((resolve, reject) => {
+      ensurePeerJs();
       destroyPeer();
       role = "guest";
       roomCode = sanitizeCode(code);
@@ -270,6 +312,7 @@
       peer = new Peer({ ...PEER_OPTS });
 
       waitForPeerOpen(peer, PEER_TIMEOUT_MS)
+        .then(() => sleep(300))
         .then(() => {
           const targetId = peerId(roomCode);
           return new Promise((res, rej) => {
@@ -325,12 +368,16 @@
     async setupGuest(code) {
       const sanitized = sanitizeCode(code);
       if (!sanitized) throw new Error("empty-code");
+      ensurePeerJs();
 
-      const maxAttempts = 6;
+      const maxAttempts = 10;
       let lastErr = null;
       for (let attempt = 0; attempt < maxAttempts; attempt++) {
         try {
-          destroyPeer();
+          if (attempt > 0) {
+            destroyPeer();
+            await sleep(900 + attempt * 300);
+          }
           await joinAsGuest(sanitized);
           if (!connected || !conn || !conn.open) {
             throw new Error("lobby-not-found");
@@ -339,9 +386,6 @@
         } catch (e) {
           lastErr = mapJoinError(e);
           console.warn("setupGuest attempt", attempt + 1, lastErr.message);
-          if (attempt < maxAttempts - 1) {
-            await sleep(700 + attempt * 250);
-          }
         }
       }
       throw lastErr || new Error("lobby-not-found");
