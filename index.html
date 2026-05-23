@@ -29,10 +29,12 @@
   <link rel="stylesheet" href="assets/game/game-drawers.css?v=45" />
   <link rel="stylesheet" href="assets/game/countdown-screen.css?v=2" />
   <link rel="stylesheet" href="assets/game/game-hud.css?v=44" />
-  <link rel="stylesheet" href="assets/game/game-layout.css?v=55" />
+  <link rel="stylesheet" href="assets/game/game-layout.css?v=56" />
   <link rel="stylesheet" href="assets/game/character-variety.css?v=54" />
   <link rel="stylesheet" href="assets/game/game-extras.css?v=56" />
-  <link rel="stylesheet" href="assets/game/game-mobile.css?v=1" />
+  <link rel="stylesheet" href="assets/game/game-mobile.css?v=2" />
+  <link rel="stylesheet" href="assets/game/answer-coach.css?v=1" />
+  <link rel="stylesheet" href="assets/game/rank-ui.css?v=1" />
   <link rel="stylesheet" href="assets/game/game-play.css?v=54" />
   <meta name="description" content="wiehasit.com — gratis online Wie-is-het spel. Maak een potje, deel de code, raad het personage met vrienden of tegen de bot." />
   <meta name="keywords" content="wiehasit.com, wie has it, wie is het online, raadspel, gratis spel" />
@@ -82,6 +84,11 @@
           // "10": "https://buy.stripe.com/test_xxxxx",
         },
       },
+    };
+    window.WIE_RANKED = {
+      /** Zet hier je matchmaker URL voor ranked vs echte spelers (Cloudflare Worker). Leeg = ranked bot. */
+      matchmakerUrl: "",
+      queueTimeoutMs: 12000,
     };
     window.wieSupportReturnTo = "screen-start";
     window.wieShowToast = function (msg) {
@@ -2027,20 +2034,28 @@
     <section class="mode-panel content">
       <p class="mode-kicker" data-i18n="modeKicker">Kies je spel</p>
       <h2 data-i18n-html="modeTitle">Hoe wil je <span class="mode-accent">spelen</span>?</h2>
-      <p class="mode-sub" data-i18n="modeSub">Kies één optie — daarna ga je verder</p>
+      <p class="mode-sub" data-i18n="modeSub">Kies één modus — daarna ga je verder</p>
+      <p id="mode-rank-badge" class="mode-rank-badge hidden" aria-live="polite"></p>
       <div class="mode-choices" role="group" aria-label="Spelmodus">
         <button id="btn-play-online" class="mode-choice mode-choice--online" type="button">
           <span class="mode-choice-icon" aria-hidden="true">🌐</span>
           <span class="mode-choice-text">
-            <span class="mode-choice-label" data-i18n="btnPlayOnline">Met vrienden online</span>
-            <span class="mode-choice-desc" data-i18n="modeOnlineDesc">Start of join met een code</span>
+            <span class="mode-choice-label" data-i18n="btnPlayOnline">Met vrienden</span>
+            <span class="mode-choice-desc" data-i18n="modeOnlineDesc">Speel tegen echte mensen online</span>
           </span>
         </button>
         <button id="btn-play-bot" class="mode-choice mode-choice--bot" type="button">
           <span class="mode-choice-icon" aria-hidden="true">🤖</span>
           <span class="mode-choice-text">
-            <span class="mode-choice-label" data-i18n="btnPlayBot">Tegen de computer</span>
-            <span class="mode-choice-desc" data-i18n="modeBotDesc">Oefenen in je eentje</span>
+            <span class="mode-choice-label" data-i18n="btnPlayBot">Tegen de bot</span>
+            <span class="mode-choice-desc" data-i18n="modeBotDesc">Oefenen solo — geen rank</span>
+          </span>
+        </button>
+        <button id="btn-play-ranked" class="mode-choice mode-choice--ranked" type="button">
+          <span class="mode-choice-icon" aria-hidden="true">🏆</span>
+          <span class="mode-choice-text">
+            <span class="mode-choice-label" data-i18n="btnPlayRanked">Ranked spel</span>
+            <span class="mode-choice-desc" data-i18n="modeRankedDesc">Win ranked punten &amp; stijg in rank</span>
           </span>
         </button>
       </div>
@@ -2089,6 +2104,63 @@
       <button id="btn-bot-medium" class="btn mode-btn mode-btn--medium" type="button" data-i18n="btnMedium" onclick="window.wieStartBotGame('medium')">Gemiddeld</button>
       <button id="btn-bot-hard" class="btn mode-btn mode-btn--hard" type="button" data-i18n="btnHard" onclick="window.wieStartBotGame('hard')">Moeilijk</button>
       <button id="btn-bot-back" class="btn mode-btn-back back" type="button" data-i18n="btnBack" onclick="window.wieShowScreen('screen-bot-diff','screen-mode')">Terug</button>
+    </section>
+  </main>
+
+  <!-- Ranked hub -->
+  <main id="screen-ranked" class="screen screen-mode-view hidden">
+    <img class="mode-bg-photo" src="assets/game/start-bg.png?v=2" alt="" aria-hidden="true" decoding="async" />
+    <div class="mode-overlay" aria-hidden="true"></div>
+    <section class="mode-panel rank-panel content">
+      <p class="mode-kicker" data-i18n="rankKicker">Ranked modus</p>
+      <h2 data-i18n-html="rankTitle">Stijg in <span class="mode-accent">rank</span></h2>
+      <div class="rank-hero">
+        <span id="rank-hero-icon" class="rank-hero-icon" aria-hidden="true">🥇</span>
+        <p id="rank-hero-tier" class="rank-hero-tier">Goud</p>
+        <p id="rank-hero-rating" class="rank-hero-rating">1000 RP</p>
+      </div>
+      <div class="rank-stats-row">
+        <div class="rank-stat">
+          <span id="rank-stat-wins" class="rank-stat-val">0</span>
+          <span class="rank-stat-label" data-i18n="rankStatWins">W</span>
+        </div>
+        <div class="rank-stat">
+          <span id="rank-stat-losses" class="rank-stat-val">0</span>
+          <span class="rank-stat-label" data-i18n="rankStatLosses">L</span>
+        </div>
+        <div class="rank-stat">
+          <span id="rank-stat-streak" class="rank-stat-val">0</span>
+          <span class="rank-stat-label" data-i18n="rankStatStreak">Streak</span>
+        </div>
+      </div>
+      <button id="btn-ranked-search" class="btn mode-btn rank-btn rank-btn--primary" type="button" data-i18n="btnRankedSearch">Zoek ranked match</button>
+      <button id="btn-ranked-leaderboard" class="btn mode-btn rank-btn rank-btn--ghost" type="button" data-i18n="btnRankTiers">Rank tiers</button>
+      <button id="btn-ranked-back" class="btn mode-btn-back back" type="button" data-i18n="btnBack">Terug</button>
+    </section>
+  </main>
+
+  <!-- Ranked queue -->
+  <main id="screen-ranked-queue" class="screen screen-mode-view hidden">
+    <img class="mode-bg-photo" src="assets/game/start-bg.png?v=2" alt="" aria-hidden="true" decoding="async" />
+    <div class="mode-overlay" aria-hidden="true"></div>
+    <section class="mode-panel rank-panel content">
+      <p class="mode-kicker" data-i18n="rankQueueKicker">Ranked matchmaking</p>
+      <h2 data-i18n="rankQueueTitle">Zoeken…</h2>
+      <div class="rank-queue-spinner" aria-hidden="true"></div>
+      <p id="rank-queue-status" class="rank-queue-status" data-i18n="rankQueueSearching">Zoeken naar ranked tegenstander…</p>
+      <button id="btn-ranked-cancel" class="btn mode-btn-back back" type="button" data-i18n="btnRankedCancel">Annuleren</button>
+    </section>
+  </main>
+
+  <!-- Rank tiers -->
+  <main id="screen-rank-tiers" class="screen screen-mode-view hidden">
+    <img class="mode-bg-photo" src="assets/game/start-bg.png?v=2" alt="" aria-hidden="true" decoding="async" />
+    <div class="mode-overlay" aria-hidden="true"></div>
+    <section class="mode-panel rank-panel content">
+      <p class="mode-kicker" data-i18n="rankTiersKicker">Rank ladder</p>
+      <h2 data-i18n="rankTiersTitle">Alle ranks</h2>
+      <ul id="rank-tier-list" class="rank-tier-list"></ul>
+      <button id="btn-rank-tiers-back" class="btn mode-btn-back back" type="button" data-i18n="btnBack">Terug</button>
     </section>
   </main>
 
@@ -2274,18 +2346,6 @@
               <div class="board-base board-base--opponent" aria-hidden="true"></div>
             </div>
             <div class="player-play-area">
-              <button type="button" class="opponent-chest" id="opponent-chest" aria-label="Tik om te raden" data-i18n-aria="chestHint">
-                <div class="chest-visual">
-                  <img
-                    class="chest-avatar"
-                    src="https://api.dicebear.com/7.x/avataaars/png?seed=Opponent&size=160"
-                    alt=""
-                  />
-                </div>
-                <span class="chest-label" data-i18n="chestLabel">Tegenstander</span>
-                <span class="chest-hint" data-i18n="chestHint">Tik om te raden</span>
-                <span id="opponent-answer" class="opponent-answer hidden" aria-live="polite"></span>
-              </button>
               <div class="board-stand board-stand--player board-stand--front">
                 <div class="board-tray board-tray--player">
                   <div class="player-board" id="player-board" aria-label="Jouw bord"></div>
@@ -2325,6 +2385,19 @@
 
     <button id="btn-give-up" class="btn-give-up" type="button" data-i18n="btnGiveUp" onclick="window.wieGiveUpClick(event)">OPGEVEN</button>
 
+    <button type="button" class="opponent-chest" id="opponent-chest" aria-label="Tik om te raden" data-i18n-aria="chestHint">
+      <div class="chest-visual">
+        <img
+          class="chest-avatar"
+          src="https://api.dicebear.com/7.x/avataaars/png?seed=Opponent&size=160"
+          alt=""
+        />
+      </div>
+      <span class="chest-label" data-i18n="chestLabel">Tegenstander</span>
+      <span class="chest-hint" data-i18n="chestHint">Tik om te raden</span>
+      <span id="opponent-answer" class="opponent-answer hidden" aria-live="polite"></span>
+    </button>
+
     <aside id="secret-card-slot" class="secret-card-slot" aria-label="Jouw geheim personage">
       <div class="secret-card-pedestal" aria-hidden="true"></div>
     </aside>
@@ -2354,7 +2427,7 @@
         <div id="quick-questions" class="quick-questions" aria-label="Snelle vragen"></div>
         <div class="question-input-row">
           <input type="text" id="question-input" class="question-input" maxlength="100"
-            placeholder="Bijv. Is het een jongen?" autocomplete="off" data-i18n-placeholder="questionPlaceholder" />
+            placeholder="Bijv. Is het een gaming-YouTuber?" autocomplete="off" data-i18n-placeholder="questionPlaceholder" />
           <button type="button" id="btn-send-question" class="btn-send-question" data-i18n="btnAsk">Vraag</button>
         </div>
         </div>
@@ -2403,9 +2476,12 @@
   <script src="assets/game/start-music.js?v=43"></script>
   <script src="assets/game/online-room.js?v=45"></script>
   <script src="assets/game/lobby-room.js?v=40"></script>
-  <script src="assets/game/character-traits.js?v=55"></script>
+  <script src="assets/game/character-traits.js?v=56"></script>
+  <script src="assets/game/rank-system.js?v=1"></script>
+  <script src="assets/game/ranked-queue.js?v=1"></script>
+  <script src="assets/game/answer-coach.js?v=1"></script>
   <script src="assets/game/stripe-donate.js?v=1"></script>
-  <script src="assets/game/game-play.js?v=53"></script>
+  <script src="assets/game/game-play.js?v=57"></script>
 
   <script>
     const I18N = {
@@ -2426,11 +2502,43 @@
         errNameEmpty: "Vul een naam in (max. 16 tekens)",
         modeKicker: "Kies je spel",
         modeTitle: 'Hoe wil je <span class="mode-accent">spelen</span>?',
-        modeSub: "Kies één optie — daarna ga je verder",
-        modeOnlineDesc: "Start of join met een code",
-        modeBotDesc: "Oefenen in je eentje",
-        btnPlayOnline: "Met vrienden online",
-        btnPlayBot: "Tegen de computer",
+        modeSub: "Kies één modus — daarna ga je verder",
+        modeOnlineDesc: "Speel tegen echte mensen online",
+        modeBotDesc: "Oefenen solo — geen rank",
+        modeRankedDesc: "Win ranked punten & stijg in rank",
+        btnPlayOnline: "Met vrienden",
+        btnPlayBot: "Tegen de bot",
+        btnPlayRanked: "Ranked spel",
+        rankKicker: "Ranked modus",
+        rankTitle: 'Stijg in <span class="mode-accent">rank</span>',
+        rankStatWins: "W",
+        rankStatLosses: "L",
+        rankStatStreak: "Streak",
+        btnRankedSearch: "Zoek ranked match",
+        btnRankTiers: "Rank tiers",
+        btnRankedCancel: "Annuleren",
+        rankQueueKicker: "Ranked matchmaking",
+        rankQueueTitle: "Zoeken…",
+        rankQueueSearching: "Zoeken naar ranked tegenstander…",
+        rankQueueChecking: "Online spelers controleren…",
+        rankQueueSearchingOnline: "Zoeken naar echte speler online…",
+        rankQueueAlmost: "Tegenstander bijna gevonden…",
+        rankQueueFallback: "Geen online speler — ranked bot wordt geladen…",
+        rankTiersKicker: "Rank ladder",
+        rankTiersTitle: "Alle ranks",
+        rankTier_bronze: "Brons",
+        rankTier_silver: "Zilver",
+        rankTier_gold: "Goud",
+        rankTier_platinum: "Platina",
+        rankTier_diamond: "Diamant",
+        rankOpponent: "Tegenstander",
+        rankNoChange: "0",
+        rankWinSub: "Ranked overwinning!",
+        rankLoseSub: "Ranked nederlaag — volgende keer beter!",
+        rankWinMsg: "+{delta} RP · {tier}",
+        rankLoseMsg: "{delta} RP · {tier}",
+        rankDrawMsg: "Geen RP-wijziging · {tier}",
+        rankBadge: "{icon} {tier} · {rating} RP",
         btnModeBack: "Terug naar start",
         btnSupport: "Steun",
         btnShareGame: "Deel",
@@ -2541,7 +2649,48 @@
         collapseQuestionDrawer: "Vragenpaneel verbergen",
         expandQuestionDrawer: "Vragenpaneel tonen",
         btnAsk: "Vraag",
-        questionPlaceholder: "Bijv. Is het een jongen?",
+        questionPlaceholder: "Bijv. Is het een gaming-YouTuber?",
+        qBoy: "Is het een jongen?",
+        qBoyShort: "Jongen?",
+        qGirl: "Is het een meisje?",
+        qGirlShort: "Meisje?",
+        qGaming: "Is het een gaming-YouTuber?",
+        qGamingShort: "Gaming?",
+        qDutch: "Is het een Nederlandse YouTuber?",
+        qDutchShort: "Nederlands?",
+        qMinecraft: "Maakt deze YouTuber Minecraft-content?",
+        qMinecraftShort: "Minecraft?",
+        qVlog: "Is het een vlogger?",
+        qVlogShort: "Vlogger?",
+        coachName: "Coach AI",
+        coachRole: "Spelcoach — helpt je beter antwoorden",
+        coachWrongTitle: "Hmm, dat klopt niet!",
+        coachWrongBody: "Jij zei {wrong}, maar bij {name} is het antwoord {right}. {reason}",
+        coachBtnOk: "Ik snap het!",
+        coachNoTags: "algemeen entertainment",
+        coachReasonGeneric: "Tip: kijk naar wat {name} op YouTube doet ({tags}).",
+        coachReasonCustomYes: "Bij {name} klopt JA — check de YouTuber-kenmerken ({tags}).",
+        coachReasonCustomNo: "Bij {name} is het antwoord NEE — check de YouTuber-kenmerken ({tags}).",
+        coachReasonBoyYes: "{name} is een mannelijke YouTuber.",
+        coachReasonBoyNo: "{name} is geen jongen — het is een vrouwelijke YouTuber.",
+        coachReasonGirlYes: "{name} is een vrouwelijke YouTuber.",
+        coachReasonGirlNo: "{name} is geen meisje — het is een mannelijke YouTuber.",
+        coachReasonGamingYes: "{name} maakt vooral gaming-video's.",
+        coachReasonGamingNo: "{name} focust niet op gaming (denk aan vlogs, beauty of tech).",
+        coachReasonDutchYes: "{name} is een Nederlandse YouTuber.",
+        coachReasonDutchNo: "{name} komt niet uit Nederland.",
+        coachReasonMinecraftYes: "{name} is bekend van Minecraft-content.",
+        coachReasonMinecraftNo: "{name} maakt geen Minecraft-video's.",
+        coachReasonVlogYes: "{name} is vooral vlogger/lifestyle.",
+        coachReasonVlogNo: "{name} is vooral geen vlogger.",
+        coachTag_gaming: "gaming",
+        coachTag_dutch: "Nederlands",
+        coachTag_minecraft: "Minecraft",
+        coachTag_beauty: "beauty/DIY",
+        coachTag_vlog: "vlog",
+        coachTag_tech: "tech",
+        coachTag_stream: "streamen",
+        coachTag_music: "muziek",
         waitAnswer: "wacht op antwoord",
         answerOpponentQuestion: "Tegenstander vraagt — jij antwoordt:",
         answerYes: "JA",
@@ -2583,11 +2732,43 @@
         errNameEmpty: "Enter a name (max 16 characters)",
         modeKicker: "Pick your game",
         modeTitle: 'How do you want to <span class="mode-accent">play</span>?',
-        modeSub: "Choose one option — then continue",
-        modeOnlineDesc: "Host or join with a code",
-        modeBotDesc: "Practice on your own",
-        btnPlayOnline: "Play with friends online",
-        btnPlayBot: "Against the computer",
+        modeSub: "Pick a mode — then continue",
+        modeOnlineDesc: "Play against real people online",
+        modeBotDesc: "Solo practice — no rank",
+        modeRankedDesc: "Earn ranked points & climb ranks",
+        btnPlayOnline: "With friends",
+        btnPlayBot: "Vs bot",
+        btnPlayRanked: "Ranked play",
+        rankKicker: "Ranked mode",
+        rankTitle: 'Climb the <span class="mode-accent">ranks</span>',
+        rankStatWins: "W",
+        rankStatLosses: "L",
+        rankStatStreak: "Streak",
+        btnRankedSearch: "Find ranked match",
+        btnRankTiers: "Rank tiers",
+        btnRankedCancel: "Cancel",
+        rankQueueKicker: "Ranked matchmaking",
+        rankQueueTitle: "Searching…",
+        rankQueueSearching: "Looking for a ranked opponent…",
+        rankQueueChecking: "Checking online players…",
+        rankQueueSearchingOnline: "Searching for a real player online…",
+        rankQueueAlmost: "Opponent almost found…",
+        rankQueueFallback: "No online player — loading ranked bot…",
+        rankTiersKicker: "Rank ladder",
+        rankTiersTitle: "All ranks",
+        rankTier_bronze: "Bronze",
+        rankTier_silver: "Silver",
+        rankTier_gold: "Gold",
+        rankTier_platinum: "Platinum",
+        rankTier_diamond: "Diamond",
+        rankOpponent: "Opponent",
+        rankNoChange: "0",
+        rankWinSub: "Ranked victory!",
+        rankLoseSub: "Ranked loss — you'll get them next time!",
+        rankWinMsg: "+{delta} RP · {tier}",
+        rankLoseMsg: "{delta} RP · {tier}",
+        rankDrawMsg: "No RP change · {tier}",
+        rankBadge: "{icon} {tier} · {rating} RP",
         btnModeBack: "Back to start",
         btnSupport: "Support",
         btnShareGame: "Share",
@@ -2698,7 +2879,48 @@
         collapseQuestionDrawer: "Hide question panel",
         expandQuestionDrawer: "Show question panel",
         btnAsk: "Ask",
-        questionPlaceholder: "e.g. Is it a boy?",
+        questionPlaceholder: "e.g. Is it a gaming YouTuber?",
+        qBoy: "Is it a boy?",
+        qBoyShort: "Boy?",
+        qGirl: "Is it a girl?",
+        qGirlShort: "Girl?",
+        qGaming: "Is it a gaming YouTuber?",
+        qGamingShort: "Gaming?",
+        qDutch: "Is it a Dutch YouTuber?",
+        qDutchShort: "Dutch?",
+        qMinecraft: "Does this YouTuber make Minecraft content?",
+        qMinecraftShort: "Minecraft?",
+        qVlog: "Is it a vlogger?",
+        qVlogShort: "Vlogger?",
+        coachName: "Coach AI",
+        coachRole: "Game coach — helps you answer better",
+        coachWrongTitle: "Hmm, that's not right!",
+        coachWrongBody: "You said {wrong}, but for {name} the answer is {right}. {reason}",
+        coachBtnOk: "Got it!",
+        coachNoTags: "general entertainment",
+        coachReasonGeneric: "Tip: look at what {name} does on YouTube ({tags}).",
+        coachReasonCustomYes: "For {name} the answer is YES — check their traits ({tags}).",
+        coachReasonCustomNo: "For {name} the answer is NO — check their traits ({tags}).",
+        coachReasonBoyYes: "{name} is a male YouTuber.",
+        coachReasonBoyNo: "{name} is not a boy — this is a female YouTuber.",
+        coachReasonGirlYes: "{name} is a female YouTuber.",
+        coachReasonGirlNo: "{name} is not a girl — this is a male YouTuber.",
+        coachReasonGamingYes: "{name} mainly makes gaming videos.",
+        coachReasonGamingNo: "{name} is not mainly gaming (think vlogs, beauty or tech).",
+        coachReasonDutchYes: "{name} is a Dutch YouTuber.",
+        coachReasonDutchNo: "{name} is not from the Netherlands.",
+        coachReasonMinecraftYes: "{name} is known for Minecraft content.",
+        coachReasonMinecraftNo: "{name} does not make Minecraft videos.",
+        coachReasonVlogYes: "{name} is mainly a vlogger/lifestyle creator.",
+        coachReasonVlogNo: "{name} is not mainly a vlogger.",
+        coachTag_gaming: "gaming",
+        coachTag_dutch: "Dutch",
+        coachTag_minecraft: "Minecraft",
+        coachTag_beauty: "beauty/DIY",
+        coachTag_vlog: "vlog",
+        coachTag_tech: "tech",
+        coachTag_stream: "streaming",
+        coachTag_music: "music",
         waitAnswer: "waiting for answer",
         answerOpponentQuestion: "Opponent asks — you answer:",
         answerYes: "YES",
@@ -2761,6 +2983,7 @@
       if (window.WieLobby && typeof window.WieLobby.refresh === "function") {
         window.WieLobby.refresh();
       }
+      if (typeof refreshRankDisplays === "function") refreshRankDisplays();
     }
 
     function setLanguage(next) {
@@ -2921,6 +3144,7 @@
           ? screenName
           : screenStart;
       transition(from, screenMode, "transition-in-from-right");
+      setTimeout(refreshRankDisplays, 340);
     }
 
     if (btnBeginEl) {
@@ -2967,6 +3191,9 @@
     const screenLobby = document.getElementById("screen-lobby");
     const screenJoin = document.getElementById("screen-join");
     const screenJoined = document.getElementById("screen-joined");
+    const screenRanked = document.getElementById("screen-ranked");
+    const screenRankedQueue = document.getElementById("screen-ranked-queue");
+    const screenRankTiers = document.getElementById("screen-rank-tiers");
     const screenGame = document.getElementById("screen-game");
     const gameCountdown = document.getElementById("game-countdown");
     const gameTable = document.getElementById("game-table");
@@ -2996,6 +3223,9 @@
     let sessionMode = "solo";
     let sessionCode = "";
     let botDifficulty = "medium";
+    let isRankedGame = false;
+    let rankedOpponentRating = 1000;
+    let rankedAutoStartPending = false;
     let onlineGameUnsub = null;
 
     const CARD_NAMES =
@@ -3173,6 +3403,154 @@
       tick();
     }
 
+    let startingGame = false;
+
+    function refreshRankDisplays() {
+      if (!window.WieRank) return;
+      const profile = WieRank.loadProfile();
+      const tier = WieRank.getTier(profile.rating);
+      const tierLabel = WieRank.tierName(tier.id, t);
+      const badge = document.getElementById("mode-rank-badge");
+      if (badge) {
+        badge.textContent = t("rankBadge")
+          .replace("{icon}", tier.icon)
+          .replace("{tier}", tierLabel)
+          .replace("{rating}", String(profile.rating));
+        badge.classList.remove("hidden");
+      }
+      const heroIcon = document.getElementById("rank-hero-icon");
+      const heroTier = document.getElementById("rank-hero-tier");
+      const heroRating = document.getElementById("rank-hero-rating");
+      if (heroIcon) heroIcon.textContent = tier.icon;
+      if (heroTier) heroTier.textContent = tierLabel;
+      if (heroRating) heroRating.textContent = profile.rating + " RP";
+      const winsEl = document.getElementById("rank-stat-wins");
+      const lossesEl = document.getElementById("rank-stat-losses");
+      const streakEl = document.getElementById("rank-stat-streak");
+      if (winsEl) winsEl.textContent = String(profile.rankedWins);
+      if (lossesEl) lossesEl.textContent = String(profile.rankedLosses);
+      if (streakEl) streakEl.textContent = String(profile.streak);
+    }
+
+    function renderRankTierList() {
+      const list = document.getElementById("rank-tier-list");
+      if (!list || !window.WieRank) return;
+      list.innerHTML = "";
+      const profile = WieRank.loadProfile();
+      const current = WieRank.getTier(profile.rating).id;
+      WieRank.TIERS.forEach((tier, i) => {
+        const next = WieRank.TIERS[i + 1];
+        const li = document.createElement("li");
+        if (tier.id === current) li.classList.add("is-current");
+        const max = next ? next.min - 1 : "∞";
+        li.innerHTML =
+          "<span>" +
+          tier.icon +
+          " " +
+          WieRank.tierName(tier.id, t) +
+          "</span><span>" +
+          tier.min +
+          "–" +
+          max +
+          " RP</span>";
+        list.appendChild(li);
+      });
+    }
+
+    function goToRankedScreen() {
+      refreshRankDisplays();
+      transition(screenMode, screenRanked, "transition-in-from-right");
+    }
+
+    function cancelRankedSearch() {
+      if (window.WieRankedQueue) WieRankedQueue.cancel();
+      transition(screenRankedQueue, screenRanked, "transition-in-from-left");
+    }
+
+    function launchRankedGameFromQueue() {
+      if (startingGame) return;
+      startingGame = true;
+      isRankedGame = true;
+      if (window.WieRank) {
+        botDifficulty = WieRank.getBotDifficultyForRating(WieRank.loadProfile().rating);
+        rankedOpponentRating = WieRank.getBotRatingForDifficulty(botDifficulty);
+      }
+      sessionMode = "solo";
+      sessionCode = "";
+      try {
+        leaveOnlineSession();
+      } catch (err) {
+        console.warn("leave online", err);
+      }
+      if (window.WieIsHetPlay) WieIsHetPlay.hideEndOverlay();
+      resetGameScreen();
+      busy = false;
+      [screenRanked, screenRankedQueue].forEach((s) => s && s.classList.add("hidden"));
+      screenGame.classList.remove("hidden");
+      setTimeout(() => {
+        startGameSession();
+        startingGame = false;
+      }, 80);
+    }
+
+    function beginRankedOnlineMatch(match) {
+      if (!match || !match.code) {
+        launchRankedGameFromQueue();
+        return;
+      }
+      isRankedGame = true;
+      rankedOpponentRating = match.opponentRating || 1000;
+      sessionCode = match.code;
+      rankedAutoStartPending = true;
+      if (match.role === "host") {
+        sessionMode = "host";
+        if (lobbyCode) lobbyCode.textContent = sessionCode;
+        runJoinLoading(
+          sessionCode,
+          () => {
+            busy = false;
+            applyLanguage();
+            if (window.WieIsHetOnline) {
+              WieIsHetOnline.setupHost(sessionCode)
+                .then(() => wireHostLobby())
+                .catch(() => wireHostLobby());
+            } else {
+              wireHostLobby();
+            }
+            screenRankedQueue.classList.add("hidden");
+            screenLobby.classList.remove("hidden");
+          },
+          "host"
+        );
+        return;
+      }
+      sessionMode = "guest";
+      runJoinLoading(
+        sessionCode,
+        () => {
+          showJoinedScreen(sessionCode);
+          connectGuestWithRetry(sessionCode).catch((e) => {
+            if (isLobbyNotFound(e)) backToJoinWithError("joinWrongCode");
+            else setJoinedStatus("joinFailed", true);
+          });
+        },
+        "guest"
+      );
+    }
+
+    function startRankedSearch() {
+      if (!window.WieRankedQueue) return;
+      const statusEl = document.getElementById("rank-queue-status");
+      transition(screenRanked, screenRankedQueue, "transition-in-from-right");
+      WieRankedQueue.start(
+        (msg) => {
+          if (statusEl) statusEl.textContent = msg;
+        },
+        (match) => beginRankedOnlineMatch(match),
+        () => launchRankedGameFromQueue()
+      );
+    }
+
     function initGamePlay() {
       if (!window.WieIsHetPlay) return;
       const onlineMatch =
@@ -3192,15 +3570,16 @@
         online: onlineMatch,
         isHost: sessionMode === "host",
         botDifficulty: sessionMode === "solo" ? botDifficulty : null,
+        isRanked: isRankedGame,
+        rankedOpponentRating: rankedOpponentRating,
       });
     }
-
-    let startingGame = false;
 
     function startBotGame(difficulty) {
       if (startingGame) return;
       startingGame = true;
       botDifficulty = difficulty || "medium";
+      isRankedGame = false;
       sessionMode = "solo";
       sessionCode = "";
       try {
@@ -3255,7 +3634,18 @@
       applyLanguage();
       if (!window.WieIsHetOnline) return;
       onlineGameUnsub = WieIsHetOnline.onMessage((msg) => {
-        if (window.WieLobby && WieLobby.handleMessage(msg)) return;
+        if (window.WieLobby && WieLobby.handleMessage(msg)) {
+          if (
+            msg.type === "lobbyJoin" &&
+            isRankedGame &&
+            rankedAutoStartPending &&
+            sessionMode === "host"
+          ) {
+            rankedAutoStartPending = false;
+            window.setTimeout(() => doStartGame(), 1400);
+          }
+          return;
+        }
         if (msg.type === "gameStart") {
           if (window.WieIsHetPlay) WieIsHetPlay.hideEndOverlay();
           resetGameScreen();
@@ -3425,6 +3815,7 @@
       if (window.WieIsHetPlay) WieIsHetPlay.hideEndOverlay();
       resetGameScreen();
       leaveOnlineSession();
+      refreshRankDisplays();
       transition(screenGame, screenMode, "transition-in-from-left");
     }
 
@@ -3435,6 +3826,10 @@
       }
       if (window.WieLobby) WieLobby.reset();
       if (window.WieIsHetOnline) WieIsHetOnline.reset();
+      isRankedGame = false;
+      rankedAutoStartPending = false;
+      rankedOpponentRating = 1000;
+      if (window.WieRankedQueue) WieRankedQueue.cancel();
       sessionMode = "solo";
       sessionCode = "";
     }
@@ -3729,6 +4124,21 @@
 
     onClick("btn-play-bot", () => {
       transition(screenMode, screenBotDiff, "transition-in-from-right");
+    });
+
+    onClick("btn-play-ranked", goToRankedScreen);
+
+    onClick("btn-ranked-search", startRankedSearch);
+    onClick("btn-ranked-cancel", cancelRankedSearch);
+    onClick("btn-ranked-back", () => {
+      transition(screenRanked, screenMode, "transition-in-from-left");
+    });
+    onClick("btn-ranked-leaderboard", () => {
+      renderRankTierList();
+      transition(screenRanked, screenRankTiers, "transition-in-from-right");
+    });
+    onClick("btn-rank-tiers-back", () => {
+      transition(screenRankTiers, screenRanked, "transition-in-from-left");
     });
 
     onClick("btn-bot-back", () => {
@@ -4070,6 +4480,8 @@
       joinWithCode: doJoinWithCode,
       connectGuest: connectGuestWithRetry,
       startBotGame,
+      startRankedSearch,
+      goRanked: goToRankedScreen,
       startSoloGame,
       startGameSession,
       startGame: doStartGame,
@@ -4083,6 +4495,8 @@
       onGiveUp: onGiveUpClick,
       hideGiveUp: hideGiveUpDialog,
     };
+
+    refreshRankDisplays();
   </script>
   <div id="wie-toast" class="wie-toast hidden" role="status" aria-live="polite"></div>
 </body>

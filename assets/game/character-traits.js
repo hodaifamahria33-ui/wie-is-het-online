@@ -45,6 +45,42 @@
 
   const CARD_NAMES = ROSTER.map((c) => c.name);
 
+  /** Content-tags voor YouTuber-vragen (sync met game-play.js evaluateQuestion). */
+  const CREATOR_TAGS = {
+    MrBeast: ["vlog"],
+    Pokimane: ["gaming", "stream"],
+    PewDiePie: ["gaming"],
+    Valkyrae: ["gaming", "stream"],
+    Markiplier: ["gaming"],
+    iJustine: ["tech", "beauty"],
+    Jacksepticeye: ["gaming"],
+    SSSniperWolf: ["vlog"],
+    KSI: ["gaming", "music"],
+    LaurDIY: ["beauty"],
+    Ninja: ["gaming", "stream"],
+    Emma: ["vlog"],
+    Dream: ["gaming", "minecraft"],
+    Aphmau: ["gaming", "minecraft"],
+    Vanoss: ["gaming"],
+    Jelly: ["gaming", "dutch"],
+    DanTDM: ["gaming", "minecraft"],
+    Zoella: ["beauty", "vlog"],
+    Ludwig: ["gaming", "stream"],
+    Tana: ["vlog"],
+    xQc: ["gaming", "stream"],
+    Nikkie: ["beauty"],
+    IShowSpeed: ["gaming", "stream"],
+    Wengie: ["beauty"],
+    Enzo: ["dutch", "vlog"],
+    Safiya: ["vlog", "beauty"],
+    Gio: ["gaming"],
+    Gibi: ["beauty"],
+    Kalvijn: ["dutch", "gaming"],
+    Rosanna: ["beauty"],
+    MKBHD: ["tech"],
+    Jess: ["beauty", "vlog"],
+  };
+
   const TRAITS = {};
   ROSTER.forEach((c) => {
     TRAITS[c.name] = {
@@ -52,6 +88,7 @@
       slug: c.slug,
       portrait: PORTRAITS + c.slug + ".png",
       avatar: c,
+      tags: CREATOR_TAGS[c.name] || [],
     };
   });
 
@@ -64,11 +101,16 @@
       slug,
       portrait: PORTRAITS + slug + ".png",
       avatar: { name, slug, bg: "6366f1,8b5cf6,312e81", hair: "short05", skinColor: "f2d3b1", hairColor: "562306" },
+      tags: [],
     };
   }
 
   function isGirl(name) {
     return !!getTraits(name).female;
+  }
+
+  function hasCreatorTag(name, tag) {
+    return (getTraits(name).tags || []).includes(tag);
   }
 
   function buildRemotePortraitUrl(cfg) {
@@ -182,6 +224,7 @@
     CARD_NAMES,
     getTraits,
     isGirl,
+    hasCreatorTag,
     cardAvatarUrl,
     cardAvatarFallbackUrl,
     buildRemotePortraitUrl,

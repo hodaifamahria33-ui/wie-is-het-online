@@ -1,43 +1,60 @@
 /**
- * Mobiel / smalle schermen: bord gecentreerd, geen horizontale overflow.
+ * Mobiel / smalle schermen — leesbaar bord, geen overlap.
  */
+
 .screen-game-view,
 #game-table,
 #game-table .game-scene {
   overflow-x: hidden;
 }
 
+/* Geen dubbele tekst: badge is genoeg tijdens kiezen */
+.screen-game-view.phase-pick-secret .game-turn-banner {
+  display: none !important;
+}
+
 @media (max-width: 900px) {
   #game-table {
-    --game-board-width: min(
-      calc(100vw - 12px),
-      calc((100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 200px) * 1.62)
-    );
+    --game-board-width: min(calc(100vw - 20px), 440px);
     --game-strip-width: 100%;
-    --board-tilt: 3deg;
+    --board-tilt: 0deg;
   }
 
   #game-table .game-scene {
-    padding-top: calc(env(safe-area-inset-top, 0px) + 52px);
-    padding-bottom: max(96px, calc(env(safe-area-inset-bottom, 0px) + 84px));
-    padding-left: max(4px, env(safe-area-inset-left));
-    padding-right: max(4px, env(safe-area-inset-right));
+    perspective: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100%;
+    padding-top: calc(env(safe-area-inset-top, 0px) + 58px);
+    padding-bottom: max(88px, calc(env(safe-area-inset-bottom, 0px) + 76px));
+    padding-left: max(8px, env(safe-area-inset-left));
+    padding-right: max(8px, env(safe-area-inset-right));
     overflow-x: hidden;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-    align-content: safe center;
   }
 
   .screen-game-view.phase-pick-secret #game-table .game-scene {
-    padding-top: calc(env(safe-area-inset-top, 0px) + 72px);
-    padding-bottom: max(88px, calc(env(safe-area-inset-bottom, 0px) + 72px));
+    padding-top: calc(env(safe-area-inset-top, 0px) + 62px);
+    padding-bottom: max(72px, calc(env(safe-area-inset-bottom, 0px) + 64px));
   }
 
   .screen-game-view.turn-player #game-table .game-scene,
   .screen-game-view.phase-question #game-table .game-scene,
   .screen-game-view.phase-post-switch #game-table .game-scene {
-    padding-top: calc(env(safe-area-inset-top, 0px) + 56px);
-    padding-bottom: max(150px, calc(env(safe-area-inset-bottom, 0px) + 132px));
+    padding-top: calc(env(safe-area-inset-top, 0px) + 58px);
+    padding-bottom: max(130px, calc(env(safe-area-inset-bottom, 0px) + 118px));
+  }
+
+  #game-table .board-stand--front {
+    transform: none !important;
+    filter: drop-shadow(0 14px 32px rgba(0, 0, 0, 0.45));
+  }
+
+  #game-table .board-stand--rear {
+    display: none !important;
   }
 
   #game-table .opponent-zone {
@@ -54,54 +71,57 @@
 
   #game-table .player-play-area {
     flex-direction: column !important;
-    flex-wrap: nowrap !important;
     align-items: center !important;
     justify-content: center !important;
-    gap: 0 !important;
     width: 100% !important;
     max-width: 100% !important;
     min-width: 0 !important;
     padding: 0 !important;
+    gap: 0 !important;
   }
 
   #game-table .board-stand--front {
     width: var(--game-board-width) !important;
-    max-width: calc(100vw - 10px) !important;
+    max-width: calc(100vw - 16px) !important;
     min-width: 0 !important;
     margin: 0 auto;
-    order: 1 !important;
   }
 
-  /* Schatkist: vast links onder, niet naast het bord */
+  /* Schatkist: vast linksonder viewport (buiten 3D-scene) */
+  #screen-game > .opponent-chest,
   #game-table .opponent-chest {
     position: fixed !important;
-    left: max(8px, env(safe-area-inset-left)) !important;
+    left: max(10px, env(safe-area-inset-left)) !important;
     right: auto !important;
     top: auto !important;
-    bottom: max(112px, calc(env(safe-area-inset-bottom, 0px) + 102px)) !important;
-    width: clamp(56px, 15vw, 72px) !important;
-    order: 0 !important;
+    bottom: max(96px, calc(env(safe-area-inset-bottom, 0px) + 88px)) !important;
+    width: clamp(52px, 14vw, 68px) !important;
     z-index: 38 !important;
     margin: 0 !important;
     transform: none !important;
     flex-shrink: 0;
   }
 
+  .screen-game-view.phase-pick-secret #opponent-chest {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none !important;
+  }
+
+  #screen-game > .opponent-chest .chest-label,
+  #screen-game > .opponent-chest .chest-hint,
   #game-table .opponent-chest .chest-label,
   #game-table .opponent-chest .chest-hint {
     display: none;
   }
 
-  #game-table .opponent-chest .chest-visual {
-    border-radius: 14px 14px 16px 16px;
-  }
-
   #secret-card-slot.secret-card-slot,
   #game-table .secret-card-slot {
-    right: max(8px, env(safe-area-inset-right)) !important;
-    bottom: max(112px, calc(env(safe-area-inset-bottom, 0px) + 102px)) !important;
-    width: clamp(62px, 16vw, 84px) !important;
+    right: max(10px, env(safe-area-inset-right)) !important;
+    bottom: max(96px, calc(env(safe-area-inset-bottom, 0px) + 88px)) !important;
+    width: clamp(64px, 17vw, 88px) !important;
     transform: scale(1) !important;
+    z-index: 39 !important;
   }
 
   #secret-card-slot.secret-card-slot.visible,
@@ -110,30 +130,82 @@
   }
 
   #game-table .board-tray {
-    padding: 7px 8px 9px;
-    border-radius: 14px;
+    padding: 8px 9px 10px;
+    border-radius: 16px;
     border-width: 3px;
   }
 
+  /* Portrait: 4 kolommen i.p.v. 8 — kaarten 2× groter */
   #game-table .opponent-board-back,
   #game-table .player-board {
-    gap: 3px;
-    padding: 6px 7px 7px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-rows: repeat(8, auto);
+    gap: 5px;
+    padding: 7px 8px 8px;
+  }
+
+  #game-table .card-well {
+    aspect-ratio: 4 / 5;
   }
 
   #game-table .card-name {
-    font-size: clamp(0.36rem, 2.65vw, 0.52rem);
-    padding: 2px 1px;
-    letter-spacing: 0.02em;
-    line-height: 1.1;
+    font-size: clamp(0.52rem, 2.85vw, 0.68rem);
+    padding: 3px 2px;
+    letter-spacing: 0.01em;
+    line-height: 1.15;
+    white-space: normal;
+    word-break: break-word;
+    hyphens: auto;
+    min-height: 2.15em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .screen-game-view .btn-give-up {
+    top: max(10px, env(safe-area-inset-top)) !important;
+    left: max(10px, env(safe-area-inset-left)) !important;
+    padding: 0.42rem 0.62rem !important;
+    font-size: 0.72rem !important;
+    border-radius: 9px !important;
+    letter-spacing: 0.04em !important;
+    max-width: 38vw;
+  }
+
+  .lang-picker {
+    top: max(10px, env(safe-area-inset-top)) !important;
+    right: max(10px, env(safe-area-inset-right)) !important;
+  }
+
+  .lang-globe {
+    width: 38px;
+    height: 38px;
+    font-size: 1.15rem;
+  }
+
+  .game-turn-badge {
+    top: max(48px, calc(env(safe-area-inset-top, 0px) + 44px)) !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    max-width: calc(100vw - 108px) !important;
+    padding: 0.38rem 0.72rem 0.42rem !important;
+    font-size: clamp(0.62rem, 2.8vw, 0.78rem) !important;
+    letter-spacing: 0.04em !important;
+    line-height: 1.25 !important;
+    text-align: center;
+    z-index: 186 !important;
   }
 
   .game-turn-banner {
     left: 50% !important;
     transform: translateX(-50%) !important;
-    width: min(92vw, 340px) !important;
-    max-width: 92vw !important;
-    top: max(46px, calc(env(safe-area-inset-top, 0px) + 42px)) !important;
+    width: min(calc(100vw - 108px), 320px) !important;
+    max-width: calc(100vw - 108px) !important;
+    top: max(48px, calc(env(safe-area-inset-top, 0px) + 44px)) !important;
+    font-size: clamp(0.72rem, 3vw, 0.88rem) !important;
+    padding: 0.45rem 0.75rem !important;
+    z-index: 40 !important;
   }
 
   .game-turn-banner.hidden {
@@ -149,20 +221,35 @@
   .game-quick-actions {
     left: 50% !important;
     transform: translateX(-50%) !important;
-    width: min(92vw, 380px) !important;
-    top: max(84px, calc(env(safe-area-inset-top, 0px) + 76px)) !important;
+    width: min(calc(100vw - 16px), 380px) !important;
+    top: max(78px, calc(env(safe-area-inset-top, 0px) + 72px)) !important;
+  }
+
+  .game-rank-hud {
+    top: max(44px, calc(env(safe-area-inset-top, 0px) + 40px)) !important;
+    font-size: 0.68rem !important;
+  }
+}
+
+/* Smalle telefoons */
+@media (max-width: 900px) and (max-width: 380px) {
+  #game-table {
+    --game-board-width: calc(100vw - 12px);
+  }
+
+  #game-table .card-name {
+    font-size: 0.5rem;
   }
 }
 
 @media (max-width: 900px) and (max-height: 520px) {
   #game-table {
-    --game-board-width: min(calc(100vw - 8px), calc(100dvh - 88px));
-    --board-tilt: 2deg;
+    --game-board-width: min(calc(100vw - 12px), calc(100dvh - 100px));
   }
 
   #game-table .game-scene {
-    padding-top: calc(env(safe-area-inset-top, 0px) + 40px);
-    padding-bottom: max(72px, calc(env(safe-area-inset-bottom, 0px) + 56px));
+    padding-top: calc(env(safe-area-inset-top, 0px) + 44px);
+    padding-bottom: max(64px, calc(env(safe-area-inset-bottom, 0px) + 52px));
   }
 
   #game-table .board-tray {
@@ -171,7 +258,7 @@
 
   #game-table .opponent-board-back,
   #game-table .player-board {
-    gap: 2px;
-    padding: 4px 5px 5px;
+    gap: 3px;
+    padding: 5px 6px 6px;
   }
 }

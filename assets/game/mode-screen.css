@@ -172,6 +172,23 @@
   color: rgba(224, 231, 255, 0.95);
 }
 
+.screen-mode-view .mode-choice--ranked {
+  color: #431407;
+  background: linear-gradient(135deg, #fde68a 0%, #fbbf24 35%, #f59e0b 100%);
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, 0.4),
+    0 8px 0 #92400e,
+    0 12px 28px rgba(146, 64, 14, 0.42);
+}
+
+.screen-mode-view .mode-choice--ranked .mode-choice-desc {
+  color: rgba(67, 20, 7, 0.88);
+}
+
+.screen-mode-view .mode-choice--ranked .mode-choice-icon {
+  background: rgba(255, 255, 255, 0.45);
+}
+
 .screen-mode-view .mode-choice:hover {
   transform: translateY(-2px);
   filter: brightness(1.05);

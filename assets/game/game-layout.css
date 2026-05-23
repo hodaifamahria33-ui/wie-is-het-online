@@ -63,6 +63,7 @@
   display: none !important;
 }
 
+.screen-game-view.phase-pick-secret .game-turn-banner,
 .screen-game-view.has-secret-visible.phase-pick-secret .game-turn-banner,
 .screen-game-view.has-secret-visible.turn-opponent .game-turn-banner {
   display: none !important;

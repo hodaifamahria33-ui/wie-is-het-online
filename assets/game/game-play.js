@@ -36,6 +36,9 @@
     askedThisTurn: false,
     usedQuestions: [],
     botDifficulty: "medium",
+    isRanked: false,
+    rankedOpponentRating: 1000,
+    lastRankResult: null,
     /** Indices op het bord die nog jouw geheim kunnen zijn (solo-bot). */
     botSuspects: null,
     botUsedQuestionIds: [],
@@ -373,14 +376,40 @@
     }
   }
 
+  function hasCreatorTag(name, tag) {
+    return (
+      window.WieCharacterArt &&
+      typeof WieCharacterArt.hasCreatorTag === "function" &&
+      WieCharacterArt.hasCreatorTag(name, tag)
+    );
+  }
+
   function evaluateCustomQuestion(text, secretName) {
     const q = String(text || "").toLowerCase().trim();
     if (!q) return Math.random() > 0.5;
-    if (/jongen|man|mannelijk|zijn het een jongen|heeft hij/.test(q)) {
+    if (/jongen|man|mannelijk|zijn het een jongen|heeft hij|\bboy\b|\bmale\b/.test(q)) {
       return evaluateQuestion("boy", secretName);
     }
-    if (/meisje|vrouw|vrouwelijk|zij|is het een meisje/.test(q)) {
+    if (/meisje|vrouw|vrouwelijk|zij|is het een meisje|\bgirl\b|\bfemale\b/.test(q)) {
       return evaluateQuestion("girl", secretName);
+    }
+    if (/gaming|gamer|game.?youtuber|speelt games|plays games/.test(q)) {
+      return evaluateQuestion("gaming", secretName);
+    }
+    if (/nederlands|dutch|nederland|\bdutch\b/.test(q)) {
+      return evaluateQuestion("dutch", secretName);
+    }
+    if (/minecraft|\bmc\b/.test(q)) {
+      return evaluateQuestion("minecraft", secretName);
+    }
+    if (/beauty|make.?up|diy|asmr/.test(q)) {
+      return evaluateQuestion("beauty", secretName);
+    }
+    if (/vlog|vlogger|lifestyle/.test(q)) {
+      return evaluateQuestion("vlog", secretName);
+    }
+    if (/tech|gadget|telefoon|smartphone|\btech\b/.test(q)) {
+      return evaluateQuestion("tech", secretName);
     }
     if (/3 letter|drie letter|kort/.test(q)) return evaluateQuestion("short", secretName);
     if (/4 letter|lang|langer/.test(q)) return evaluateQuestion("long", secretName);
@@ -396,6 +425,18 @@
         return isMaleCharacter(n);
       case "girl":
         return isFemaleCharacter(n);
+      case "gaming":
+        return hasCreatorTag(n, "gaming");
+      case "dutch":
+        return hasCreatorTag(n, "dutch");
+      case "minecraft":
+        return hasCreatorTag(n, "minecraft");
+      case "beauty":
+        return hasCreatorTag(n, "beauty");
+      case "vlog":
+        return hasCreatorTag(n, "vlog");
+      case "tech":
+        return hasCreatorTag(n, "tech");
       case "short":
         return n.length <= 3;
       case "long":
@@ -536,12 +577,12 @@
   function renderQuickQuestions() {
     if (!quickQuestionsEl) return;
     quickQuestionsEl.innerHTML = "";
-    AI_QUESTIONS.forEach((q) => {
+    getAIQuestions().forEach((q) => {
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = "quick-q-btn";
-      btn.textContent = q.text.replace(/^Is het een? /i, "").replace(/^Heeft de naam /i, "").replace(/^Begint de naam met /i, "Letter ");
-      if (btn.textContent.length > 22) btn.textContent = q.text.slice(0, 20) + "…";
+      btn.textContent = q.short || q.text;
+      if (btn.textContent.length > 22) btn.textContent = btn.textContent.slice(0, 20) + "…";
       btn.addEventListener("click", () => {
         if (state.phase !== PHASE.MY_TURN || state.askedThisTurn) return;
         if (questionInput) questionInput.value = q.text;
@@ -895,22 +936,55 @@
     finishQuestionAsAsker(yes, questionText);
   }
 
-  function onAnswerChipClick(btn) {
-    if (state.phase !== PHASE.ANSWER_QUESTION) return;
-    const yes = btn.dataset.answer === "yes";
-    if (!state.online && state.pendingQuestion?.id) {
-      narrowBotSuspects(state.pendingQuestion.id, yes);
+  function getCorrectAnswerForPlayerSecret() {
+    if (state.secretIndex == null || !state.pendingQuestion) return null;
+    const secretName = getSecretName(state.secretIndex);
+    const pq = state.pendingQuestion;
+    if (pq.id && pq.id !== "custom") {
+      return evaluateQuestion(pq.id, secretName);
     }
+    return evaluateCustomQuestion(pq.text, secretName);
+  }
+
+  function proceedAfterPlayerAnswer(useYes) {
     hideQuestionPanel();
     hideOpponentAnswer();
+    if (!state.online && state.pendingQuestion?.id) {
+      narrowBotSuspects(state.pendingQuestion.id, useYes);
+    }
     if (state.online && window.WieIsHetOnline) {
-      window.WieIsHetOnline.send({ type: "answer", yes });
+      window.WieIsHetOnline.send({ type: "answer", yes: useYes });
       state.phase = PHASE.WAIT_OPPONENT_POST;
       clearInteractivity();
       setBanner(tFn("waitOpponentTurn"));
       return;
     }
     setTimeout(beginMyTurn, 400);
+  }
+
+  function onAnswerChipClick(btn) {
+    if (state.phase !== PHASE.ANSWER_QUESTION) return;
+    const playerYes = btn.dataset.answer === "yes";
+
+    if (!state.online && state.secretIndex != null) {
+      const correctYes = getCorrectAnswerForPlayerSecret();
+      if (correctYes !== null && playerYes !== correctYes) {
+        if (window.WieAnswerCoach && typeof WieAnswerCoach.show === "function") {
+          WieAnswerCoach.show({
+            question: state.pendingQuestion,
+            secretName: getSecretName(state.secretIndex),
+            playerYes,
+            correctYes,
+            onContinue: () => proceedAfterPlayerAnswer(correctYes),
+          });
+          return;
+        }
+        proceedAfterPlayerAnswer(correctYes);
+        return;
+      }
+    }
+
+    proceedAfterPlayerAnswer(playerYes);
   }
 
   function endPlayerTurnAfterFlip() {
@@ -922,14 +996,16 @@
     beginTheirTurn();
   }
 
-  const AI_QUESTIONS = [
-    { id: "boy", text: "Is het een jongen?" },
-    { id: "girl", text: "Is het een meisje?" },
-    { id: "short", text: "Heeft de naam 3 letters?" },
-    { id: "long", text: "Heeft de naam 4 letters of meer?" },
-    { id: "a-m", text: "Begint de naam met A–M?" },
-    { id: "n-z", text: "Begint de naam met N–Z?" },
-  ];
+  function getAIQuestions() {
+    return [
+      { id: "boy", text: tFn("qBoy"), short: tFn("qBoyShort") },
+      { id: "girl", text: tFn("qGirl"), short: tFn("qGirlShort") },
+      { id: "gaming", text: tFn("qGaming"), short: tFn("qGamingShort") },
+      { id: "dutch", text: tFn("qDutch"), short: tFn("qDutchShort") },
+      { id: "minecraft", text: tFn("qMinecraft"), short: tFn("qMinecraftShort") },
+      { id: "vlog", text: tFn("qVlog"), short: tFn("qVlogShort") },
+    ];
+  }
 
   const BOT_CONFIG = {
     easy: {
@@ -998,7 +1074,8 @@
   }
 
   function pickCasualQuestion() {
-    return AI_QUESTIONS[Math.floor(Math.random() * AI_QUESTIONS.length)];
+    const pool = getAIQuestions();
+    return pool[Math.floor(Math.random() * pool.length)];
   }
 
   function pickSmartQuestion() {
@@ -1006,10 +1083,9 @@
     if (suspects.length <= 1) {
       return pickCasualQuestion();
     }
-    const fresh = AI_QUESTIONS.filter(
-      (q) => !state.botUsedQuestionIds.includes(q.id)
-    );
-    const pool = fresh.length ? fresh : AI_QUESTIONS;
+    const all = getAIQuestions();
+    const fresh = all.filter((q) => !state.botUsedQuestionIds.includes(q.id));
+    const pool = fresh.length ? fresh : all;
     let bestQ = pool[0];
     let bestScore = Infinity;
     for (const q of pool) {
@@ -1197,6 +1273,7 @@
     if (winOverlay) {
       winOverlay.classList.add("hidden");
       winOverlay.classList.remove("active", "lose", "give-up");
+      updateRankDeltaOverlay(null);
     }
     const actions = winOverlay?.querySelector(".win-end-actions");
     if (actions) actions.classList.add("hidden");
@@ -1299,19 +1376,84 @@
     restoreAfterGiveUpCancel();
   }
 
+  function applyRankResult(won) {
+    if (!state.isRanked || !window.WieRank) return null;
+    const result = WieRank.applyMatchResult(won, state.rankedOpponentRating, { ranked: true });
+    state.lastRankResult = result;
+    return result;
+  }
+
+  function rankDeltaText(result) {
+    if (!result || !window.WieRank) return "";
+    const delta = WieRank.formatDelta(result.delta, tFn);
+    const tier = WieRank.tierName(result.tier.id, tFn);
+    if (result.delta > 0) {
+      return tFn("rankWinMsg").replace("{delta}", delta).replace("{tier}", tier);
+    }
+    if (result.delta < 0) {
+      return tFn("rankLoseMsg").replace("{delta}", delta).replace("{tier}", tier);
+    }
+    return tFn("rankDrawMsg").replace("{tier}", tier);
+  }
+
+  function updateRankDeltaOverlay(result) {
+    if (!winOverlay) return;
+    let el = winOverlay.querySelector(".win-rank-delta");
+    if (!el) {
+      el = document.createElement("p");
+      el.className = "win-rank-delta hidden";
+      const sub = winOverlay.querySelector(".win-sub");
+      if (sub && sub.parentNode) sub.parentNode.insertBefore(el, sub.nextSibling);
+    }
+    if (!result) {
+      el.classList.add("hidden");
+      return;
+    }
+    el.textContent = rankDeltaText(result);
+    el.classList.remove("hidden", "win-rank-delta--up", "win-rank-delta--down", "win-rank-delta--neutral");
+    if (result.delta > 0) el.classList.add("win-rank-delta--up");
+    else if (result.delta < 0) el.classList.add("win-rank-delta--down");
+    else el.classList.add("win-rank-delta--neutral");
+  }
+
+  function setRankHudVisible(visible) {
+    let hud = document.getElementById("game-rank-hud");
+    if (!visible) {
+      if (hud) hud.classList.add("hidden");
+      return;
+    }
+    if (!window.WieRank) return;
+    if (!hud && screenGame) {
+      hud = document.createElement("div");
+      hud.id = "game-rank-hud";
+      hud.className = "game-rank-hud";
+      screenGame.appendChild(hud);
+    }
+    if (!hud) return;
+    const profile = WieRank.loadProfile();
+    const tier = WieRank.getTier(profile.rating);
+    hud.textContent =
+      tier.icon + " " + WieRank.tierName(tier.id, tFn) + " · " + profile.rating;
+    hud.classList.remove("hidden");
+  }
+
   function showWin() {
     state.phase = PHASE.WON;
     clearInteractivity();
     hideQuestionPanel();
     hideBanner();
     clearOpponentReveal();
+    const rankResult = applyRankResult(true);
     if (winOverlay) {
       winOverlay.classList.remove("hidden", "lose");
       winOverlay.classList.add("active");
       const title = winOverlay.querySelector(".win-title");
       const sub = winOverlay.querySelector(".win-sub");
       if (title) title.textContent = tFn("youWon");
-      if (sub) sub.textContent = tFn("winSub");
+      if (sub) {
+        sub.textContent = state.isRanked ? tFn("rankWinSub") : tFn("winSub");
+      }
+      updateRankDeltaOverlay(rankResult);
     }
     if (screenGame) screenGame.classList.add("game-won");
     showEndActions();
@@ -1323,13 +1465,17 @@
     hideQuestionPanel();
     hideBanner();
     revealOpponentSecret(revealIndex);
+    const rankResult = applyRankResult(false);
     if (winOverlay) {
       winOverlay.classList.remove("hidden");
       winOverlay.classList.add("active", "lose");
       const title = winOverlay.querySelector(".win-title");
       const sub = winOverlay.querySelector(".win-sub");
       if (title) title.textContent = tFn("youLost");
-      if (sub) sub.textContent = tFn("loseRevealSub");
+      if (sub) {
+        sub.textContent = state.isRanked ? tFn("rankLoseSub") : tFn("loseRevealSub");
+      }
+      updateRankDeltaOverlay(rankResult);
     }
     showEndActions();
   }
@@ -1447,6 +1593,7 @@
     state.usedQuestions = [];
     state.botSuspects = null;
     state.botUsedQuestionIds = [];
+    setRankHudVisible(state.isRanked);
     clearPostAnswerTimers();
     if (secretSlot) {
       Array.from(secretSlot.children).forEach((child) => {
@@ -1471,7 +1618,7 @@
     hideOpponentAnswer();
     clearOpponentReveal();
     setScreenTurn("pick");
-    setBanner(tFn("phasePickSecret"));
+    hideBanner();
     state.playerWells.forEach((w) => w.classList.add("interactive"));
     bindWellClickHandlers();
     if (opponentChest && !state.online) {
@@ -1592,6 +1739,10 @@
     state.usedQuestions = [];
     state.botSuspects = null;
     state.botUsedQuestionIds = [];
+    state.isRanked = false;
+    state.rankedOpponentRating = 1000;
+    state.lastRankResult = null;
+    setRankHudVisible(false);
     clearPostAnswerTimers();
     clearInteractivity();
     clearOpponentReveal();
@@ -1640,6 +1791,9 @@
       state.online = Boolean(opts.online);
       state.isHost = opts.isHost !== false;
       state.botDifficulty = opts.botDifficulty || "medium";
+      state.isRanked = Boolean(opts.isRanked);
+      state.rankedOpponentRating = opts.rankedOpponentRating || 1000;
+      state.lastRankResult = null;
       if (!state.online && state.botDifficulty) {
         state.remoteSecretReady = false;
         state.localSecretReady = false;
