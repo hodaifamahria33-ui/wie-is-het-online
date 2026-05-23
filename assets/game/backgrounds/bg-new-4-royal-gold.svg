@@ -1,26 +1,75 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
   <defs>
-    <radialGradient id="spot" cx="50%" cy="38%" r="55%">
-      <stop offset="0%" stop-color="#fbbf24" stop-opacity="0.28"/>
-      <stop offset="40%" stop-color="#b45309" stop-opacity="0.12"/>
-      <stop offset="100%" stop-color="#0a0612" stop-opacity="0"/>
-    </radialGradient>
-    <linearGradient id="curt" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0%" stop-color="#3b0764" stop-opacity="0.95"/>
-      <stop offset="18%" stop-color="#3b0764" stop-opacity="0"/>
-      <stop offset="82%" stop-color="#3b0764" stop-opacity="0"/>
+    <linearGradient id="stageBg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1a0f2e"/>
+      <stop offset="55%" stop-color="#12082a"/>
+      <stop offset="100%" stop-color="#0a0612"/>
+    </linearGradient>
+    <linearGradient id="curtainL" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#2e1065"/>
+      <stop offset="55%" stop-color="#6b21a8"/>
+      <stop offset="100%" stop-color="#4c1d95"/>
+    </linearGradient>
+    <linearGradient id="curtainR" x1="1" y1="0" x2="0" y2="0">
+      <stop offset="0%" stop-color="#2e1065"/>
+      <stop offset="55%" stop-color="#6b21a8"/>
+      <stop offset="100%" stop-color="#4c1d95"/>
+    </linearGradient>
+    <linearGradient id="curtainFold" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#581c87" stop-opacity="0.9"/>
+      <stop offset="50%" stop-color="#a855f7" stop-opacity="0.35"/>
       <stop offset="100%" stop-color="#3b0764" stop-opacity="0.95"/>
     </linearGradient>
-    <linearGradient id="stage" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#1e1b4b"/>
-      <stop offset="100%" stop-color="#0f0a1a"/>
+    <linearGradient id="goldTrim" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fde68a"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+    <radialGradient id="spotlight" cx="50%" cy="32%" r="48%">
+      <stop offset="0%" stop-color="#fef3c7" stop-opacity="0.42"/>
+      <stop offset="35%" stop-color="#fbbf24" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#0a0612" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1c1917" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#0c0a09" stop-opacity="0.95"/>
     </linearGradient>
   </defs>
-  <rect width="1920" height="1080" fill="url(#stage)"/>
-  <rect width="1920" height="1080" fill="url(#curt)"/>
-  <rect width="1920" height="1080" fill="url(#spot)"/>
-  <path d="M0 720 Q960 640 1920 720 L1920 1080 L0 1080 Z" fill="#0a0612" opacity="0.7"/>
-  <ellipse cx="960" cy="720" rx="640" ry="50" fill="#f59e0b" opacity="0.15"/>
-  <rect x="860" y="0" width="200" height="1080" fill="#fbbf24" opacity="0.04"/>
-  <circle cx="960" cy="360" r="3" fill="#fde68a" opacity="0.9"/>
+
+  <rect width="1920" height="1080" fill="url(#stageBg)"/>
+  <rect width="1920" height="1080" fill="url(#spotlight)"/>
+
+  <!-- Linker gordijn -->
+  <path fill="url(#curtainL)" d="M0 0 H420 V1080 H0 Z"/>
+  <path fill="url(#curtainFold)" opacity="0.55" d="M0 0 H95 V1080 H0 Z"/>
+  <path fill="#3b0764" opacity="0.45" d="M95 0 H170 V1080 H95 Z"/>
+  <path fill="url(#curtainFold)" opacity="0.4" d="M170 0 H250 V1080 H170 Z"/>
+  <path fill="#581c87" opacity="0.35" d="M250 0 H330 V1080 H250 Z"/>
+  <path fill="url(#curtainFold)" opacity="0.5" d="M330 0 H420 V1080 H330 Z"/>
+  <!-- Gordijnplooi rand -->
+  <path fill="none" stroke="#c084fc" stroke-opacity="0.25" stroke-width="2" d="M95 0 V1080 M170 0 V1080 M250 0 V1080 M330 0 V1080"/>
+
+  <!-- Rechter gordijn -->
+  <path fill="url(#curtainR)" d="M1500 0 H1920 V1080 H1500 Z"/>
+  <path fill="url(#curtainFold)" opacity="0.55" d="M1825 0 H1920 V1080 H1825 Z"/>
+  <path fill="#3b0764" opacity="0.45" d="M1750 0 H1825 V1080 H1750 Z"/>
+  <path fill="url(#curtainFold)" opacity="0.4" d="M1670 0 H1750 V1080 H1670 Z"/>
+  <path fill="#581c87" opacity="0.35" d="M1590 0 H1670 V1080 H1590 Z"/>
+  <path fill="url(#curtainFold)" opacity="0.5" d="M1500 0 H1590 V1080 H1500 Z"/>
+  <path fill="none" stroke="#c084fc" stroke-opacity="0.25" stroke-width="2" d="M1825 0 V1080 M1750 0 V1080 M1670 0 V1080 M1590 0 V1080"/>
+
+  <!-- Gouden gordijnroede + kwastjes -->
+  <rect x="0" y="0" width="1920" height="28" fill="url(#goldTrim)"/>
+  <rect x="0" y="24" width="1920" height="6" fill="#92400e" opacity="0.6"/>
+  <circle cx="48" cy="14" r="10" fill="#fbbf24" opacity="0.85"/>
+  <circle cx="96" cy="14" r="10" fill="#f59e0b" opacity="0.75"/>
+  <circle cx="1824" cy="14" r="10" fill="#fbbf24" opacity="0.85"/>
+  <circle cx="1872" cy="14" r="10" fill="#f59e0b" opacity="0.75"/>
+
+  <!-- Podium vloer -->
+  <path d="M0 760 Q960 680 1920 760 L1920 1080 L0 1080 Z" fill="url(#floor)"/>
+  <ellipse cx="960" cy="760" rx="720" ry="55" fill="#f59e0b" opacity="0.22"/>
+  <ellipse cx="960" cy="760" rx="480" ry="28" fill="#fde68a" opacity="0.12"/>
+
+  <!-- Spotlight straal -->
+  <path d="M860 0 L1060 0 L1120 680 L800 680 Z" fill="#fbbf24" opacity="0.06"/>
 </svg>

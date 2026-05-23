@@ -31,7 +31,7 @@ html.start-screen-active body {
   inset: 0;
   z-index: 1;
   pointer-events: none;
-  background: linear-gradient(180deg, rgba(15, 10, 26, 0.25) 0%, transparent 28%, rgba(15, 10, 26, 0.35) 100%);
+  background: linear-gradient(180deg, rgba(15, 10, 26, 0.08) 0%, transparent 30%, rgba(15, 10, 26, 0.15) 100%);
 }
 
 .screen-start .start-scene {
