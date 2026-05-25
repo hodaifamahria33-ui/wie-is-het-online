@@ -3793,18 +3793,30 @@
       }
       if (gameCountdown) {
         gameCountdown.classList.add("hidden");
-        gameCountdown.style.display = "";
+        gameCountdown.style.display = "none";
       }
       refreshActiveCardNames();
       buildGameBoards();
-      if (gameTable) gameTable.classList.remove("hidden");
+      if (gameTable) {
+        gameTable.classList.remove("hidden");
+        gameTable.style.visibility = "visible";
+        gameTable.style.opacity = "1";
+      }
       if (screenGame) {
         screenGame.classList.remove("hidden");
         screenGame.classList.add("game-session-active");
       }
-      syncPlayCardNames();
+      try {
+        syncPlayCardNames();
+      } catch (err) {
+        console.warn("syncPlayCardNames finish", err);
+      }
       if (window.WieIsHetPlay) {
-        WieIsHetPlay.wireBoards();
+        try {
+          WieIsHetPlay.wireBoards();
+        } catch (err) {
+          console.warn("wireBoards finish", err);
+        }
         try {
           WieIsHetPlay.beginPickSecretPhase();
         } catch (err) {
@@ -3814,8 +3826,12 @@
             banner.textContent = t("phasePickSecret");
             banner.classList.remove("hidden");
           }
-          if (screenGame) screenGame.classList.add("phase-pick-secret", "turn-player");
+          if (screenGame) {
+            screenGame.classList.add("phase-pick-secret", "turn-player");
+          }
         }
+      } else if (screenGame) {
+        screenGame.classList.add("phase-pick-secret", "turn-player");
       }
       const stack = document.querySelector("#game-table .board-stack");
       if (stack) stack.style.transform = "";
@@ -4042,8 +4058,10 @@
       isRankedGame = false;
       sessionMode = "solo";
       sessionCode = "";
+      const isDaily =
+        window.WieGameFeatures && WieGameFeatures.getCardMode() === "daily";
       if (window.WieGameFeatures) {
-        if (WieGameFeatures.getCardMode() !== "daily") WieGameFeatures.setCardMode("full");
+        if (!isDaily) WieGameFeatures.setCardMode("full");
         WieGameFeatures.recordBotGamePlayed();
       }
       try {
@@ -4054,11 +4072,20 @@
       if (window.WieIsHetPlay) WieIsHetPlay.hideEndOverlay();
       resetGameScreen();
       busy = false;
-      transition(screenBotDiff, screenGame, "transition-in-from-right");
-      setTimeout(() => {
-        startGameSession();
-        startingGame = false;
-      }, TRANSITION_MS + 50);
+      showGameScreen();
+      try {
+        startGameSession({ skipCountdown: isDaily, skipTutorial: isDaily });
+      } catch (err) {
+        console.error("startBotGame", err);
+        try {
+          refreshActiveCardNames();
+          buildGameBoards();
+          finishCountdownStartPlay();
+        } catch (err2) {
+          console.error("startBotGame fallback", err2);
+        }
+      }
+      startingGame = false;
     }
 
     function startSoloGame(difficulty) {
@@ -4169,7 +4196,8 @@
       });
     }
 
-    function startGameSession() {
+    function startGameSession(opts) {
+      opts = opts || {};
       clearCountdown();
       if (sessionKickoffGuard) {
         clearTimeout(sessionKickoffGuard);
@@ -4177,44 +4205,68 @@
       }
       refreshActiveCardNames();
       buildGameBoards();
-      syncPlayCardNames();
+      try {
+        syncPlayCardNames();
+      } catch (err) {
+        console.warn("syncPlayCardNames", err);
+      }
       if (window.WieIsHetPlay) {
         try {
           WieIsHetPlay.reset();
         } catch (err) {
           console.warn("play reset", err);
         }
-        WieIsHetPlay.wireBoards();
+        try {
+          WieIsHetPlay.wireBoards();
+        } catch (err) {
+          console.warn("wireBoards", err);
+        }
       }
-      if (screenGame) screenGame.classList.remove("hidden");
+      if (screenGame) {
+        screenGame.classList.remove("hidden");
+        screenGame.classList.add("game-session-active");
+      }
       if (gameTable) gameTable.classList.add("hidden");
       if (gameCountdown) {
         gameCountdown.classList.remove("hidden");
         gameCountdown.style.display = "flex";
+        gameCountdown.style.visibility = "visible";
+        gameCountdown.style.opacity = "1";
       }
       if (window.WieOrientationLock) WieOrientationLock.refresh();
+
       function beginPlayKickoff() {
         if (window.WieOrientationLock) WieOrientationLock.refresh();
+        if (opts.skipCountdown) {
+          finishCountdownStartPlay();
+          return;
+        }
         if (gameCountdown) {
           gameCountdown.classList.remove("hidden");
           gameCountdown.style.display = "flex";
         }
         runCountdownThenTable();
       }
+
       function afterTutorial() {
         beginPlayKickoff();
       }
-      if (window.WieGameFeatures && WieGameFeatures.shouldShowTutorial()) {
+
+      if (opts.skipTutorial) {
+        beginPlayKickoff();
+      } else if (window.WieGameFeatures && WieGameFeatures.shouldShowTutorial()) {
         WieGameFeatures.maybeShowTutorial(afterTutorial);
       } else {
         afterTutorial();
       }
+
+      const kickMs = opts.skipCountdown ? 2500 : 14000;
       sessionKickoffGuard = window.setTimeout(function () {
         if (!screenGame || screenGame.classList.contains("hidden")) return;
         if (gameTable && !gameTable.classList.contains("hidden")) return;
         console.warn("wie: spel-start fallback");
         finishCountdownStartPlay();
-      }, 14000);
+      }, kickMs);
     }
 
     function returnToLobbyFromGame() {
