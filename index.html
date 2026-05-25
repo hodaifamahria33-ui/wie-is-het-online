@@ -51,13 +51,13 @@
   <link rel="stylesheet" href="assets/game/lobby-screen.css?v=1" />
   <link rel="stylesheet" href="assets/game/code-screen.css?v=3" />
   <link rel="stylesheet" href="assets/game/premium-game.css?v=47" />
-  <link rel="stylesheet" href="assets/game/game-drawers.css?v=47" />
+  <link rel="stylesheet" href="assets/game/game-drawers.css?v=48" />
   <link rel="stylesheet" href="assets/game/countdown-screen.css?v=2" />
   <link rel="stylesheet" href="assets/game/game-hud.css?v=44" />
   <link rel="stylesheet" href="assets/game/game-layout.css?v=56" />
   <link rel="stylesheet" href="assets/game/character-variety.css?v=55" />
-  <link rel="stylesheet" href="assets/game/game-extras.css?v=59" />
-  <link rel="stylesheet" href="assets/game/game-mobile.css?v=9" />
+  <link rel="stylesheet" href="assets/game/game-extras.css?v=60" />
+  <link rel="stylesheet" href="assets/game/game-mobile.css?v=10" />
   <link rel="stylesheet" href="assets/game/orientation-lock.css?v=6" />
   <link rel="stylesheet" href="assets/game/answer-coach.css?v=1" />
   <link rel="stylesheet" href="assets/game/rank-ui.css?v=6" />
@@ -2432,6 +2432,7 @@
             </div>
             <div class="player-play-area">
               <button type="button" class="opponent-chest" id="opponent-chest" aria-label="Tik om te raden" data-i18n-aria="chestHint">
+                <span class="side-dock-label side-dock-label--guess" data-i18n="sideDockGuess">Raad!</span>
                 <div class="chest-visual">
                   <img
                     class="chest-avatar"
@@ -2483,6 +2484,7 @@
     <button id="btn-give-up" class="btn-give-up" type="button" data-i18n="btnGiveUp" onclick="window.wieGiveUpClick(event)">OPGEVEN</button>
 
     <aside id="secret-card-slot" class="secret-card-slot" aria-label="Jouw geheim personage">
+      <span class="side-dock-label side-dock-label--secret" data-i18n="sideDockYourSecret">Jouw geheim</span>
       <div class="secret-card-pedestal" aria-hidden="true"></div>
     </aside>
 
@@ -2831,6 +2833,8 @@
         opponentGaveUpSub: "Oke",
         chestLabel: "Tegenstander",
         chestHint: "Tik om te raden",
+        sideDockYourSecret: "Jouw geheim",
+        sideDockGuess: "Raad!",
         btnPlayAgain: "Opnieuw spelen",
         btnGoToMenu: "Naar menu",
         giveUpTitle: "Opgeven?",
@@ -3086,6 +3090,8 @@
         opponentGaveUpSub: "OK",
         chestLabel: "Opponent",
         chestHint: "Tap to guess",
+        sideDockYourSecret: "Your secret",
+        sideDockGuess: "Guess!",
         btnPlayAgain: "Play again",
         btnGoToMenu: "Go to menu",
         giveUpTitle: "Give up?",
