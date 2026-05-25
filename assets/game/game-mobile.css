@@ -2,6 +2,30 @@
  * Mobiel / smalle schermen — leesbaar bord, geen overlap.
  */
 
+/* iOS/Safari: geen automatische zoom bij focus (inputs min. 16px) */
+@media (max-width: 900px), ((hover: none) or (pointer: coarse)) {
+  .question-input,
+  .name-input,
+  .code-input,
+  .lobby-chat-input,
+  input[type="text"],
+  input[type="search"],
+  input[type="email"],
+  input[type="tel"],
+  textarea,
+  select {
+    font-size: 16px !important;
+    touch-action: manipulation;
+  }
+
+  .question-input:focus,
+  .name-input:focus,
+  .code-input:focus,
+  .lobby-chat-input:focus {
+    font-size: 16px !important;
+  }
+}
+
 .screen-game-view,
 #game-table,
 #game-table .game-scene {
@@ -773,8 +797,8 @@ html.wie-phone-landscape-game .question-input-row {
 }
 
 html.wie-phone-landscape-game .question-input {
-  font-size: 0.72rem;
-  padding: 0.38rem 0.5rem;
+  font-size: 16px !important;
+  padding: 0.45rem 0.55rem;
 }
 
 html.wie-phone-landscape-game .btn-send-question {
