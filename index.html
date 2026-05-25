@@ -608,14 +608,18 @@
       var err = document.getElementById("join-error");
       if (err) err.textContent = "";
     };
-    window.wieStartBotGame = function (difficulty) {
+    window.wieStartBotGame = function (difficulty, ev) {
+      if (ev && ev.preventDefault) ev.preventDefault();
+      if (ev && ev.stopPropagation) ev.stopPropagation();
       var d = difficulty || "medium";
-      if (window.wieApp && window.wieApp.startBotGame) return window.wieApp.startBotGame(d);
-      var tries = 0;
-      (function waitApp() {
-        if (window.wieApp && window.wieApp.startBotGame) return window.wieApp.startBotGame(d);
-        if (++tries < 80) setTimeout(waitApp, 40);
-      })();
+      try {
+        if (window.wieApp && window.wieApp.startBotGame) {
+          return window.wieApp.startBotGame(d);
+        }
+      } catch (err) {
+        console.error("wieStartBotGame", err);
+      }
+      if (window.wieShowScreen) window.wieShowScreen("screen-bot-diff", "screen-game");
     };
     window.wieMakePot = function () {
       if (window.wieApp && window.wieApp.enterHostLobby) return window.wieApp.enterHostLobby();
@@ -2228,9 +2232,9 @@
       <h2 data-i18n-html="botDiffTitle">Kies je <span class="mode-accent">niveau</span></h2>
       <p class="mode-sub" data-i18n="botDiffSub">Hoe slim moet de tegenstander zijn?</p>
       <p id="bot-diff-daily-note" class="mode-sub mode-daily-note hidden" aria-live="polite"></p>
-      <button id="btn-bot-easy" class="btn mode-btn mode-btn--easy" type="button" data-i18n="btnEasy" onclick="window.wieStartBotGame('easy')">Makkelijk</button>
-      <button id="btn-bot-medium" class="btn mode-btn mode-btn--medium" type="button" data-i18n="btnMedium" onclick="window.wieStartBotGame('medium')">Gemiddeld</button>
-      <button id="btn-bot-hard" class="btn mode-btn mode-btn--hard" type="button" data-i18n="btnHard" onclick="window.wieStartBotGame('hard')">Moeilijk</button>
+      <button id="btn-bot-easy" class="btn mode-btn mode-btn--easy" type="button" data-i18n="btnEasy" onclick="window.wieStartBotGame('easy', event)">Makkelijk</button>
+      <button id="btn-bot-medium" class="btn mode-btn mode-btn--medium" type="button" data-i18n="btnMedium" onclick="window.wieStartBotGame('medium', event)">Gemiddeld</button>
+      <button id="btn-bot-hard" class="btn mode-btn mode-btn--hard" type="button" data-i18n="btnHard" onclick="window.wieStartBotGame('hard', event)">Moeilijk</button>
       <button id="btn-bot-back" class="btn mode-btn-back back" type="button" data-i18n="btnBack" onclick="window.wieShowScreen('screen-bot-diff','screen-mode')">Terug</button>
     </section>
   </main>
@@ -4052,40 +4056,47 @@
     }
 
     function startBotGame(difficulty) {
-      if (startingGame) return;
-      startingGame = true;
+      startingGame = false;
+      busy = false;
       botDifficulty = difficulty || "medium";
       isRankedGame = false;
       sessionMode = "solo";
       sessionCode = "";
       const isDaily =
         window.WieGameFeatures && WieGameFeatures.getCardMode() === "daily";
-      if (window.WieGameFeatures) {
-        if (!isDaily) WieGameFeatures.setCardMode("full");
-        WieGameFeatures.recordBotGamePlayed();
+      try {
+        if (window.WieGameFeatures) {
+          if (!isDaily) WieGameFeatures.setCardMode("full");
+          WieGameFeatures.recordBotGamePlayed();
+        }
+      } catch (err) {
+        console.warn("daily/bot setup", err);
       }
       try {
         leaveOnlineSession();
       } catch (err) {
         console.warn("leave online", err);
       }
-      if (window.WieIsHetPlay) WieIsHetPlay.hideEndOverlay();
-      resetGameScreen();
-      busy = false;
-      showGameScreen();
-      try {
-        startGameSession({ skipCountdown: isDaily, skipTutorial: isDaily });
-      } catch (err) {
-        console.error("startBotGame", err);
-        try {
-          refreshActiveCardNames();
-          buildGameBoards();
-          finishCountdownStartPlay();
-        } catch (err2) {
-          console.error("startBotGame fallback", err2);
-        }
+      if (window.WieIsHetPlay && WieIsHetPlay.hideEndOverlay) {
+        WieIsHetPlay.hideEndOverlay();
       }
-      startingGame = false;
+      resetGameScreen();
+      showGameScreen();
+      document.documentElement.classList.remove("app-booting");
+      window.setTimeout(function () {
+        try {
+          startGameSession({ skipCountdown: isDaily, skipTutorial: isDaily });
+        } catch (err) {
+          console.error("startBotGame", err);
+          try {
+            refreshActiveCardNames();
+            buildGameBoards();
+            finishCountdownStartPlay();
+          } catch (err2) {
+            console.error("startBotGame fallback", err2);
+          }
+        }
+      }, 0);
     }
 
     function startSoloGame(difficulty) {
@@ -5080,6 +5091,9 @@
     });
 
     onClick("btn-play-bot", goToBotDiffScreen);
+    onClick("btn-bot-easy", () => startBotGame("easy"));
+    onClick("btn-bot-medium", () => startBotGame("medium"));
+    onClick("btn-bot-hard", () => startBotGame("hard"));
 
     onClick("btn-play-ranked", goToRankedScreen);
 
