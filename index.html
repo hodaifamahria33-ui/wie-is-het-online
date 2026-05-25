@@ -51,7 +51,7 @@
   <link rel="stylesheet" href="assets/game/joined-screen.css?v=5" />
   <link rel="stylesheet" href="assets/game/lobby-screen.css?v=1" />
   <link rel="stylesheet" href="assets/game/code-screen.css?v=3" />
-  <link rel="stylesheet" href="assets/game/premium-game.css?v=47" />
+  <link rel="stylesheet" href="assets/game/premium-game.css?v=48" />
   <link rel="stylesheet" href="assets/game/game-drawers.css?v=48" />
   <link rel="stylesheet" href="assets/game/countdown-screen.css?v=2" />
   <link rel="stylesheet" href="assets/game/game-hud.css?v=44" />
@@ -1970,11 +1970,16 @@
       transform: scale(1.03);
     }
 
-    .lang-picker {
+    /* Taalkiezer alleen op beginscherm (zit in #screen-start) */
+    .screen-start .lang-picker {
       position: fixed;
       top: max(14px, env(safe-area-inset-top));
       right: max(14px, env(safe-area-inset-right));
       z-index: 400;
+    }
+
+    .screen-start.hidden .lang-picker {
+      display: none !important;
     }
 
     .lang-globe {
@@ -2054,16 +2059,15 @@
     </div>
   </main>
 
-  <div class="lang-picker">
-    <button id="btn-lang" class="lang-globe" type="button" aria-label="Taal kiezen" aria-expanded="false" aria-haspopup="true">🌍</button>
-    <div id="lang-menu" class="lang-menu hidden" role="menu">
-      <button type="button" class="lang-option" data-lang="nl" role="menuitem">Nederlands</button>
-      <button type="button" class="lang-option" data-lang="en" role="menuitem">English</button>
-    </div>
-  </div>
-
   <!-- Scherm 1: beginscherm -->
   <main id="screen-start" class="screen screen-start">
+    <div class="lang-picker" aria-hidden="false">
+      <button id="btn-lang" class="lang-globe" type="button" aria-label="Taal kiezen" aria-expanded="false" aria-haspopup="true">🌍</button>
+      <div id="lang-menu" class="lang-menu hidden" role="menu">
+        <button type="button" class="lang-option" data-lang="nl" role="menuitem">Nederlands</button>
+        <button type="button" class="lang-option" data-lang="en" role="menuitem">English</button>
+      </div>
+    </div>
     <img
       id="start-bg-photo"
       class="start-bg-photo"
@@ -3572,9 +3576,17 @@
     }
 
     /** Direct schermwissel — geen animatie (voorkomt freeze op mobiel). */
+    function closeLangMenu() {
+      const langMenu = document.getElementById("lang-menu");
+      const langBtn = document.getElementById("btn-lang");
+      if (langMenu) langMenu.classList.add("hidden");
+      if (langBtn) langBtn.setAttribute("aria-expanded", "false");
+    }
+
     function showScreenNow(from, to) {
       if (!to) return;
       busy = false;
+      if (to !== screenStart) closeLangMenu();
       document.querySelectorAll("main.screen").forEach((el) => {
         el.classList.remove(
           "transition-out",
