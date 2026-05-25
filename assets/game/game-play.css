@@ -200,11 +200,28 @@
     0 0 16px rgba(255, 255, 255, 0.35);
 }
 
-/* Gekozen geheim: niet meer op het bord (alleen in het vak rechts) */
+/* Gekozen geheim: verborgen op bord (staat rechts), behalve tijdens raden */
 #player-board .card-well.picked-secret {
   opacity: 0 !important;
   visibility: hidden !important;
   pointer-events: none !important;
+}
+
+.screen-game-view.phase-guess #player-board .card-well.picked-secret {
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+}
+
+.screen-game-view.phase-guess #player-board .card-well.picked-secret .card-tile {
+  transform: rotateX(-13deg) !important;
+}
+
+.screen-game-view.phase-guess #player-board .card-well.picked-secret.guess-mode {
+  outline: 3px solid rgba(250, 204, 21, 0.9);
+  outline-offset: 2px;
+  border-radius: 12px;
+  z-index: 3;
 }
 
 .card-well.opponent-secret-revealed .card-tile.revealed-secret .card-face {

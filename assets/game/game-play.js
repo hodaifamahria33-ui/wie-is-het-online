@@ -742,7 +742,7 @@
 
   function showQuestionPanel(mode) {
     if (mode === "ask") {
-      clearInteractivity();
+      enableMyFlips();
       if (opponentChest) opponentChest.classList.add("chest-guess-ready");
       showQuestionDrawer();
       return;
@@ -1253,6 +1253,7 @@
     state.askedThisTurn = false;
     setScreenTurn("my");
     wireQuestionDrawer();
+    enableMyFlips();
     window.setTimeout(() => showQuestionPanel("ask"), 80);
     if (!state.online && window.WieGameFeatures) {
       WieGameFeatures.showBotTip("ask");
@@ -1314,6 +1315,28 @@
     return state.phase === PHASE.MY_TURN;
   }
 
+  function isGuessIndexCorrect(index) {
+    if (typeof index !== "number" || index < 0) return false;
+    const guessName = getSecretName(index);
+    if (!guessName) return false;
+    if (typeof state.opponentSecretIndex !== "number") return false;
+    if (index === state.opponentSecretIndex) return true;
+    const oppName = getSecretName(state.opponentSecretIndex);
+    return Boolean(oppName && oppName === guessName);
+  }
+
+  function enableGuessModeWells() {
+    state.playerWells.forEach((w) => {
+      const tile = w.querySelector(".card-tile");
+      const canTap =
+        tile &&
+        (!tile.classList.contains("is-down") || w.classList.contains("picked-secret"));
+      if (canTap) {
+        w.classList.add("guess-mode", "interactive");
+      }
+    });
+  }
+
   function beginGuessMode() {
     if (!canGuessNow()) return;
     hideQuestionPanel();
@@ -1325,14 +1348,8 @@
     if (window.WieDailyMissions && WieDailyMissions.onGuessPhaseStart) {
       WieDailyMissions.onGuessPhaseStart();
     }
-    clearInteractivity();
     setBanner(tFn("guessPrompt"));
-    state.playerWells.forEach((w, i) => {
-      const tile = w.querySelector(".card-tile");
-      if (tile && !tile.classList.contains("is-down")) {
-        w.classList.add("guess-mode", "interactive");
-      }
-    });
+    enableGuessModeWells();
   }
 
   function showEndActions() {
@@ -1426,12 +1443,7 @@
         showPostAnswerPanel("free");
         break;
       case PHASE.GUESS:
-        state.playerWells.forEach((w) => {
-          const tile = w.querySelector(".card-tile");
-          if (tile && !tile.classList.contains("is-down")) {
-            w.classList.add("guess-mode", "interactive");
-          }
-        });
+        enableGuessModeWells();
         break;
       case PHASE.THEIR_TURN:
         if (opponentZone) opponentZone.classList.add("turn-active");
@@ -1646,7 +1658,7 @@
       return;
     }
 
-    if (index === state.opponentSecretIndex) {
+    if (isGuessIndexCorrect(index)) {
       showWin();
     } else {
       finishOnlineWrongGuess(state.opponentSecretIndex);
