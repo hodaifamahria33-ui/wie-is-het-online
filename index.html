@@ -610,17 +610,15 @@
       if (err) err.textContent = "";
     };
     window.wieStartBotGame = function (difficulty, ev) {
-      if (ev && ev.preventDefault) ev.preventDefault();
-      if (ev && ev.stopPropagation) ev.stopPropagation();
-      var d = difficulty || "medium";
-      try {
-        if (window.wieApp && window.wieApp.startBotGame) {
-          return window.wieApp.startBotGame(d);
-        }
-      } catch (err) {
-        console.error("wieStartBotGame", err);
+      if (ev) {
+        if (ev.preventDefault) ev.preventDefault();
+        if (ev.stopPropagation) ev.stopPropagation();
+      }
+      if (typeof window.wieBootSolo === "function") {
+        return window.wieBootSolo(difficulty || "medium");
       }
       if (window.wieShowScreen) window.wieShowScreen("screen-bot-diff", "screen-game");
+      return false;
     };
     window.wieMakePot = function () {
       if (window.wieApp && window.wieApp.enterHostLobby) return window.wieApp.enterHostLobby();
@@ -2693,6 +2691,7 @@
   <script src="assets/game/game-sounds.js?v=1"></script>
   <script src="assets/game/game-features.js?v=4"></script>
   <script src="assets/game/game-play.js?v=67"></script>
+  <script src="assets/game/solo-start.js?v=1"></script>
 
   <script>
     const I18N = {
@@ -4198,18 +4197,16 @@
       }, 350);
     }
 
-    let lastBotStartMs = 0;
-
-    function startBotGame(difficulty) {
-      const now = Date.now();
-      if (now - lastBotStartMs < 500) return;
-      lastBotStartMs = now;
+    window.__wieApplySoloStart = function (difficulty, names) {
       startingGame = false;
       busy = false;
       botDifficulty = difficulty || "medium";
       isRankedGame = false;
       sessionMode = "solo";
       sessionCode = "";
+      if (Array.isArray(names) && names.length) {
+        CARD_NAMES = names.slice();
+      }
       const isDaily =
         window.WieGameFeatures && WieGameFeatures.getCardMode() === "daily";
       try {
@@ -4219,11 +4216,6 @@
         }
       } catch (err) {
         console.warn("daily/bot setup", err);
-      }
-      try {
-        leaveOnlineSession();
-      } catch (err) {
-        console.warn("leave online", err);
       }
       clearCountdown();
       if (sessionKickoffGuard) {
@@ -4238,19 +4230,36 @@
       } catch (err) {
         console.warn("play reset", err);
       }
+      refreshActiveCardNames();
+      try {
+        syncPlayCardNames();
+      } catch (err) {
+        console.warn("syncPlayCardNames solo", err);
+      }
+      beginSoloPickPhase();
+      applyLanguage();
+      window.setTimeout(function () {
+        try {
+          leaveOnlineSession();
+        } catch (err) {
+          console.warn("leave online", err);
+        }
+      }, 0);
+    };
+
+    function startBotGame(difficulty) {
+      if (typeof window.wieBootSolo === "function") {
+        return window.wieBootSolo(difficulty || "medium");
+      }
+      startingGame = false;
+      busy = false;
+      botDifficulty = difficulty || "medium";
       showGameScreen();
       document.documentElement.classList.remove("app-booting");
       try {
-        launchBotGameNow(isDaily);
+        launchBotGameNow(false);
       } catch (err) {
         console.error("startBotGame", err);
-        try {
-          ensureBoardBuilt();
-          forceShowGameBoard();
-          beginSoloPickPhase();
-        } catch (err2) {
-          console.error("startBotGame fallback", err2);
-        }
       }
     }
 
@@ -4346,6 +4355,7 @@
 
     function showGameScreen() {
       busy = false;
+      document.documentElement.classList.remove("app-booting");
       if (window.WieOrientationLock) WieOrientationLock.refresh();
       document.querySelectorAll("main.screen").forEach((el) => {
         el.classList.remove(
@@ -4356,6 +4366,8 @@
         );
         if (el === screenGame) {
           el.classList.remove("hidden");
+          el.style.visibility = "visible";
+          el.style.display = "block";
         } else {
           el.classList.add("hidden");
         }
