@@ -500,16 +500,14 @@ html.wie-phone-landscape-game .screen-game-view.phase-pick-secret #game-table .o
   pointer-events: none !important;
 }
 
-/* Linker dock: grote raad-kist boven OPGEVEN */
+/* Linker dock: grote raad-kist links midden (OPGEVEN blijft linksonder) */
 html.wie-phone-landscape-game #game-table .opponent-chest {
   position: fixed !important;
   left: max(6px, env(safe-area-inset-left)) !important;
   right: auto !important;
-  top: auto !important;
-  bottom: calc(
-    max(6px, env(safe-area-inset-bottom)) + var(--landscape-give-up-h) + 10px
-  ) !important;
-  transform: none !important;
+  top: 50% !important;
+  bottom: auto !important;
+  transform: translateY(-50%) !important;
   width: var(--landscape-chest-w) !important;
   z-index: 37 !important;
   margin: 0 !important;
