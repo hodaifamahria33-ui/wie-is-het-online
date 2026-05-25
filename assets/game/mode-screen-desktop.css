@@ -1,0 +1,185 @@
+/**
+ * Modus-/menu-schermen: volledige breedte op PC (muis).
+ * Telefoon/tablet touch blijft ongewijzigd (max-width + geen fine pointer).
+ */
+@media (min-width: 1025px) and (hover: hover) and (pointer: fine) {
+  .screen-mode-view.screen,
+  .screen-menu-view.screen,
+  .screen-name-view.screen,
+  .screen-daily-missions-view.screen,
+  .screen-support-view.screen {
+    align-items: center;
+    justify-content: center;
+    min-height: 100dvh;
+    min-height: 100vh;
+    width: 100%;
+    padding:
+      max(28px, env(safe-area-inset-top, 0px) + 16px)
+      max(48px, env(safe-area-inset-right, 0px) + 32px)
+      max(28px, env(safe-area-inset-bottom, 0px) + 16px)
+      max(48px, env(safe-area-inset-left, 0px) + 32px);
+    box-sizing: border-box;
+  }
+
+  .screen-mode-view .mode-overlay,
+  .screen-menu-view .mode-overlay {
+    background:
+      radial-gradient(ellipse 90% 55% at 50% 40%, rgba(30, 27, 75, 0.45) 0%, transparent 72%),
+      linear-gradient(
+        180deg,
+        rgba(15, 23, 42, 0.5) 0%,
+        transparent 28%,
+        transparent 72%,
+        rgba(15, 23, 42, 0.65) 100%
+      );
+  }
+
+  .screen-mode-view .mode-panel,
+  .screen-menu-view .mode-panel,
+  .screen-name-view .mode-panel,
+  .screen-daily-missions-view .mode-panel,
+  .screen-support-view .support-panel {
+    width: min(92vw, 1040px);
+    max-width: 1040px;
+    margin: auto;
+    padding: 2.25rem 2.75rem 2.5rem;
+    border-radius: 28px;
+  }
+
+  .screen-mode-view h2,
+  .screen-menu-view h2,
+  .screen-name-view h2,
+  .screen-daily-missions-view h2 {
+    font-size: clamp(2.25rem, 3.2vw, 3rem);
+    margin-bottom: 0.65rem;
+  }
+
+  .screen-mode-view .mode-sub,
+  .screen-menu-view .mode-sub,
+  .screen-name-view .mode-sub,
+  .screen-daily-missions-view .mode-sub {
+    margin-bottom: 1.5rem;
+    font-size: 1.05rem;
+  }
+
+  .screen-mode-view .mode-rank-badge,
+  .screen-mode-view .mode-stats-line {
+    font-size: 0.95rem;
+    margin-bottom: 0.65rem;
+  }
+
+  /* 4 modi: 2×2 raster over volle paneelbreedte */
+  .screen-mode-view .mode-choices {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .screen-mode-view .mode-choice {
+    padding: 1.15rem 1.25rem;
+    min-height: 5.5rem;
+  }
+
+  .screen-mode-view .mode-choice-icon {
+    width: 3.25rem;
+    height: 3.25rem;
+    font-size: 1.65rem;
+  }
+
+  .screen-mode-view .mode-choice-label {
+    font-size: 1.12rem;
+  }
+
+  .screen-mode-view .mode-choice-desc {
+    font-size: 0.92rem;
+  }
+
+  .screen-mode-view .mode-link-support {
+    grid-column: 1 / -1;
+    margin-top: 0.35rem;
+    font-size: 1rem;
+  }
+
+  .screen-mode-view .mode-btn-back {
+    margin-top: 1.25rem;
+    font-size: 0.9rem;
+    padding: 0.75rem 1.5rem;
+  }
+
+  /* Online-menu: knoppen naast elkaar */
+  .screen-menu-view .mode-panel .mode-btn--online,
+  .screen-menu-view .mode-panel .mode-btn--bot {
+    display: inline-block;
+    width: calc(50% - 0.4rem);
+    vertical-align: top;
+  }
+
+  .screen-menu-view .mode-panel {
+    text-align: center;
+  }
+
+  .screen-menu-view .mode-panel > .mode-btn--online {
+    margin-right: 0.5rem;
+  }
+
+  /* Bot-moeilijkheid: 3 knoppen in één rij */
+  #screen-bot-diff .mode-panel .mode-btn--easy,
+  #screen-bot-diff .mode-panel .mode-btn--medium,
+  #screen-bot-diff .mode-panel .mode-btn--hard {
+    display: inline-block;
+    width: calc(33.333% - 0.5rem);
+    margin-top: 0.65rem;
+    vertical-align: top;
+  }
+
+  #screen-bot-diff .mode-panel {
+    width: min(88vw, 720px);
+    max-width: 720px;
+  }
+
+  /* Daily challenges: bredere kaarten */
+  .screen-daily-missions-view .mode-panel {
+    width: min(88vw, 720px);
+    max-width: 720px;
+  }
+
+  .daily-missions-list {
+    gap: 0.85rem;
+  }
+
+  .daily-mission-card {
+    padding: 1rem 1.15rem;
+  }
+
+  .screen-name-view .mode-panel {
+    width: min(50vw, 520px);
+    max-width: 520px;
+  }
+
+  .screen-name-view .name-input {
+    font-size: 1.25rem;
+    padding: 1.1rem 1.15rem;
+  }
+
+  .screen-mode-view .mode-screen-back-top {
+    top: max(20px, env(safe-area-inset-top, 0px) + 12px);
+    left: max(28px, env(safe-area-inset-left, 0px) + 20px);
+    font-size: 0.88rem;
+    padding: 0.6rem 1.15rem 0.65rem;
+  }
+}
+
+/* Grote desktops */
+@media (min-width: 1400px) and (hover: hover) and (pointer: fine) {
+  .screen-mode-view .mode-panel,
+  .screen-menu-view .mode-panel {
+    width: min(88vw, 1120px);
+    max-width: 1120px;
+    padding: 2.5rem 3.25rem 2.75rem;
+  }
+
+  .screen-mode-view .mode-choices {
+    gap: 1.15rem;
+  }
+}
