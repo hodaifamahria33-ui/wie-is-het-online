@@ -771,6 +771,9 @@
     broadcastGameStart() {
       return send({ type: "gameStart" });
     },
+    broadcastReturnLobby() {
+      return send({ type: "returnLobby" });
+    },
     sendSecretReady() {
       return send({ type: "secretReady" });
     },

@@ -58,6 +58,7 @@
   <link rel="stylesheet" href="assets/game/character-variety.css?v=55" />
   <link rel="stylesheet" href="assets/game/game-extras.css?v=62" />
   <link rel="stylesheet" href="assets/game/game-mobile.css?v=16" />
+  <link rel="stylesheet" href="assets/game/game-features.css?v=1" />
   <link rel="stylesheet" href="assets/game/orientation-lock.css?v=7" />
   <link rel="stylesheet" href="assets/game/answer-coach.css?v=1" />
   <link rel="stylesheet" href="assets/game/rank-ui.css?v=6" />
@@ -275,9 +276,18 @@
         localStorage.setItem("wiePlayerName", name);
       } catch (e) {}
       if (err) err.textContent = "";
+      if (window.wiePendingQuickBot) {
+        window.wiePendingQuickBot = false;
+        if (window.WieGameFeatures) WieGameFeatures.setCardMode("full");
+        if (window.wieApp && window.wieApp.startBotGame) {
+          window.wieApp.startBotGame("easy");
+          return;
+        }
+      }
       var nameScreen = document.getElementById("screen-name");
       var mode = document.getElementById("screen-mode");
       if (!nameScreen || !mode) return;
+      if (window.WieGameFeatures) WieGameFeatures.updateModeStatsUI();
       document.querySelectorAll("main.screen").forEach(function (el) {
         if (el !== mode) el.classList.add("hidden");
       });
@@ -310,6 +320,7 @@
         window.wieGoBegin();
         return;
       }
+      if (window.WieGameFeatures) WieGameFeatures.setCardMode("full");
       window.wieShowScreen("screen-mode", "screen-bot-diff");
     };
     window.wieGoPlayRanked = function () {
@@ -317,8 +328,27 @@
         window.wieGoBegin();
         return;
       }
+      if (window.WieGameFeatures) WieGameFeatures.setCardMode("full");
       if (window.wieApp && window.wieApp.goRanked) return window.wieApp.goRanked();
       window.wieShowScreen("screen-mode", "screen-ranked");
+    };
+    window.wieQuickStartBot = function () {
+      if (window.WieSounds) WieSounds.unlock();
+      if (window.WieGameFeatures) WieGameFeatures.setCardMode("full");
+      if (!window.wieSavedName()) {
+        window.wiePendingQuickBot = true;
+        window.wieShowScreen("screen-start", "screen-name");
+        return;
+      }
+      if (window.wieApp && window.wieApp.startBotGame) window.wieApp.startBotGame("easy");
+    };
+    window.wieStartDaily = function () {
+      if (!window.wieSavedName()) {
+        window.wieGoBegin();
+        return;
+      }
+      if (window.WieGameFeatures) WieGameFeatures.setCardMode("daily");
+      window.wieShowScreen("screen-mode", "screen-bot-diff");
     };
     window.wieShowScreen = function (fromId, toId) {
       var from = document.getElementById(fromId);
@@ -2009,6 +2039,14 @@
             START
           </button>
           <p class="start-tagline" data-i18n="startTagline">Raad de verborgen persoon en ontdek wie jij bent!</p>
+          <button
+            type="button"
+            class="btn-start-quick"
+            data-i18n="btnQuickBot"
+            onclick="window.wieQuickStartBot()"
+          >
+            Snel proberen tegen bot 🤖
+          </button>
         </div>
         <nav class="start-support-bar start-support-bar--inline" aria-label="Steun en deel">
           <button type="button" class="start-support-btn" onclick="window.wieOpenSupport('screen-start')">
@@ -2073,6 +2111,7 @@
       <h2 data-i18n-html="modeTitle">Hoe wil je <span class="mode-accent">spelen</span>?</h2>
       <p class="mode-sub" data-i18n="modeSub">Kies één modus — daarna ga je verder</p>
       <p id="mode-rank-badge" class="mode-rank-badge hidden" aria-live="polite"></p>
+      <p id="mode-stats-line" class="mode-stats-line hidden" aria-live="polite"></p>
       <div class="mode-choices" role="group" aria-label="Spelmodus">
         <button id="btn-play-online" class="mode-choice mode-choice--online" type="button" onclick="window.wieGoPlayOnline()">
           <span class="mode-choice-icon" aria-hidden="true">🌐</span>
@@ -2093,6 +2132,13 @@
           <span class="mode-choice-text">
             <span class="mode-choice-label" data-i18n="btnPlayRanked">Ranked spel</span>
             <span class="mode-choice-desc" data-i18n="modeRankedDesc">Win ranked punten &amp; stijg in rank</span>
+          </span>
+        </button>
+        <button id="btn-daily-challenge" class="mode-choice mode-choice--daily" type="button" onclick="window.wieStartDaily()">
+          <span class="mode-choice-icon" aria-hidden="true">📅</span>
+          <span class="mode-choice-text">
+            <span class="mode-choice-label" data-i18n="btnDailyChallenge">Daily challenge</span>
+            <span class="mode-choice-desc" data-i18n="modeDailyDesc">16 personages — vandaag voor iedereen hetzelfde</span>
           </span>
         </button>
       </div>
@@ -2584,7 +2630,9 @@
   <script src="assets/game/answer-coach.js?v=1"></script>
   <script src="assets/game/stripe-donate.js?v=1"></script>
   <script src="assets/game/orientation-lock.js?v=10"></script>
-  <script src="assets/game/game-play.js?v=65"></script>
+  <script src="assets/game/game-sounds.js?v=1"></script>
+  <script src="assets/game/game-features.js?v=1"></script>
+  <script src="assets/game/game-play.js?v=66"></script>
 
   <script>
     const I18N = {
@@ -2612,6 +2660,25 @@
         btnPlayOnline: "Met vrienden",
         btnPlayBot: "Tegen de bot",
         btnPlayRanked: "Ranked spel",
+        btnDailyChallenge: "Daily challenge",
+        modeDailyDesc: "16 personages — vandaag hetzelfde bord voor iedereen",
+        btnQuickBot: "Snel proberen tegen bot 🤖",
+        modeStatsLine: "{wins} overwinningen · {losses} verloren · {played} potjes",
+        tutorialStep1Title: "Kies je geheim",
+        tutorialStep1Text: "Tik één kaart op jouw bord. De tegenstander weet niet wie jij bent.",
+        tutorialStep2Title: "Stel vragen",
+        tutorialStep2Text: "Stel ja/nee-vragen en draai kaarten weg die niet meer kunnen.",
+        tutorialStep3Title: "Raad!",
+        tutorialStep3Text: "Zeker? Tik de schatkist of een kaart om te raden. Goed = win!",
+        tutorialNext: "Volgende",
+        tutorialSkip: "Overslaan",
+        tutorialStart: "Start spel!",
+        botTipPick: "Tip: tik één personage als jouw geheim.",
+        botTipAsk: "Tip: stel een vraag, bv. “Is het een jongen?”",
+        botTipGuess: "Tip: zeker? Tik de schatkist links om te raden.",
+        lobbyEmotesLabel: "Snelle reacties",
+        soundToggleAria: "Geluid aan of uit",
+        btnPlayAgainLobby: "Nog een potje (lobby)",
         rankKicker: "Ranked modus",
         rankTitle: 'Stijg in <span class="mode-accent">rank</span>',
         rankStatWins: "W",
@@ -2835,7 +2902,7 @@
         chestHint: "Tik om te raden",
         sideDockYourSecret: "Jouw geheim",
         sideDockGuess: "Raad!",
-        btnPlayAgain: "Opnieuw spelen",
+        btnPlayAgain: "Nog een potje (lobby)",
         btnGoToMenu: "Naar menu",
         giveUpTitle: "Opgeven?",
         giveUpConfirm: "Wil je terug naar het menu?",
@@ -2869,6 +2936,25 @@
         btnPlayOnline: "With friends",
         btnPlayBot: "Vs bot",
         btnPlayRanked: "Ranked play",
+        btnDailyChallenge: "Daily challenge",
+        modeDailyDesc: "16 characters — same board for everyone today",
+        btnQuickBot: "Quick try vs bot 🤖",
+        modeStatsLine: "{wins} wins · {losses} losses · {played} games",
+        tutorialStep1Title: "Pick your secret",
+        tutorialStep1Text: "Tap one card on your board. Your opponent won't know who you picked.",
+        tutorialStep2Title: "Ask questions",
+        tutorialStep2Text: "Ask yes/no questions and flip away cards that can't be right.",
+        tutorialStep3Title: "Guess!",
+        tutorialStep3Text: "Sure? Tap the chest or a card to guess. Correct = you win!",
+        tutorialNext: "Next",
+        tutorialSkip: "Skip",
+        tutorialStart: "Start game!",
+        botTipPick: "Tip: tap one character as your secret.",
+        botTipAsk: "Tip: ask a question, e.g. “Is it a boy?”",
+        botTipGuess: "Tip: sure? Tap the chest on the left to guess.",
+        lobbyEmotesLabel: "Quick reactions",
+        soundToggleAria: "Sound on or off",
+        btnPlayAgainLobby: "Another round (lobby)",
         rankKicker: "Ranked mode",
         rankTitle: 'Climb the <span class="mode-accent">ranks</span>',
         rankStatWins: "W",
@@ -3092,7 +3178,7 @@
         chestHint: "Tap to guess",
         sideDockYourSecret: "Your secret",
         sideDockGuess: "Guess!",
-        btnPlayAgain: "Play again",
+        btnPlayAgain: "Another round (lobby)",
         btnGoToMenu: "Go to menu",
         giveUpTitle: "Give up?",
         giveUpConfirm: "Do you want to go back to the menu?",
@@ -3418,7 +3504,7 @@
     let rankedAutoStartPending = false;
     let onlineGameUnsub = null;
 
-    const CARD_NAMES =
+    const CARD_NAMES_BASE =
       window.WieCharacterArt && WieCharacterArt.CARD_NAMES
         ? WieCharacterArt.CARD_NAMES.slice()
         : [
@@ -3428,6 +3514,15 @@
             "xQc", "Nikkie", "IShowSpeed", "Logan Paul", "Enzo", "Safiya", "Gio", "Gibi",
             "Kalvijn", "Rosanna", "MKBHD", "Jess",
           ];
+    let CARD_NAMES = CARD_NAMES_BASE.slice();
+
+    function refreshActiveCardNames() {
+      if (window.WieGameFeatures && typeof WieGameFeatures.getActiveCardNames === "function") {
+        CARD_NAMES = WieGameFeatures.getActiveCardNames(CARD_NAMES_BASE);
+      } else {
+        CARD_NAMES = CARD_NAMES_BASE.slice();
+      }
+    }
 
     function cardAvatarUrl(name) {
       if (window.WieCharacterArt) return WieCharacterArt.cardAvatarUrl(name);
@@ -3785,6 +3880,10 @@
       isRankedGame = false;
       sessionMode = "solo";
       sessionCode = "";
+      if (window.WieGameFeatures) {
+        if (WieGameFeatures.getCardMode() !== "daily") WieGameFeatures.setCardMode("full");
+        WieGameFeatures.recordBotGamePlayed();
+      }
       try {
         leaveOnlineSession();
       } catch (err) {
@@ -3849,6 +3948,10 @@
           }
           return;
         }
+        if (msg.type === "returnLobby" || msg.type === "playAgainLobby") {
+          returnToLobbyFromGame();
+          return;
+        }
         if (msg.type === "gameStart") {
           if (window.WieIsHetPlay) WieIsHetPlay.hideEndOverlay();
           resetGameScreen();
@@ -3866,6 +3969,17 @@
       if (!window.WieIsHetOnline) return;
       onlineGameUnsub = WieIsHetOnline.onMessage((msg) => {
         if (window.WieLobby && WieLobby.handleMessage(msg)) return;
+        if (msg.type === "returnLobby") {
+          returnToLobbyFromGame();
+          return;
+        }
+        if (msg.type === "playAgainLobby" && WieIsHetOnline.isHost()) {
+          if (typeof WieIsHetOnline.broadcastReturnLobby === "function") {
+            WieIsHetOnline.broadcastReturnLobby();
+          }
+          returnToLobbyFromGame();
+          return;
+        }
         if (msg.type === "gameStart") {
           if (window.WieIsHetPlay) WieIsHetPlay.hideEndOverlay();
           resetGameScreen();
@@ -3895,6 +4009,7 @@
 
     function startGameSession() {
       clearCountdown();
+      refreshActiveCardNames();
       buildGameBoards();
       if (window.WieIsHetPlay) {
         try {
@@ -3918,10 +4033,30 @@
         }
         runCountdownThenTable();
       }
-      if (window.WieOrientationLock && typeof WieOrientationLock.waitForLandscape === "function") {
-        WieOrientationLock.waitForLandscape(beginAfterRotate);
+      function afterTutorial() {
+        if (window.WieOrientationLock && typeof WieOrientationLock.waitForLandscape === "function") {
+          WieOrientationLock.waitForLandscape(beginAfterRotate);
+        } else {
+          beginAfterRotate();
+        }
+      }
+      if (window.WieGameFeatures && WieGameFeatures.shouldShowTutorial()) {
+        WieGameFeatures.maybeShowTutorial(afterTutorial);
       } else {
-        beginAfterRotate();
+        afterTutorial();
+      }
+    }
+
+    function returnToLobbyFromGame() {
+      if (window.WieIsHetPlay) WieIsHetPlay.hideEndOverlay();
+      resetGameScreen();
+      busy = false;
+      if (sessionMode === "host") {
+        transition(screenGame, screenLobby, "transition-in-from-left");
+        if (window.WieLobby) WieLobby.refresh();
+      } else if (sessionMode === "guest") {
+        transition(screenGame, screenJoined, "transition-in-from-left");
+        if (window.WieLobby) WieLobby.refresh();
       }
     }
 
@@ -4073,17 +4208,32 @@
     }
 
     function playAgainFromEnd() {
-      if (window.WieIsHetPlay) WieIsHetPlay.hideEndOverlay();
-      resetGameScreen();
+      if (window.WieSounds) WieSounds.play("ui");
       if (window.WieIsHetOnline && WieIsHetOnline.isConnected()) {
+        if (isRankedGame) {
+          if (window.WieIsHetPlay) WieIsHetPlay.hideEndOverlay();
+          resetGameScreen();
+          if (WieIsHetOnline.isHost()) {
+            WieIsHetOnline.broadcastGameStart();
+            startGameSession();
+          } else {
+            WieIsHetOnline.send({ type: "playAgain" });
+          }
+          return;
+        }
         if (WieIsHetOnline.isHost()) {
-          WieIsHetOnline.broadcastGameStart();
-          startGameSession();
+          if (typeof WieIsHetOnline.broadcastReturnLobby === "function") {
+            WieIsHetOnline.broadcastReturnLobby();
+          }
+          returnToLobbyFromGame();
         } else {
-          WieIsHetOnline.send({ type: "playAgain" });
+          WieIsHetOnline.send({ type: "playAgainLobby" });
+          returnToLobbyFromGame();
         }
         return;
       }
+      if (window.WieIsHetPlay) WieIsHetPlay.hideEndOverlay();
+      resetGameScreen();
       startGameSession();
     }
 

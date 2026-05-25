@@ -191,6 +191,7 @@
     }
     tile.classList.remove("flip-anim-up");
     tile.classList.add("is-down");
+    if (window.WieSounds) WieSounds.play("flip");
     if (anim) {
       tile.classList.add("flip-anim-down");
       tile.addEventListener(
@@ -725,6 +726,7 @@
   }
 
   function showAnswerReveal(yes) {
+    if (window.WieSounds) WieSounds.play(yes ? "yes" : "no");
     if (!answerRevealOverlay || !answerRevealText) return;
     hideAnswerReveal();
     answerRevealOverlay.classList.remove("hidden", "answer-reveal--yes", "answer-reveal--no");
@@ -1251,6 +1253,9 @@
     setScreenTurn("my");
     wireQuestionDrawer();
     window.setTimeout(() => showQuestionPanel("ask"), 80);
+    if (!state.online && window.WieGameFeatures) {
+      WieGameFeatures.showBotTip("ask");
+    }
   }
 
   function beginTheirTurn() {
@@ -1311,6 +1316,9 @@
   function beginGuessMode() {
     if (!canGuessNow()) return;
     hideQuestionPanel();
+    if (!state.online && window.WieGameFeatures) {
+      WieGameFeatures.showBotTip("guess");
+    }
     state.phase = PHASE.GUESS;
     setScreenTurn("guess");
     clearInteractivity();
@@ -1522,6 +1530,8 @@
       updateRankDeltaOverlay(rankResult);
     }
     if (screenGame) screenGame.classList.add("game-won");
+    if (window.WieSounds) WieSounds.play("win");
+    if (window.WieGameFeatures) WieGameFeatures.onGameEnd(true);
     showEndActions();
   }
 
@@ -1552,6 +1562,8 @@
       screenGame.classList.remove("game-give-up-pending", "give-up-shaking");
       screenGame.classList.add("game-won");
     }
+    if (window.WieSounds) WieSounds.play("win");
+    if (window.WieGameFeatures) WieGameFeatures.onGameEnd(true);
     showEndActions();
   }
 
@@ -1579,6 +1591,8 @@
       }
       updateRankDeltaOverlay(rankResult);
     }
+    if (window.WieSounds) WieSounds.play("lose");
+    if (window.WieGameFeatures) WieGameFeatures.onGameEnd(false);
     showEndActions();
   }
 
@@ -1594,6 +1608,7 @@
       }
       showWin();
     } else {
+      if (window.WieSounds) WieSounds.play("no");
       setBanner(tFn("guessWrong"));
       setTimeout(showLose, 1200);
     }
@@ -1726,6 +1741,9 @@
     setScreenTurn("pick");
     hideBanner();
     state.playerWells.forEach((w) => w.classList.add("interactive"));
+    if (!state.online && window.WieGameFeatures) {
+      WieGameFeatures.showBotTip("pick");
+    }
     bindWellClickHandlers();
     if (opponentChest && !state.online) {
       opponentChest.classList.remove("chest-guess-ready");

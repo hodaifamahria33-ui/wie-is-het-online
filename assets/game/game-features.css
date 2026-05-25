@@ -1,0 +1,221 @@
+/* Tutorial */
+.tutorial-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right))
+    max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+  background: rgba(5, 3, 18, 0.88);
+  backdrop-filter: blur(8px);
+}
+
+.tutorial-overlay.hidden {
+  display: none !important;
+}
+
+.tutorial-card {
+  width: min(92vw, 360px);
+  padding: 1.25rem 1.15rem 1.1rem;
+  border-radius: 20px;
+  border: 3px solid rgba(250, 204, 21, 0.55);
+  background: linear-gradient(165deg, #2d1f5c 0%, #120a28 100%);
+  color: #f8fafc;
+  text-align: center;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55);
+}
+
+.tutorial-step-dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.4rem;
+  margin-bottom: 0.75rem;
+}
+
+.tutorial-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.tutorial-dot.is-active {
+  background: #facc15;
+  box-shadow: 0 0 10px rgba(250, 204, 21, 0.6);
+}
+
+.tutorial-icon {
+  font-size: 2.2rem;
+  margin-bottom: 0.35rem;
+}
+
+.tutorial-title {
+  margin: 0 0 0.45rem;
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: #fef08a;
+}
+
+.tutorial-text {
+  margin: 0 0 1rem;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: rgba(226, 232, 240, 0.92);
+}
+
+.tutorial-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.tutorial-btn {
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  border-radius: 12px;
+  font-weight: 800;
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  border: 2px solid transparent;
+}
+
+.tutorial-btn--primary {
+  background: linear-gradient(180deg, #fde047 0%, #eab308 100%);
+  color: #1a1035;
+  border-color: #fff;
+}
+
+.tutorial-btn--ghost {
+  background: rgba(255, 255, 255, 0.08);
+  color: #e2e8f0;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Bot-tip banner */
+.game-coach-tip {
+  position: fixed;
+  left: 50%;
+  bottom: max(72px, calc(env(safe-area-inset-bottom) + 56px));
+  transform: translateX(-50%);
+  z-index: 185;
+  max-width: min(92vw, 340px);
+  padding: 0.45rem 0.7rem;
+  border-radius: 12px;
+  background: rgba(15, 10, 35, 0.92);
+  border: 2px solid rgba(129, 140, 248, 0.55);
+  color: #e0e7ff;
+  font-size: clamp(0.68rem, 2.8vw, 0.8rem);
+  font-weight: 700;
+  text-align: center;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.game-coach-tip.hidden {
+  opacity: 0;
+  visibility: hidden;
+}
+
+html.wie-phone-landscape-game .game-coach-tip {
+  bottom: max(8px, env(safe-area-inset-bottom));
+  top: auto;
+  max-width: min(42vw, 220px);
+  left: auto;
+  right: max(8px, env(safe-area-inset-right));
+  transform: none;
+}
+
+/* Mode: stats + daily */
+.mode-stats-line {
+  margin: 0 0 0.65rem;
+  padding: 0.4rem 0.65rem;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.2);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: rgba(254, 249, 195, 0.95);
+  text-align: center;
+}
+
+.mode-stats-line.hidden {
+  display: none;
+}
+
+.mode-choice--daily {
+  border-color: rgba(251, 191, 36, 0.45);
+}
+
+.btn-start-quick {
+  display: block;
+  width: min(100%, 280px);
+  margin: 0.5rem auto 0;
+  padding: 0.5rem 0.85rem;
+  border-radius: 12px;
+  border: 2px solid rgba(129, 140, 248, 0.5);
+  background: rgba(30, 27, 75, 0.85);
+  color: #c7d2fe;
+  font-weight: 800;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.btn-start-quick:hover {
+  filter: brightness(1.08);
+}
+
+.sound-toggle {
+  position: fixed;
+  bottom: max(12px, env(safe-area-inset-bottom));
+  right: max(12px, env(safe-area-inset-right));
+  z-index: 390;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  background: rgba(15, 10, 35, 0.85);
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.screen-game-view .sound-toggle {
+  z-index: 448;
+}
+
+.lobby-emotes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 0.45rem;
+}
+
+.lobby-emote-btn {
+  flex: 1 1 auto;
+  min-width: 2.2rem;
+  padding: 0.28rem 0.35rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.08);
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.lobby-emote-btn:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.screen-game-view.game-win-flash .game-bg-dim {
+  animation: winFlashBg 0.55s ease-out;
+}
+
+@keyframes winFlashBg {
+  0% {
+    background: rgba(250, 204, 21, 0.35);
+  }
+  100% {
+    background: transparent;
+  }
+}
