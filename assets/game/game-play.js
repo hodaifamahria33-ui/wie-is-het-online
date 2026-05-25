@@ -83,7 +83,7 @@
   let cardNames = [];
 
   const MALE_NAMES =
-    /^(MrBeast|PewDiePie|Markiplier|Jacksepticeye|KSI|Ninja|Dream|Vanoss|DanTDM|Ludwig|xQc|IShowSpeed|Enzo|Gio|Kalvijn|MKBHD|Anas)$/i;
+    /^(MrBeast|PewDiePie|Markiplier|Jacksepticeye|KSI|Ninja|Dream|Vanoss|DanTDM|Ludwig|xQc|IShowSpeed|Enzo|Gio|Kalvijn|MKBHD|Logan Paul)$/i;
   const FEMALE_NAMES =
     /^(Pokimane|Valkyrae|iJustine|SSSniperWolf|LaurDIY|Emma|Aphmau|Jelly|Zoella|Tana|Nikkie|Safiya|Gibi|Rosanna|Jess)$/i;
 
