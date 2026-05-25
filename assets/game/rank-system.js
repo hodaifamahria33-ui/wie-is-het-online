@@ -96,10 +96,43 @@
     return 1 / (1 + Math.pow(10, (oppRating - myRating) / 400));
   }
 
+  /** 0 = laag rank, 1 = hoog rank (minder winst, meer verlies). */
+  function rankPressure(rating) {
+    const prog = getTierProgress(rating);
+    const tierIdx = TIERS.findIndex((t) => t.id === prog.tier.id);
+    const tierT = tierIdx / Math.max(1, TIERS.length - 1);
+    let withinT = 1;
+    if (prog.next && prog.max > prog.min) {
+      withinT = (rating - prog.min) / (prog.max - prog.min);
+    }
+    return Math.min(1, Math.max(0, tierT * 0.8 + withinT * 0.2));
+  }
+
+  /** Ranked: winst = plus, verlies = min; hoog rank = kleine plus, grote min. */
+  function calcRankedDelta(myRating, oppRating, won) {
+    const pressure = rankPressure(myRating);
+    const opp = oppRating || 1000;
+    const expected = expectedScore(myRating, opp);
+
+    if (won) {
+      const winCeiling = Math.round(36 - pressure * 26);
+      const winFloor = Math.round(10 - pressure * 5);
+      const surprise = 0.45 + (1 - expected) * 0.85;
+      let gain = winCeiling * surprise;
+      gain = Math.round(Math.max(winFloor, Math.min(winCeiling, gain)));
+      return Math.max(5, gain);
+    }
+
+    const lossFloor = Math.round(-14 - pressure * 6);
+    const lossCeiling = Math.round(-28 - pressure * 18);
+    const shock = 0.5 + expected * 0.9;
+    let loss = lossFloor + (lossCeiling - lossFloor) * shock;
+    loss = Math.round(Math.min(-8, Math.max(lossCeiling, loss)));
+    return Math.min(-8, loss);
+  }
+
   function calcDelta(myRating, oppRating, won) {
-    const K = 32;
-    const score = won ? 1 : 0;
-    return Math.round(K * (score - expectedScore(myRating, oppRating)));
+    return calcRankedDelta(myRating, oppRating, won);
   }
 
   function getBotRatingForDifficulty(difficulty) {
@@ -116,7 +149,9 @@
     const opts = options || {};
     const profile = loadProfile();
     const before = profile.rating;
-    const delta = calcDelta(before, opponentRating || 1000, won);
+    const delta = opts.ranked
+      ? calcRankedDelta(before, opponentRating || 1000, won)
+      : calcDelta(before, opponentRating || 1000, won);
     profile.rating = Math.max(0, before + delta);
     profile.peakRating = Math.max(profile.peakRating, profile.rating);
 
@@ -162,6 +197,8 @@
     getTierProgress,
     tierName,
     calcDelta,
+    calcRankedDelta,
+    rankPressure,
     getBotRatingForDifficulty,
     getBotDifficultyForRating,
     applyMatchResult,
