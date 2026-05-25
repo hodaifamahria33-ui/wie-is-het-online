@@ -634,6 +634,8 @@
 .win-card {
   text-align: center;
   padding: 2rem 2.5rem;
+  max-width: min(92vw, 420px);
+  box-sizing: border-box;
   border-radius: 24px;
   background: linear-gradient(165deg, #fef08a 0%, #facc15 40%, #eab308 100%);
   border: 5px solid #fff;
@@ -783,10 +785,37 @@
 }
 
 .lose-reveal-face .card-face {
-  width: clamp(110px, 28vw, 160px);
+  width: clamp(72px, 22vw, 120px);
+  max-width: 120px;
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+/* Geen bord-stijlen doorgeven — foto blijft compact in win-popup */
+.lose-reveal-face .card-face .card-photo,
+.lose-reveal-face .card-face .card-photo--real,
+.lose-reveal-face .card-face .card-photo--portrait {
+  flex: none !important;
+  width: 100% !important;
+  height: auto !important;
+  max-height: 5.5rem !important;
+  aspect-ratio: 1 !important;
+  min-height: 0 !important;
+}
+
+.lose-reveal-face .card-face .card-img {
+  width: 100% !important;
+  height: 100% !important;
+  max-height: 5.5rem !important;
+  object-fit: cover !important;
+}
+
+.lose-reveal-face .card-face .card-name {
+  font-size: clamp(0.42rem, 2vw, 0.55rem) !important;
+  min-height: 0 !important;
+  padding: 2px 3px !important;
+  line-height: 1.1 !important;
 }
 
 .lose-reveal-name {

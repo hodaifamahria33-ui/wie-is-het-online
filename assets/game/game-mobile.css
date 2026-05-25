@@ -778,3 +778,96 @@ html.wie-phone-landscape-game .game-turn-banner {
   font-size: clamp(0.55rem, 2.2vw, 0.68rem) !important;
   padding: 0.28rem 0.5rem !important;
 }
+
+/* Win/verlies-popup: compact zodat knoppen (menu e.d.) zichtbaar blijven */
+html.wie-phone-landscape-game .win-overlay,
+#screen-game .win-overlay {
+  align-items: center !important;
+  justify-content: center !important;
+  padding: max(6px, env(safe-area-inset-top)) 8px max(6px, env(safe-area-inset-bottom)) !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+html.wie-phone-landscape-game .win-overlay .win-card,
+#screen-game .win-overlay.active .win-card {
+  padding: 0.7rem 0.85rem 0.8rem !important;
+  max-width: min(88vw, 280px) !important;
+  width: 100% !important;
+  max-height: min(88dvh, 88svh) !important;
+  overflow-y: auto !important;
+  box-sizing: border-box !important;
+}
+
+html.wie-phone-landscape-game .win-overlay .win-title,
+#screen-game .win-overlay .win-title {
+  font-size: clamp(1.2rem, 5.5vw, 1.65rem) !important;
+  margin-bottom: 0.2rem !important;
+  line-height: 1.1 !important;
+}
+
+html.wie-phone-landscape-game .win-overlay .win-sub,
+#screen-game .win-overlay .win-sub {
+  font-size: clamp(0.72rem, 2.8vw, 0.88rem) !important;
+  line-height: 1.25 !important;
+}
+
+html.wie-phone-landscape-game .win-overlay .lose-opponent-reveal,
+#screen-game .win-overlay .lose-opponent-reveal {
+  margin-top: 0.45rem !important;
+  padding-top: 0.45rem !important;
+}
+
+html.wie-phone-landscape-game .win-overlay .lose-reveal-face .card-face,
+#screen-game .win-overlay .lose-reveal-face .card-face {
+  width: clamp(56px, 16vw, 76px) !important;
+  max-width: 76px !important;
+}
+
+html.wie-phone-landscape-game .win-overlay .lose-reveal-face .card-photo,
+html.wie-phone-landscape-game .win-overlay .lose-reveal-face .card-img,
+#screen-game .win-overlay .lose-reveal-face .card-photo,
+#screen-game .win-overlay .lose-reveal-face .card-img {
+  max-height: 3.25rem !important;
+}
+
+html.wie-phone-landscape-game .win-overlay .lose-reveal-name,
+#screen-game .win-overlay .lose-reveal-name {
+  font-size: clamp(0.75rem, 3vw, 0.95rem) !important;
+  letter-spacing: 0.05em !important;
+}
+
+html.wie-phone-landscape-game .win-overlay .lose-reveal-label,
+#screen-game .win-overlay .lose-reveal-label {
+  font-size: 0.65rem !important;
+  margin-bottom: 0.25rem !important;
+}
+
+html.wie-phone-landscape-game .win-overlay .win-end-actions,
+html.wie-phone-landscape-game .win-overlay .win-give-up-actions,
+#screen-game .win-overlay .win-end-actions,
+#screen-game .win-overlay .win-give-up-actions {
+  margin-top: 0.55rem !important;
+  gap: 0.4rem !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+html.wie-phone-landscape-game .win-overlay .btn-win-action,
+#screen-game .win-overlay .btn-win-action {
+  padding: 0.45rem 0.6rem !important;
+  font-size: clamp(0.62rem, 2.5vw, 0.75rem) !important;
+}
+
+html.wie-phone-landscape-game .win-overlay.opponent-gave-up .win-card {
+  padding: 0.85rem 1rem !important;
+  max-width: min(88vw, 300px) !important;
+}
+
+html.wie-phone-landscape-game .win-overlay.opponent-gave-up .win-title {
+  font-size: clamp(1.25rem, 5vw, 1.75rem) !important;
+}
+
+html.wie-phone-landscape-game .win-overlay.opponent-gave-up .win-sub {
+  font-size: clamp(0.8rem, 3vw, 1rem) !important;
+}
