@@ -12,7 +12,7 @@
 
   /* Sync met scripts/download-portraits.mjs */
   const ROSTER = [
-    { name: "MrBeast", slug: "mrbeast", seed: "MrBeast-Jimmy", female: false, bg: BOY_BG, hair: "short05", beard: "variant03", skinColor: "f2d3b1", hairColor: "562306", eyes: "variant10" },
+    { name: "MrBeast", slug: "mrbeast", seed: "MrBeast-Jimmy", female: false, bg: BOY_BG, hair: "short05", beard: "variant03", skinColor: "f2d3b1", hairColor: "e5d7a3", eyes: "variant10" },
     { name: "PewDiePie", slug: "pewdiepie", seed: "PewDiePie-Felix", female: false, bg: BOY_BG, hair: "short11", beard: "variant08", glasses: "variant03", skinColor: "f2d3b1", hairColor: "e5d7a3" },
     { name: "Markiplier", slug: "markiplier", seed: "Markiplier-Mark", female: false, bg: BOY_BG, hair: "short08", beard: "variant06", skinColor: "ecad80", hairColor: "0e0e0e", eyes: "variant08" },
     { name: "Jacksepticeye", slug: "jacksepticeye", seed: "Jacksepticeye-Sean", female: false, bg: BOY_BG, hair: "short16", beard: "variant02", skinColor: "f2d3b1", hairColor: "3eac2c", eyes: "variant16" },
@@ -167,6 +167,97 @@
     return (getTraits(name).tags || []).includes(tag);
   }
 
+  function colorLuminance(hex) {
+    const h = String(hex || "")
+      .replace(/^#/, "")
+      .trim();
+    if (h.length !== 6) return 0.5;
+    const rgb = [0, 2, 4].map((i) => {
+      const v = parseInt(h.slice(i, i + 2), 16) / 255;
+      return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+    });
+    return 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2];
+  }
+
+  const DARK_COLOR_LUM = 0.38;
+  const LIGHT_COLOR_LUM = 0.52;
+
+  function avatarCfg(name) {
+    return getTraits(name).avatar || {};
+  }
+
+  function hasDarkHair(name) {
+    const lum = colorLuminance(avatarCfg(name).hairColor);
+    return lum < DARK_COLOR_LUM;
+  }
+
+  function hasLightHair(name) {
+    const lum = colorLuminance(avatarCfg(name).hairColor);
+    return lum >= LIGHT_COLOR_LUM;
+  }
+
+  function hasDarkSkin(name) {
+    const lum = colorLuminance(avatarCfg(name).skinColor);
+    return lum < DARK_COLOR_LUM;
+  }
+
+  function hasLightSkin(name) {
+    const lum = colorLuminance(avatarCfg(name).skinColor);
+    return lum >= LIGHT_COLOR_LUM;
+  }
+
+  function hasGlasses(name) {
+    return Boolean(avatarCfg(name).glasses);
+  }
+
+  function hasBeard(name) {
+    return Boolean(avatarCfg(name).beard);
+  }
+
+  /** Vrije tekst → ja/nee op uiterlijk; null = niet herkend. */
+  function answerVisualQuestion(text, name) {
+    const q = String(text || "")
+      .toLowerCase()
+      .trim()
+      .replace(/[?!.,;:]+/g, "")
+      .replace(/\s+/g, " ");
+    if (!q || !name) return null;
+
+    const neg = /\b(niet|geen|no|not|without|zonder)\b/.test(q);
+    const pick = (v) => (neg ? !v : v);
+
+    const skinQ =
+      /\b(huid|huids|huiskleur|skin|teint)\b/.test(q) ||
+      /\b(huid|huids|huiskleur|skin)\s*(kleur|color)\b/.test(q);
+    const hairQ = /\b(haar|hair|haarkleur)\b/.test(q);
+
+    if (skinQ && /\b(donker|dark|zwart|black|bruin|brown)\b/.test(q)) {
+      return pick(hasDarkSkin(name));
+    }
+    if (skinQ && /\b(licht|light|blank|wit|white|pale|fair)\b/.test(q)) {
+      return pick(hasLightSkin(name));
+    }
+    if (hairQ && /\b(donker|dark|zwart|black|bruin|brown)\b/.test(q)) {
+      return pick(hasDarkHair(name));
+    }
+    if (hairQ && /\b(blond|blonde|licht|light|grijs|gray|grey|wit|white)\b/.test(q)) {
+      return pick(hasLightHair(name));
+    }
+    if (/\b(bril|glasses|spectacles)\b/.test(q)) {
+      return pick(hasGlasses(name));
+    }
+    if (/\b(baard|beard)\b/.test(q)) {
+      return pick(hasBeard(name));
+    }
+    if (/\b(roze|pink)\b/.test(q) && /\b(achtergrond|background|kaart|card)\b/.test(q)) {
+      return pick(isGirl(name));
+    }
+    if (/\b(blauw|blue)\b/.test(q) && /\b(achtergrond|background|kaart|card)\b/.test(q)) {
+      return pick(!isGirl(name));
+    }
+    return null;
+  }
+
   function buildRemotePortraitUrl(cfg) {
     const p = new URLSearchParams();
     const girl = !!cfg.female;
@@ -307,6 +398,13 @@
     getTraits,
     isGirl,
     hasCreatorTag,
+    hasDarkHair,
+    hasLightHair,
+    hasDarkSkin,
+    hasLightSkin,
+    hasGlasses,
+    hasBeard,
+    answerVisualQuestion,
     cardAvatarUrl,
     cardAvatarFallbackUrl,
     buildRemotePortraitUrl,

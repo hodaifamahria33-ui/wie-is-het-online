@@ -438,11 +438,37 @@
       return "boy";
     }
     if (
-      /\b(meisje|meisjes|meid|meiden|vrouw|vrouwelijk|dame|haar|zij|girl|female|woman|gal)\b/.test(q) ||
+      /\b(meisje|meisjes|meid|meiden|vrouw|vrouwelijk|dame|zij|girl|female|woman|gal)\b/.test(q) ||
       /is het een meisje|is het een meid|is ze|is zij|is het een vrouw/.test(q)
     ) {
       return "girl";
     }
+    if (
+      /\b(donker|dark|zwart|black)\b/.test(q) &&
+      /\b(haar|hair|haarkleur)\b/.test(q)
+    ) {
+      return "dark-hair";
+    }
+    if (
+      /\b(blond|blonde|licht|light|grijs|gray|grey)\b/.test(q) &&
+      /\b(haar|hair)\b/.test(q)
+    ) {
+      return "light-hair";
+    }
+    if (
+      /\b(donker|dark|zwart|black|bruin)\b/.test(q) &&
+      /\b(huid|huids|huiskleur|skin|teint)\b/.test(q)
+    ) {
+      return "dark-skin";
+    }
+    if (
+      /\b(licht|light|blank|wit|white|pale|fair)\b/.test(q) &&
+      /\b(huid|huids|huiskleur|skin|teint)\b/.test(q)
+    ) {
+      return "light-skin";
+    }
+    if (/\b(bril|glasses|spectacles)\b/.test(q)) return "glasses";
+    if (/\b(baard|beard)\b/.test(q)) return "beard";
     if (/gaming|gamer|game.?youtuber|speelt games|plays games|stream/.test(q)) {
       return "gaming";
     }
@@ -468,16 +494,29 @@
     return null;
   }
 
+  function evaluateVisualQuestion(text, secretName) {
+    if (
+      window.WieCharacterArt &&
+      typeof WieCharacterArt.answerVisualQuestion === "function"
+    ) {
+      return WieCharacterArt.answerVisualQuestion(text, secretName);
+    }
+    return null;
+  }
+
   function evaluateCustomQuestion(text, secretName) {
+    const visual = evaluateVisualQuestion(text, secretName);
+    if (visual !== null) return visual;
     const questionId = resolveQuestionIdFromText(text);
     if (questionId) {
       return evaluateQuestion(questionId, secretName);
     }
-    return Math.random() > 0.5;
+    return false;
   }
 
   function evaluateQuestion(questionId, secretName) {
     const n = secretName.trim();
+    const art = window.WieCharacterArt;
     switch (questionId) {
       case "boy":
         return isMaleCharacter(n);
@@ -495,6 +534,18 @@
         return hasCreatorTag(n, "vlog");
       case "tech":
         return hasCreatorTag(n, "tech");
+      case "dark-hair":
+        return art && typeof art.hasDarkHair === "function" ? art.hasDarkHair(n) : false;
+      case "light-hair":
+        return art && typeof art.hasLightHair === "function" ? art.hasLightHair(n) : false;
+      case "dark-skin":
+        return art && typeof art.hasDarkSkin === "function" ? art.hasDarkSkin(n) : false;
+      case "light-skin":
+        return art && typeof art.hasLightSkin === "function" ? art.hasLightSkin(n) : false;
+      case "glasses":
+        return art && typeof art.hasGlasses === "function" ? art.hasGlasses(n) : false;
+      case "beard":
+        return art && typeof art.hasBeard === "function" ? art.hasBeard(n) : false;
       case "short":
         return n.length <= 3;
       case "long":
@@ -504,8 +555,18 @@
       case "n-z":
         return /^[N-Z]/i.test(n);
       default:
-        return Math.random() > 0.5;
+        return false;
     }
+  }
+
+  function resolveAnswerForSecret(questionText, secretName, knownQuestionId) {
+    const visual = evaluateVisualQuestion(questionText, secretName);
+    if (visual !== null) return visual;
+    const questionId = knownQuestionId || resolveQuestionIdFromText(questionText);
+    if (questionId) {
+      return evaluateQuestion(questionId, secretName);
+    }
+    return evaluateCustomQuestion(questionText, secretName);
   }
 
   function answerText(yes) {
@@ -1011,10 +1072,7 @@
       return;
     }
     const secretName = getSecretName(state.opponentSecretIndex);
-    const questionId = knownQuestionId || resolveQuestionIdFromText(questionText);
-    const yes = questionId
-      ? evaluateQuestion(questionId, secretName)
-      : evaluateCustomQuestion(questionText, secretName);
+    const yes = resolveAnswerForSecret(questionText, secretName, knownQuestionId);
     questionInput.value = "";
     finishQuestionAsAsker(yes, questionText);
   }
@@ -1023,11 +1081,8 @@
     if (state.secretIndex == null || !state.pendingQuestion) return null;
     const secretName = getSecretName(state.secretIndex);
     const pq = state.pendingQuestion;
-    const questionId = pq.id && pq.id !== "custom" ? pq.id : resolveQuestionIdFromText(pq.text);
-    if (questionId) {
-      return evaluateQuestion(questionId, secretName);
-    }
-    return evaluateCustomQuestion(pq.text, secretName);
+    const knownId = pq.id && pq.id !== "custom" ? pq.id : null;
+    return resolveAnswerForSecret(pq.text, secretName, knownId);
   }
 
   function proceedAfterPlayerAnswer(useYes) {

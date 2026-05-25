@@ -20,7 +20,7 @@ const GIRL_BG = "fbcfe8,f472b6,be185d";
 
 /** Sync met assets/game/character-traits.js */
 const ROSTER = [
-  { name: "MrBeast", slug: "mrbeast", seed: "MrBeast-Jimmy", female: false, bg: BOY_BG, hair: "short05", beard: "variant03", skinColor: "f2d3b1", hairColor: "562306", eyes: "variant10" },
+  { name: "MrBeast", slug: "mrbeast", seed: "MrBeast-Jimmy", female: false, bg: BOY_BG, hair: "short05", beard: "variant03", skinColor: "f2d3b1", hairColor: "e5d7a3", eyes: "variant10" },
   { name: "PewDiePie", slug: "pewdiepie", seed: "PewDiePie-Felix", female: false, bg: BOY_BG, hair: "short11", beard: "variant08", glasses: "variant03", skinColor: "f2d3b1", hairColor: "e5d7a3" },
   { name: "Markiplier", slug: "markiplier", seed: "Markiplier-Mark", female: false, bg: BOY_BG, hair: "short08", beard: "variant06", skinColor: "ecad80", hairColor: "0e0e0e", eyes: "variant08" },
   { name: "Jacksepticeye", slug: "jacksepticeye", seed: "Jacksepticeye-Sean", female: false, bg: BOY_BG, hair: "short16", beard: "variant02", skinColor: "f2d3b1", hairColor: "3eac2c", eyes: "variant16" },
