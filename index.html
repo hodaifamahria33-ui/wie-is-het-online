@@ -58,7 +58,7 @@
   <link rel="stylesheet" href="assets/game/character-variety.css?v=55" />
   <link rel="stylesheet" href="assets/game/game-extras.css?v=62" />
   <link rel="stylesheet" href="assets/game/game-mobile.css?v=17" />
-  <link rel="stylesheet" href="assets/game/game-features.css?v=3" />
+  <link rel="stylesheet" href="assets/game/game-features.css?v=4" />
   <link rel="stylesheet" href="assets/game/orientation-lock.css?v=7" />
   <link rel="stylesheet" href="assets/game/answer-coach.css?v=1" />
   <link rel="stylesheet" href="assets/game/rank-ui.css?v=6" />
@@ -284,6 +284,13 @@
           return;
         }
       }
+      if (window.wiePendingDaily) {
+        window.wiePendingDaily = false;
+        if (window.WieGameFeatures) WieGameFeatures.setCardMode("daily");
+        if (typeof window.wieRefreshCardSetup === "function") window.wieRefreshCardSetup();
+        window.wieShowScreen("screen-name", "screen-bot-diff");
+        return;
+      }
       var nameScreen = document.getElementById("screen-name");
       var mode = document.getElementById("screen-mode");
       if (!nameScreen || !mode) return;
@@ -321,8 +328,7 @@
         return;
       }
       if (window.WieGameFeatures) WieGameFeatures.setCardMode("full");
-      refreshActiveCardNames();
-      updateBotDiffDailyNote();
+      if (typeof window.wieRefreshCardSetup === "function") window.wieRefreshCardSetup();
       window.wieShowScreen("screen-mode", "screen-bot-diff");
     };
     window.wieGoPlayRanked = function () {
@@ -346,12 +352,12 @@
     };
     window.wieStartDaily = function () {
       if (!window.wieSavedName()) {
+        window.wiePendingDaily = true;
         window.wieGoBegin();
         return;
       }
       if (window.WieGameFeatures) WieGameFeatures.setCardMode("daily");
-      refreshActiveCardNames();
-      updateBotDiffDailyNote();
+      if (typeof window.wieRefreshCardSetup === "function") window.wieRefreshCardSetup();
       window.wieShowScreen("screen-mode", "screen-bot-diff");
     };
     window.wieShowScreen = function (fromId, toId) {
@@ -2636,7 +2642,7 @@
   <script src="assets/game/stripe-donate.js?v=1"></script>
   <script src="assets/game/orientation-lock.js?v=10"></script>
   <script src="assets/game/game-sounds.js?v=1"></script>
-  <script src="assets/game/game-features.js?v=2"></script>
+  <script src="assets/game/game-features.js?v=3"></script>
   <script src="assets/game/game-play.js?v=67"></script>
 
   <script>
@@ -3395,6 +3401,19 @@
         runGuestJoinFlow(code);
         return;
       }
+      if (window.wiePendingDaily) {
+        window.wiePendingDaily = false;
+        if (window.WieGameFeatures) WieGameFeatures.setCardMode("daily");
+        refreshActiveCardNames();
+        updateBotDiffDailyNote();
+        busy = false;
+        if (screenName) screenName.classList.add("hidden");
+        if (screenBotDiff) screenBotDiff.classList.remove("hidden");
+        document.querySelectorAll("main.screen").forEach((el) => {
+          if (el !== screenBotDiff) el.classList.add("hidden");
+        });
+        return;
+      }
       busy = false;
       transition(screenName, screenMode, "transition-in-from-right");
     }
@@ -3670,8 +3689,14 @@
       });
     }
 
+    let sessionKickoffGuard = null;
+
     function finishCountdownStartPlay() {
       countdownTimeout = null;
+      if (sessionKickoffGuard) {
+        clearTimeout(sessionKickoffGuard);
+        sessionKickoffGuard = null;
+      }
       if (gameCountdown) {
         gameCountdown.classList.add("hidden");
         gameCountdown.style.display = "";
@@ -4052,6 +4077,10 @@
 
     function startGameSession() {
       clearCountdown();
+      if (sessionKickoffGuard) {
+        clearTimeout(sessionKickoffGuard);
+        sessionKickoffGuard = null;
+      }
       refreshActiveCardNames();
       buildGameBoards();
       syncPlayCardNames();
@@ -4063,13 +4092,14 @@
         }
         WieIsHetPlay.wireBoards();
       }
+      if (screenGame) screenGame.classList.remove("hidden");
       if (gameTable) gameTable.classList.add("hidden");
       if (gameCountdown) {
         gameCountdown.classList.remove("hidden");
         gameCountdown.style.display = "flex";
       }
       if (window.WieOrientationLock) WieOrientationLock.refresh();
-      function beginAfterRotate() {
+      function beginPlayKickoff() {
         if (window.WieOrientationLock) WieOrientationLock.refresh();
         if (gameCountdown) {
           gameCountdown.classList.remove("hidden");
@@ -4078,17 +4108,19 @@
         runCountdownThenTable();
       }
       function afterTutorial() {
-        if (window.WieOrientationLock && typeof WieOrientationLock.waitForLandscape === "function") {
-          WieOrientationLock.waitForLandscape(beginAfterRotate);
-        } else {
-          beginAfterRotate();
-        }
+        beginPlayKickoff();
       }
       if (window.WieGameFeatures && WieGameFeatures.shouldShowTutorial()) {
         WieGameFeatures.maybeShowTutorial(afterTutorial);
       } else {
         afterTutorial();
       }
+      sessionKickoffGuard = window.setTimeout(function () {
+        if (!screenGame || screenGame.classList.contains("hidden")) return;
+        if (gameTable && !gameTable.classList.contains("hidden")) return;
+        console.warn("wie: spel-start fallback");
+        finishCountdownStartPlay();
+      }, 14000);
     }
 
     function returnToLobbyFromGame() {
@@ -5226,6 +5258,11 @@
     window.wieShowHostCodeScreen = showHostCodeScreen;
     window.wieEnterHostLobby = enterHostLobby;
 
+    window.wieRefreshCardSetup = function () {
+      refreshActiveCardNames();
+      updateBotDiffDailyNote();
+    };
+
     window.wieApp = {
       goName: goToNameScreen,
       continueName: continueFromNameScreen,
@@ -5249,6 +5286,7 @@
       goRanked: goToRankedScreen,
       startSoloGame,
       startGameSession,
+      refreshCardSetup: refreshActiveCardNames,
       startGame: doStartGame,
       copyLink: doCopyLink,
       shareWa: doShareWa,

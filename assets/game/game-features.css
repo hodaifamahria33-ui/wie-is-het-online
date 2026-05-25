@@ -155,12 +155,25 @@ html.wie-phone-landscape-game .game-coach-tip {
 }
 
 /* Daily: 16 kaarten = 4×4 raster */
+html.wie-daily-challenge #game-table {
+  --game-board-width: min(72vw, 420px);
+  --game-strip-width: min(99vw, calc(min(72vw, 420px) + 120px));
+}
+
+html.wie-daily-challenge #game-table .board-stand--front {
+  width: min(72vw, 420px) !important;
+  max-width: min(72vw, 420px) !important;
+  min-width: 0 !important;
+}
+
 html.wie-daily-challenge #game-table .opponent-board-back,
 html.wie-daily-challenge #game-table .player-board {
   grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
   grid-template-rows: repeat(4, minmax(0, 1fr)) !important;
   aspect-ratio: 1 / 1.05;
-  max-width: min(72vw, 420px);
+  width: 100% !important;
+  max-width: min(72vw, 420px) !important;
+  min-width: 0 !important;
   margin: 0 auto;
 }
 
