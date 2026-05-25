@@ -42,6 +42,7 @@
     /** Indices op het bord die nog jouw geheim kunnen zijn (solo-bot). */
     botSuspects: null,
     botUsedQuestionIds: [],
+    pendingGuessIndex: null,
   };
 
   const POST_ANSWER_SWITCH_SEC = 10;
@@ -1321,6 +1322,9 @@
     }
     state.phase = PHASE.GUESS;
     setScreenTurn("guess");
+    if (window.WieDailyMissions && WieDailyMissions.onGuessPhaseStart) {
+      WieDailyMissions.onGuessPhaseStart();
+    }
     clearInteractivity();
     setBanner(tFn("guessPrompt"));
     state.playerWells.forEach((w, i) => {
@@ -1512,6 +1516,7 @@
   }
 
   function showWin() {
+    if (state.phase === PHASE.WON || state.phase === PHASE.LOST) return;
     state.phase = PHASE.WON;
     clearInteractivity();
     hideQuestionPanel();
@@ -1532,6 +1537,9 @@
     if (screenGame) screenGame.classList.add("game-won");
     if (window.WieSounds) WieSounds.play("win");
     if (window.WieGameFeatures) WieGameFeatures.onGameEnd(true);
+    if (window.WieDailyMissions && WieDailyMissions.onGameEnd) {
+      WieDailyMissions.onGameEnd(true, { botDifficulty: state.botDifficulty });
+    }
     showEndActions();
   }
 
@@ -1564,6 +1572,9 @@
     }
     if (window.WieSounds) WieSounds.play("win");
     if (window.WieGameFeatures) WieGameFeatures.onGameEnd(true);
+    if (window.WieDailyMissions && WieDailyMissions.onGameEnd) {
+      WieDailyMissions.onGameEnd(true, { botDifficulty: state.botDifficulty });
+    }
     showEndActions();
   }
 
@@ -1573,12 +1584,24 @@
     window.WieIsHetOnline.send({ type: "giveUp" });
   }
 
+  function resolveLoseRevealIndex(revealIndex) {
+    if (typeof revealIndex === "number" && revealIndex >= 0) return revealIndex;
+    if (typeof state.opponentSecretIndex === "number" && state.opponentSecretIndex >= 0) {
+      return state.opponentSecretIndex;
+    }
+    if (typeof state.secretIndex === "number" && state.secretIndex >= 0) {
+      return state.secretIndex;
+    }
+    return null;
+  }
+
   function showLose(revealIndex) {
+    if (state.phase === PHASE.LOST || state.phase === PHASE.WON) return;
     state.phase = PHASE.LOST;
     clearInteractivity();
     hideQuestionPanel();
     hideBanner();
-    revealOpponentSecret(revealIndex);
+    revealOpponentSecret(resolveLoseRevealIndex(revealIndex));
     const rankResult = applyRankResult(false);
     if (winOverlay) {
       winOverlay.classList.remove("hidden");
@@ -1593,24 +1616,40 @@
     }
     if (window.WieSounds) WieSounds.play("lose");
     if (window.WieGameFeatures) WieGameFeatures.onGameEnd(false);
+    if (window.WieDailyMissions && WieDailyMissions.onGameEnd) {
+      WieDailyMissions.onGameEnd(false, { botDifficulty: state.botDifficulty });
+    }
     showEndActions();
+  }
+
+  function finishOnlineWrongGuess(revealIndex) {
+    state.pendingGuessIndex = null;
+    if (window.WieSounds) WieSounds.play("no");
+    setBanner(tFn("guessWrong"));
+    const idx = resolveLoseRevealIndex(revealIndex);
+    window.setTimeout(() => showLose(idx), 1200);
+  }
+
+  function finishOnlineCorrectGuess() {
+    state.pendingGuessIndex = null;
+    showWin();
   }
 
   function onGuessCard(index) {
     if (state.phase !== PHASE.GUESS) return;
     clearInteractivity();
+
+    if (state.online && window.WieIsHetOnline) {
+      state.pendingGuessIndex = index;
+      setBanner(tFn("guessChecking"));
+      window.WieIsHetOnline.send({ type: "guess", index });
+      return;
+    }
+
     if (index === state.opponentSecretIndex) {
-      if (state.online && window.WieIsHetOnline) {
-        window.WieIsHetOnline.send({
-          type: "win",
-          secretIndex: state.opponentSecretIndex,
-        });
-      }
       showWin();
     } else {
-      if (window.WieSounds) WieSounds.play("no");
-      setBanner(tFn("guessWrong"));
-      setTimeout(showLose, 1200);
+      finishOnlineWrongGuess(state.opponentSecretIndex);
     }
   }
 
@@ -1692,13 +1731,55 @@
       showWinOpponentGiveUp();
       return;
     }
-    if (msg.type === "win") {
+    if (msg.type === "guess" && typeof msg.index === "number") {
+      if (state.phase === PHASE.WON || state.phase === PHASE.LOST) return;
+      if (state.secretIndex == null) return;
+      const correct = msg.index === state.secretIndex;
+      const secretIdx = state.secretIndex;
+      if (window.WieIsHetOnline) {
+        window.WieIsHetOnline.send({
+          type: "guessResult",
+          correct,
+          secretIndex: secretIdx,
+        });
+      }
+      if (correct) {
+        showLose(secretIdx);
+      } else {
+        showWin();
+      }
+      return;
+    }
+    if (msg.type === "guessResult") {
+      if (state.phase === PHASE.WON || state.phase === PHASE.LOST) return;
       if (typeof msg.secretIndex === "number") {
         state.opponentSecretIndex = msg.secretIndex;
       }
-      showLose(msg.secretIndex);
+      if (msg.correct) {
+        finishOnlineCorrectGuess();
+      } else {
+        finishOnlineWrongGuess(msg.secretIndex);
+      }
+      return;
     }
-    if (msg.type === "lose") showLose(msg.secretIndex);
+    if (msg.type === "win") {
+      if (state.phase === PHASE.WON || state.phase === PHASE.LOST) return;
+      if (typeof msg.secretIndex === "number") {
+        state.opponentSecretIndex = msg.secretIndex;
+      }
+      const loseReveal =
+        typeof msg.secretIndex === "number" ? msg.secretIndex : state.secretIndex;
+      showLose(loseReveal);
+      return;
+    }
+    if (msg.type === "lose") {
+      if (state.phase === PHASE.WON || state.phase === PHASE.LOST) return;
+      if (typeof msg.secretIndex === "number") {
+        state.opponentSecretIndex = msg.secretIndex;
+      }
+      finishOnlineWrongGuess(msg.secretIndex);
+      return;
+    }
     if (msg.type === "playAgain" && state.isHost) {
       document.dispatchEvent(new CustomEvent("wieishet-play-again"));
     }
@@ -1709,6 +1790,7 @@
     state.phase = PHASE.PICK_SECRET;
     state.secretIndex = null;
     state.opponentSecretIndex = null;
+    state.pendingGuessIndex = null;
     state.localSecretReady = false;
     state.remoteSecretReady = false;
     state.usedQuestions = [];
@@ -1843,6 +1925,7 @@
     state.phase = PHASE.IDLE;
     state.secretIndex = null;
     state.opponentSecretIndex = null;
+    state.pendingGuessIndex = null;
     state.localSecretReady = false;
     state.remoteSecretReady = false;
     state.askedThisTurn = false;
