@@ -200,16 +200,26 @@
     0 0 16px rgba(255, 255, 255, 0.35);
 }
 
-.card-well.picked-secret {
-  opacity: 0.35;
+/* Gekozen geheim: niet meer op het bord (alleen in het vak rechts) */
+#player-board .card-well.picked-secret {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
 }
 
 .card-well.opponent-secret-revealed .card-tile.revealed-secret .card-face {
   opacity: 1;
 }
 
-.card-well.picked-secret .card-tile {
+#player-board .card-well.picked-secret .card-tile {
   transform: rotateX(80deg) translateY(10%);
+}
+
+/* Gele “gok”-rand alleen tijdens raden, niet op andere kaarten */
+.screen-game-view:not(.phase-guess) #player-board .card-well.guess-mode {
+  outline: none !important;
+  animation: none !important;
+  cursor: default;
 }
 
 .card-tile.flip-anim-down {
