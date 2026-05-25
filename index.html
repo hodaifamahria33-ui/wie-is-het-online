@@ -44,7 +44,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Nunito:wght@600;700;800&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="assets/game/start-screen.css?v=66" />
-  <link rel="stylesheet" href="assets/game/mode-screen.css?v=10" />
+  <link rel="stylesheet" href="assets/game/mode-screen.css?v=11" />
   <link rel="stylesheet" href="assets/game/support-screen.css?v=1" />
   <link rel="stylesheet" href="assets/game/stripe-donate.css?v=1" />
   <link rel="stylesheet" href="assets/game/joined-screen.css?v=5" />
@@ -304,6 +304,10 @@
       if (window.wieApp && window.wieApp.nameBack) return window.wieApp.nameBack();
       if (window.wieSetStartBg) window.wieSetStartBg(true);
       window.wieShowScreen("screen-name", "screen-start");
+    };
+    window.wieModeBack = function () {
+      if (window.wieApp && window.wieApp.modeBack) return window.wieApp.modeBack();
+      window.wieShowScreen("screen-mode", "screen-name");
     };
     window.wieShowMode = window.wieGoBegin;
     window.wieSavedName = function () {
@@ -2161,6 +2165,16 @@
 
   <!-- Keuzescherm: online of bot -->
   <main id="screen-mode" class="screen screen-mode-view hidden">
+    <button
+      id="btn-mode-back-top"
+      class="mode-screen-back-top back"
+      type="button"
+      data-i18n="btnBack"
+      onclick="window.wieModeBack()"
+      aria-label="Terug"
+    >
+      ← Terug
+    </button>
     <div class="mode-overlay" aria-hidden="true"></div>
     <section class="mode-panel content">
       <p class="mode-kicker" data-i18n="modeKicker">Kies je spel</p>
@@ -2199,7 +2213,7 @@
         </button>
       </div>
       <button id="btn-open-support" class="mode-link-support" type="button" data-i18n="btnSupportGame" onclick="window.wieOpenSupport('screen-mode')">Steun het spel ❤️</button>
-      <button id="btn-mode-back" class="btn mode-btn-back back" type="button" data-i18n="btnModeBack">Terug</button>
+      <button id="btn-mode-back" class="btn mode-btn-back back" type="button" data-i18n="btnBack" onclick="window.wieModeBack()">Terug</button>
     </section>
   </main>
 
@@ -5322,7 +5336,8 @@
     onClick("btn-name-continue", continueFromNameScreen);
     onClick("btn-name-back", nameBackToStart);
 
-    onClick("btn-mode-back", () => {
+    function modeBackToName() {
+      busy = false;
       transition(screenMode, screenName, "transition-in-from-left");
       setTimeout(() => {
         if (playerNameInput) {
@@ -5330,7 +5345,10 @@
           playerNameInput.focus();
         }
       }, 320);
-    });
+    }
+
+    onClick("btn-mode-back", modeBackToName);
+    onClick("btn-mode-back-top", modeBackToName);
 
     onClick("btn-play-online", () => {
       transition(screenMode, screenMenu, "transition-in-from-right");
@@ -5669,6 +5687,7 @@
       goName: goToNameScreen,
       continueName: continueFromNameScreen,
       nameBack: nameBackToStart,
+      modeBack: modeBackToName,
       goMode: goToModeChoice,
       showHostCode: showHostCodeScreen,
       goHost: goHostAndCreatePot,

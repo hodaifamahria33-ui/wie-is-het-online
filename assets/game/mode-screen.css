@@ -392,13 +392,51 @@
 .screen-mode-view.screen,
 .screen-menu-view.screen {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   padding:
-    max(16px, env(safe-area-inset-top))
+    max(52px, calc(env(safe-area-inset-top) + 44px))
     16px
     max(20px, env(safe-area-inset-bottom));
   box-sizing: border-box;
+}
+
+/* Terug altijd zichtbaar (panel is lang met 4 modi) */
+.screen-mode-view .mode-screen-back-top {
+  position: fixed;
+  top: max(12px, env(safe-area-inset-top, 0px) + 8px);
+  left: max(12px, env(safe-area-inset-left, 0px) + 8px);
+  z-index: 430;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0.55rem 1rem 0.6rem;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-radius: 999px;
+  background: rgba(15, 10, 35, 0.88);
+  color: #fef9c3;
+  font-family: "Nunito", "Outfit", sans-serif;
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.screen-mode-view .mode-screen-back-top:hover {
+  background: rgba(49, 46, 129, 0.95);
+  color: #fff;
+  border-color: rgba(251, 191, 36, 0.55);
+}
+
+.screen-mode-view.hidden .mode-screen-back-top {
+  display: none;
 }
 
 .screen-mode-view .lang-picker,
