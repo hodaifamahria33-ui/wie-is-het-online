@@ -112,7 +112,7 @@
       },
     };
     window.WIE_RANKED = {
-      matchmakerUrl: "",
+      matchmakerUrl: "https://wieishet-online-signal.hodaifamahria33.workers.dev/ranked",
       queueTimeoutMs: 22000,
     };
     window.wieSupportReturnTo = "screen-start";
@@ -2567,15 +2567,14 @@
   <script src="assets/game/start-music.js?v=43"></script>
   <script>
     window.WIE_ONLINE = {
-      signalUrl: "",
+      signalUrl: "https://wieishet-online-signal.hodaifamahria33.workers.dev",
       signalUrlCandidates: [
         "https://wieishet-online-signal.hodaifamahria33.workers.dev",
-        "https://wieishet-online-signal.hodaifamahria33-ui.workers.dev",
       ],
     };
   </script>
-  <script src="assets/game/online-config.js?v=1"></script>
-  <script src="assets/game/online-room.js?v=55"></script>
+  <script src="assets/game/online-config.js?v=2"></script>
+  <script src="assets/game/online-room.js?v=56"></script>
   <script src="assets/game/lobby-room.js?v=41"></script>
   <script src="assets/game/character-traits.js?v=59"></script>
   <script src="assets/game/rank-system.js?v=3"></script>
@@ -2715,6 +2714,7 @@
         joinConnected: "Verbonden! Wacht tot de host START GAME drukt.",
         joinWrongCode: "Verkeerde code",
         joinLobbyNotFound: "Verkeerde code",
+        joinHostNotReady: "Host is nog niet online. Laat je vriend eerst op Maak potje drukken en in de lobby blijven.",
         joinFailed: "Kon host niet bereiken. Host moet eerst een potje maken en in de lobby blijven.",
         joinFailedHint: "Zelfde code · zelfde link (hodaifamahria33-ui.github.io). WiFi aan, geen privé-tab.",
         btnJoinRetry: "OPNIEUW VERBINDEN",
@@ -2963,6 +2963,7 @@
         joinConnected: "Connected! Wait for the host to press START GAME.",
         joinWrongCode: "Wrong code",
         joinLobbyNotFound: "Wrong code",
+        joinHostNotReady: "Host is not online yet. Your friend must tap Create game and stay in the lobby.",
         joinFailed: "Could not reach the host. Host must create a game and stay in the lobby.",
         joinFailedHint: "Same code · same link. Use WiFi, not a private browser tab.",
         btnJoinRetry: "RECONNECT",
@@ -3702,7 +3703,7 @@
         () => {
           showJoinedScreen(sessionCode);
           connectGuestWithRetry(sessionCode).catch((e) => {
-            if (isLobbyNotFound(e)) backToJoinWithError("joinWrongCode");
+            if (isLobbyNotFound(e)) backToJoinWithError("joinHostNotReady");
             else setJoinedStatus("joinFailed", true);
           });
         },
@@ -4340,7 +4341,7 @@
         if (window.WieIsHetOnline) WieIsHetOnline.reset();
         sessionMode = "solo";
         if (joinError) {
-          joinError.textContent = isLobbyNotFound(e) ? t("joinWrongCode") : t("joinFailed");
+          joinError.textContent = joinErrorMessage(e);
         }
         screenJoin.classList.remove("hidden");
         if (screenJoined) screenJoined.classList.add("hidden");
@@ -4361,18 +4362,17 @@
       return (
         s.includes("lobby-not-found") ||
         s.includes("peer-unavailable") ||
-        s.includes("unavailable") ||
         s.includes("could not connect") ||
-        s.includes("not found") ||
         s.includes("conn-timeout") ||
         s.includes("conn-closed") ||
         s.includes("no-connection") ||
-        s.includes("peer-timeout") ||
-        s.includes("peerjs-missing") ||
-        s.includes("ws-timeout") ||
-        s.includes("ws-error") ||
-        s.includes("signal-unavailable")
+        s.includes("peer-timeout")
       );
+    }
+
+    function joinErrorMessage(err) {
+      if (isLobbyNotFound(err)) return t("joinHostNotReady");
+      return t("joinFailed");
     }
 
     let joinBusy = false;
@@ -4436,6 +4436,14 @@
             await WieOnlineConfig.discover();
           }
           await WieIsHetOnline.setupHost(pot);
+          if (WieIsHetOnline.getBackend && WieIsHetOnline.getBackend() === "peerjs" && WieIsHetOnline.probeHostOnline) {
+            for (let w = 0; w < 24; w++) {
+              if (gen !== hostConnectGen || sessionMode !== "host" || sessionCode !== pot) return;
+              const live = await WieIsHetOnline.probeHostOnline(pot);
+              if (live === true) break;
+              await new Promise((r) => setTimeout(r, 450));
+            }
+          }
           if (WieIsHetOnline.isHostReady && WieIsHetOnline.isHostReady()) {
             setLobbyHostStatus("ready");
             return;
@@ -4565,8 +4573,12 @@
       sessionMode = "solo";
       if (window.WieIsHetOnline) WieIsHetOnline.reset();
       const msgKey =
-        messageKey === "joinLobbyNotFound" || messageKey === "joinWrongCode"
-          ? "joinWrongCode"
+        messageKey === "joinLobbyNotFound" ||
+        messageKey === "joinWrongCode" ||
+        messageKey === "joinHostNotReady"
+          ? messageKey === "joinWrongCode"
+            ? "joinWrongCode"
+            : "joinHostNotReady"
           : messageKey;
       if (joinError) joinError.textContent = t(msgKey);
       if (joinCodeInput && joinedCode) joinCodeInput.value = joinedCode.textContent.trim();
@@ -4588,7 +4600,7 @@
         if (screenJoined) screenJoined.classList.remove("join-error");
         if (joinError) joinError.textContent = "";
         connectGuestWithRetry(c).catch((e) => {
-          if (isLobbyNotFound(e)) backToJoinWithError("joinWrongCode");
+          if (isLobbyNotFound(e)) backToJoinWithError("joinHostNotReady");
           else setJoinedStatus("joinFailed", true);
         });
       });

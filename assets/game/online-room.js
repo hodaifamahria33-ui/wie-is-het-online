@@ -130,20 +130,26 @@
   }
 
   async function waitForHostPeer(code, maxMs) {
-    const deadline = Date.now() + (maxMs || 18000);
+    const deadline = Date.now() + (maxMs || 45000);
     let falseStreak = 0;
+    let sawHost = false;
     while (Date.now() < deadline) {
       const probe = await probeHostPeer(code);
-      if (probe === true) return true;
+      if (probe === true) {
+        sawHost = true;
+        falseStreak = 0;
+        await sleep(500);
+        return true;
+      }
       if (probe === false) {
         falseStreak += 1;
-        if (falseStreak >= 4) throw new Error("lobby-not-found");
+        if (!sawHost && falseStreak >= 14) throw new Error("lobby-not-found");
       } else {
         falseStreak = 0;
       }
-      await sleep(700);
+      await sleep(650);
     }
-    return false;
+    return sawHost;
   }
 
   function emit(msg) {
@@ -217,10 +223,12 @@
       msg.includes("peer-error") ||
       msg.includes("no-connection") ||
       msg.includes("ws-timeout") ||
-      msg.includes("ws-error") ||
-      msg.includes("signal-unavailable")
+      msg.includes("ws-error")
     ) {
       return new Error("lobby-not-found");
+    }
+    if (msg.includes("signal-unavailable") || msg.includes("signal-server-down")) {
+      return new Error("signal-server-down");
     }
     return err instanceof Error ? err : new Error(msg || "conn-error");
   }
@@ -393,9 +401,7 @@
     return connectRelayHostAt(base, code);
   }
 
-  async function connectRelayGuest(code) {
-    const base = await pickSignalBase();
-    if (!base) throw new Error("signal-unavailable");
+  async function connectRelayGuestAt(base, code) {
     destroyAll();
     backend = "relay";
     role = "guest";
@@ -406,6 +412,12 @@
     await waitForWsOpen(socket, WS_OPEN_TIMEOUT_MS);
     await waitForPeerConnected(RELAY_PAIR_TIMEOUT_MS);
     return { role, roomCode, backend };
+  }
+
+  async function connectRelayGuest(code) {
+    const base = await pickSignalBase();
+    if (!base) throw new Error("signal-unavailable");
+    return connectRelayGuestAt(base, code);
   }
 
   function waitForPeerOpen(peerInstance, ms) {
@@ -660,23 +672,25 @@
     if (!sanitized) throw new Error("empty-code");
 
     await ensureSignalReady();
-    if (signalUrls().length) {
-      for (let i = 0; i < 4; i++) {
+    const relayBase = await pickSignalBase();
+    if (relayBase) {
+      for (let i = 0; i < 2; i++) {
         try {
           if (i > 0) {
             destroyAll();
-            await sleep(900);
+            await sleep(700);
           }
-          return await connectRelayGuest(sanitized);
+          return await connectRelayGuestAt(relayBase, sanitized);
         } catch (e) {
           console.warn("relay guest", i + 1, e);
-          if (String(e.message).includes("lobby-not-found")) throw e;
+          const msg = String(e && e.message ? e.message : e);
+          if (msg.includes("lobby-not-found")) throw e;
         }
       }
     }
 
     try {
-      await waitForHostPeer(sanitized, 20000);
+      await waitForHostPeer(sanitized, 50000);
     } catch (e) {
       if (String(e.message).includes("lobby-not-found")) throw e;
     }

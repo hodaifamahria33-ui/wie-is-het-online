@@ -21,7 +21,7 @@ try {
   if ($out -notmatch "https://[^\s]+\.workers\.dev") {
     throw "Deploy mislukt of geen workers.dev URL in output. Run: npx wrangler login"
   }
-  $url = ([regex]::Match($out, "https://[a-z0-9\-]+\.workers\.dev")).Value
+  $url = ([regex]::Match($out, "https://[^\s]+\.workers\.dev")).Value
   if (-not $url) { throw "Kon worker URL niet parsen." }
   Write-Host "Worker URL: $url"
 
@@ -34,8 +34,20 @@ try {
   }
   Set-Content -Path $indexHtml -Value $html -Encoding UTF8 -NoNewline
   Write-Host "index.html bijgewerkt met signalUrl + matchmakerUrl"
+
+  $cfgJs = Join-Path $root "assets\game\online-config.js"
+  if (Test-Path $cfgJs) {
+    $cfg = Get-Content $cfgJs -Raw -Encoding UTF8
+    if ($cfg -notmatch [regex]::Escape($url)) {
+      $cfg = $cfg -replace '(DEFAULT_CANDIDATES\s*=\s*\[\s*\r?\n)', "`$1    `"$url`",`r`n"
+    }
+    Set-Content -Path $cfgJs -Value $cfg -Encoding UTF8 -NoNewline
+    Write-Host "online-config.js bijgewerkt"
+  }
+
   Write-Host ""
-  Write-Host "Volgende stap: git add index.html && git commit && git push"
+  Write-Host "Test: $url/health"
+  Write-Host "Volgende stap: git push (index.html + assets/game/online-*.js)"
 } finally {
   Pop-Location
 }

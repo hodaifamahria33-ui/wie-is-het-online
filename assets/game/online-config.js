@@ -4,7 +4,6 @@
 (function () {
   const DEFAULT_CANDIDATES = [
     "https://wieishet-online-signal.hodaifamahria33.workers.dev",
-    "https://wieishet-online-signal.hodaifamahria33-ui.workers.dev",
   ];
 
   function bases() {
@@ -35,24 +34,24 @@
   }
 
   async function discover() {
-    if (window.WIE_ONLINE && window.WIE_ONLINE.signalUrl) {
-      if (!window.WIE_RANKED) window.WIE_RANKED = {};
-      if (!window.WIE_RANKED.matchmakerUrl) {
-        window.WIE_RANKED.matchmakerUrl =
-          String(window.WIE_ONLINE.signalUrl).replace(/\/$/, "") + "/ranked";
-      }
-      return window.WIE_ONLINE.signalUrl;
-    }
-    for (const base of bases()) {
+    window.WIE_ONLINE = window.WIE_ONLINE || {};
+    window.WIE_RANKED = window.WIE_RANKED || {};
+
+    const ordered = bases();
+    for (const base of ordered) {
       if (await probe(base)) {
-        window.WIE_ONLINE = window.WIE_ONLINE || {};
         window.WIE_ONLINE.signalUrl = base;
-        window.WIE_RANKED = window.WIE_RANKED || {};
         window.WIE_RANKED.matchmakerUrl = base + "/ranked";
         window.WIE_ONLINE.__discovered = true;
+        window.WIE_ONLINE.__signalLive = true;
         return base;
       }
     }
+
+    window.WIE_ONLINE.signalUrl = "";
+    window.WIE_RANKED.matchmakerUrl = "";
+    window.WIE_ONLINE.__discovered = false;
+    window.WIE_ONLINE.__signalLive = false;
     return null;
   }
 
