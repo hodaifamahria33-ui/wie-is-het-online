@@ -58,7 +58,7 @@
   <link rel="stylesheet" href="assets/game/character-variety.css?v=55" />
   <link rel="stylesheet" href="assets/game/game-extras.css?v=62" />
   <link rel="stylesheet" href="assets/game/game-mobile.css?v=16" />
-  <link rel="stylesheet" href="assets/game/game-features.css?v=1" />
+  <link rel="stylesheet" href="assets/game/game-features.css?v=2" />
   <link rel="stylesheet" href="assets/game/orientation-lock.css?v=7" />
   <link rel="stylesheet" href="assets/game/answer-coach.css?v=1" />
   <link rel="stylesheet" href="assets/game/rank-ui.css?v=6" />
@@ -321,6 +321,8 @@
         return;
       }
       if (window.WieGameFeatures) WieGameFeatures.setCardMode("full");
+      refreshActiveCardNames();
+      updateBotDiffDailyNote();
       window.wieShowScreen("screen-mode", "screen-bot-diff");
     };
     window.wieGoPlayRanked = function () {
@@ -348,6 +350,8 @@
         return;
       }
       if (window.WieGameFeatures) WieGameFeatures.setCardMode("daily");
+      refreshActiveCardNames();
+      updateBotDiffDailyNote();
       window.wieShowScreen("screen-mode", "screen-bot-diff");
     };
     window.wieShowScreen = function (fromId, toId) {
@@ -2181,6 +2185,7 @@
       <p class="mode-kicker" data-i18n="botDiffKicker">Solo tegen de bot</p>
       <h2 data-i18n-html="botDiffTitle">Kies je <span class="mode-accent">niveau</span></h2>
       <p class="mode-sub" data-i18n="botDiffSub">Hoe slim moet de tegenstander zijn?</p>
+      <p id="bot-diff-daily-note" class="mode-sub mode-daily-note hidden" aria-live="polite"></p>
       <button id="btn-bot-easy" class="btn mode-btn mode-btn--easy" type="button" data-i18n="btnEasy" onclick="window.wieStartBotGame('easy')">Makkelijk</button>
       <button id="btn-bot-medium" class="btn mode-btn mode-btn--medium" type="button" data-i18n="btnMedium" onclick="window.wieStartBotGame('medium')">Gemiddeld</button>
       <button id="btn-bot-hard" class="btn mode-btn mode-btn--hard" type="button" data-i18n="btnHard" onclick="window.wieStartBotGame('hard')">Moeilijk</button>
@@ -2622,7 +2627,7 @@
     };
   </script>
   <script src="assets/game/online-config.js?v=3"></script>
-  <script src="assets/game/online-room.js?v=59"></script>
+  <script src="assets/game/online-room.js?v=60"></script>
   <script src="assets/game/lobby-room.js?v=41"></script>
   <script src="assets/game/character-traits.js?v=61"></script>
   <script src="assets/game/rank-system.js?v=3"></script>
@@ -2631,8 +2636,8 @@
   <script src="assets/game/stripe-donate.js?v=1"></script>
   <script src="assets/game/orientation-lock.js?v=10"></script>
   <script src="assets/game/game-sounds.js?v=1"></script>
-  <script src="assets/game/game-features.js?v=1"></script>
-  <script src="assets/game/game-play.js?v=66"></script>
+  <script src="assets/game/game-features.js?v=2"></script>
+  <script src="assets/game/game-play.js?v=67"></script>
 
   <script>
     const I18N = {
@@ -2676,6 +2681,7 @@
         botTipPick: "Tip: tik één personage als jouw geheim.",
         botTipAsk: "Tip: stel een vraag, bv. “Is het een jongen?”",
         botTipGuess: "Tip: zeker? Tik de schatkist links om te raden.",
+        dailyBotSub: "📅 Daily {date} — {count} personages (zelfde bord voor iedereen vandaag)",
         lobbyEmotesLabel: "Snelle reacties",
         soundToggleAria: "Geluid aan of uit",
         btnPlayAgainLobby: "Nog een potje (lobby)",
@@ -2952,6 +2958,7 @@
         botTipPick: "Tip: tap one character as your secret.",
         botTipAsk: "Tip: ask a question, e.g. “Is it a boy?”",
         botTipGuess: "Tip: sure? Tap the chest on the left to guess.",
+        dailyBotSub: "📅 Daily {date} — {count} characters (same board for everyone today)",
         lobbyEmotesLabel: "Quick reactions",
         soundToggleAria: "Sound on or off",
         btnPlayAgainLobby: "Another round (lobby)",
@@ -3522,6 +3529,37 @@
       } else {
         CARD_NAMES = CARD_NAMES_BASE.slice();
       }
+      const isDaily =
+        window.WieGameFeatures && WieGameFeatures.getCardMode() === "daily";
+      document.documentElement.classList.toggle("wie-daily-challenge", isDaily);
+      if (gameTable) gameTable.classList.toggle("game-table--daily", isDaily);
+    }
+
+    function syncPlayCardNames() {
+      initGamePlay();
+      if (window.WieIsHetPlay && typeof WieIsHetPlay.syncCardNames === "function") {
+        WieIsHetPlay.syncCardNames(CARD_NAMES);
+      }
+    }
+
+    function updateBotDiffDailyNote() {
+      const note = document.getElementById("bot-diff-daily-note");
+      if (!note || !window.WieGameFeatures) return;
+      if (WieGameFeatures.getCardMode() === "daily") {
+        const names = WieGameFeatures.getDailyCardNames
+          ? WieGameFeatures.getDailyCardNames(CARD_NAMES_BASE)
+          : CARD_NAMES;
+        const dateLabel = WieGameFeatures.getDailyLabel
+          ? WieGameFeatures.getDailyLabel()
+          : "";
+        note.textContent = t("dailyBotSub")
+          .replace("{date}", dateLabel)
+          .replace("{count}", String(names.length || 16));
+        note.classList.remove("hidden");
+      } else {
+        note.textContent = "";
+        note.classList.add("hidden");
+      }
     }
 
     function cardAvatarUrl(name) {
@@ -3606,9 +3644,13 @@
       const container = document.getElementById("countdown-photos");
       if (!container) return;
       container.innerHTML = "";
-      const slots = [0, 3, 7, 11, 15, 19, 23, 27];
+      const n = CARD_NAMES.length;
+      const slots =
+        n <= 16
+          ? [0, 2, 4, 6, 8, 10, 12, 14].map((i) => Math.min(i, n - 1))
+          : [0, 3, 7, 11, 15, 19, 23, 27];
       slots.forEach((idx, i) => {
-        const name = CARD_NAMES[idx % CARD_NAMES.length];
+        const name = CARD_NAMES[idx % n];
         const art = document.createElement("article");
         art.className = "countdown-polaroid cp" + (i + 1);
         const img = document.createElement("img");
@@ -3634,13 +3676,14 @@
         gameCountdown.classList.add("hidden");
         gameCountdown.style.display = "";
       }
+      refreshActiveCardNames();
       buildGameBoards();
       if (gameTable) gameTable.classList.remove("hidden");
       if (screenGame) {
         screenGame.classList.remove("hidden");
         screenGame.classList.add("game-session-active");
       }
-      initGamePlay();
+      syncPlayCardNames();
       if (window.WieIsHetPlay) {
         WieIsHetPlay.wireBoards();
         try {
@@ -4011,6 +4054,7 @@
       clearCountdown();
       refreshActiveCardNames();
       buildGameBoards();
+      syncPlayCardNames();
       if (window.WieIsHetPlay) {
         try {
           WieIsHetPlay.reset();

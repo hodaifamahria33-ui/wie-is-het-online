@@ -149,6 +149,29 @@ html.wie-phone-landscape-game .game-coach-tip {
   border-color: rgba(251, 191, 36, 0.45);
 }
 
+.mode-daily-note {
+  color: #fde68a !important;
+  font-weight: 800;
+}
+
+/* Daily: 16 kaarten = 4×4 raster */
+html.wie-daily-challenge #game-table .opponent-board-back,
+html.wie-daily-challenge #game-table .player-board {
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  grid-template-rows: repeat(4, minmax(0, 1fr)) !important;
+  aspect-ratio: 1 / 1.05;
+  max-width: min(72vw, 420px);
+  margin: 0 auto;
+}
+
+html.wie-phone-landscape-game.wie-daily-challenge #game-table .opponent-board-back,
+html.wie-phone-landscape-game.wie-daily-challenge #game-table .player-board {
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  grid-template-rows: repeat(4, minmax(0, 1fr)) !important;
+  aspect-ratio: 4 / 4.2;
+  max-width: var(--game-board-width);
+}
+
 .btn-start-quick {
   display: block;
   width: min(100%, 280px);

@@ -1922,6 +1922,9 @@
       }
     },
     wireBoards,
+    syncCardNames(names) {
+      cardNames = Array.isArray(names) ? names.slice() : [];
+    },
     beginPickSecretPhase,
     reset,
     hideEndOverlay,

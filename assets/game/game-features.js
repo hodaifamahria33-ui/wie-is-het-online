@@ -199,6 +199,10 @@
   window.WieGameFeatures = {
     init() {
       cardMode = localStorage.getItem(CARD_MODE_KEY) || "full";
+      document.documentElement.classList.toggle(
+        "wie-daily-challenge",
+        cardMode === "daily"
+      );
       mountTutorial();
       mountCoachTip();
       mountSoundToggle();
@@ -211,6 +215,10 @@
     setCardMode(mode) {
       cardMode = mode === "daily" ? "daily" : "full";
       localStorage.setItem(CARD_MODE_KEY, cardMode);
+      document.documentElement.classList.toggle(
+        "wie-daily-challenge",
+        cardMode === "daily"
+      );
     },
 
     getCardMode() {
@@ -222,7 +230,16 @@
       if (cardMode !== "daily" || list.length < 17) return list;
       const h = hashDate(new Date());
       const idx = pickDailyIndices(list.length, 16, h);
-      return idx.map((i) => list[i]);
+      const picked = idx.map((i) => list[i]).filter(Boolean);
+      return picked.length >= 16 ? picked.slice(0, 16) : list;
+    },
+
+    getDailyCardNames(fullList) {
+      const prev = cardMode;
+      cardMode = "daily";
+      const names = this.getActiveCardNames(fullList);
+      cardMode = prev;
+      return names;
     },
 
     getDailyLabel() {
