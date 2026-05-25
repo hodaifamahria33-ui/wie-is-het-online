@@ -286,9 +286,7 @@
       }
       if (window.wiePendingDaily) {
         window.wiePendingDaily = false;
-        if (window.WieGameFeatures) WieGameFeatures.setCardMode("daily");
-        if (typeof window.wieRefreshCardSetup === "function") window.wieRefreshCardSetup();
-        window.wieShowScreen("screen-name", "screen-bot-diff");
+        if (window.wieApp && window.wieApp.continueName) return window.wieApp.continueName();
         return;
       }
       var nameScreen = document.getElementById("screen-name");
@@ -323,12 +321,11 @@
       window.wieShowScreen("screen-mode", "screen-menu");
     };
     window.wieGoPlayBot = function () {
+      if (window.wieApp && window.wieApp.goToBotDiff) return window.wieApp.goToBotDiff();
       if (!window.wieSavedName()) {
         window.wieGoBegin();
         return;
       }
-      if (window.WieGameFeatures) WieGameFeatures.setCardMode("full");
-      if (typeof window.wieRefreshCardSetup === "function") window.wieRefreshCardSetup();
       window.wieShowScreen("screen-mode", "screen-bot-diff");
     };
     window.wieGoPlayRanked = function () {
@@ -351,13 +348,12 @@
       if (window.wieApp && window.wieApp.startBotGame) window.wieApp.startBotGame("easy");
     };
     window.wieStartDaily = function () {
+      if (window.wieApp && window.wieApp.goToDaily) return window.wieApp.goToDaily();
       if (!window.wieSavedName()) {
         window.wiePendingDaily = true;
         window.wieGoBegin();
         return;
       }
-      if (window.WieGameFeatures) WieGameFeatures.setCardMode("daily");
-      if (typeof window.wieRefreshCardSetup === "function") window.wieRefreshCardSetup();
       window.wieShowScreen("screen-mode", "screen-bot-diff");
     };
     window.wieShowScreen = function (fromId, toId) {
@@ -2130,7 +2126,7 @@
             <span class="mode-choice-desc" data-i18n="modeOnlineDesc">Speel tegen echte mensen online</span>
           </span>
         </button>
-        <button id="btn-play-bot" class="mode-choice mode-choice--bot" type="button" onclick="window.wieGoPlayBot()">
+        <button id="btn-play-bot" class="mode-choice mode-choice--bot" type="button">
           <span class="mode-choice-icon" aria-hidden="true">🤖</span>
           <span class="mode-choice-text">
             <span class="mode-choice-label" data-i18n="btnPlayBot">Tegen de bot</span>
@@ -2144,7 +2140,7 @@
             <span class="mode-choice-desc" data-i18n="modeRankedDesc">Win ranked punten &amp; stijg in rank</span>
           </span>
         </button>
-        <button id="btn-daily-challenge" class="mode-choice mode-choice--daily" type="button" onclick="window.wieStartDaily()">
+        <button id="btn-daily-challenge" class="mode-choice mode-choice--daily" type="button">
           <span class="mode-choice-icon" aria-hidden="true">📅</span>
           <span class="mode-choice-text">
             <span class="mode-choice-label" data-i18n="btnDailyChallenge">Daily challenge</span>
@@ -2642,7 +2638,7 @@
   <script src="assets/game/stripe-donate.js?v=1"></script>
   <script src="assets/game/orientation-lock.js?v=10"></script>
   <script src="assets/game/game-sounds.js?v=1"></script>
-  <script src="assets/game/game-features.js?v=3"></script>
+  <script src="assets/game/game-features.js?v=4"></script>
   <script src="assets/game/game-play.js?v=67"></script>
 
   <script>
@@ -3403,15 +3399,10 @@
       }
       if (window.wiePendingDaily) {
         window.wiePendingDaily = false;
-        if (window.WieGameFeatures) WieGameFeatures.setCardMode("daily");
-        refreshActiveCardNames();
-        updateBotDiffDailyNote();
         busy = false;
-        if (screenName) screenName.classList.add("hidden");
-        if (screenBotDiff) screenBotDiff.classList.remove("hidden");
-        document.querySelectorAll("main.screen").forEach((el) => {
-          if (el !== screenBotDiff) el.classList.add("hidden");
-        });
+        if (window.WieGameFeatures) WieGameFeatures.setCardMode("daily");
+        updateBotDiffDailyNote();
+        transition(screenName, screenBotDiff, "transition-in-from-right");
         return;
       }
       busy = false;
@@ -3438,6 +3429,29 @@
           : screenStart;
       transition(from, screenMode, "transition-in-from-right");
       setTimeout(refreshRankDisplays, 340);
+    }
+
+    function goToBotDiffScreen() {
+      if (busy) return;
+      if (!getSavedPlayerName()) {
+        goToNameScreen();
+        return;
+      }
+      if (window.WieGameFeatures) WieGameFeatures.setCardMode("full");
+      updateBotDiffDailyNote();
+      transition(screenMode, screenBotDiff, "transition-in-from-right");
+    }
+
+    function goToDailyChallenge() {
+      if (busy) return;
+      if (!getSavedPlayerName()) {
+        window.wiePendingDaily = true;
+        goToNameScreen();
+        return;
+      }
+      if (window.WieGameFeatures) WieGameFeatures.setCardMode("daily");
+      updateBotDiffDailyNote();
+      transition(screenMode, screenBotDiff, "transition-in-from-right");
     }
 
     if (playerNameInput) {
@@ -4935,9 +4949,8 @@
       transition(screenMode, screenMenu, "transition-in-from-right");
     });
 
-    onClick("btn-play-bot", () => {
-      transition(screenMode, screenBotDiff, "transition-in-from-right");
-    });
+    onClick("btn-play-bot", goToBotDiffScreen);
+    onClick("btn-daily-challenge", goToDailyChallenge);
 
     onClick("btn-play-ranked", goToRankedScreen);
 
@@ -5282,6 +5295,8 @@
       joinWithCode: doJoinWithCode,
       connectGuest: connectGuestWithRetry,
       startBotGame,
+      goToBotDiff: goToBotDiffScreen,
+      goToDaily: goToDailyChallenge,
       startRankedSearch,
       goRanked: goToRankedScreen,
       startSoloGame,

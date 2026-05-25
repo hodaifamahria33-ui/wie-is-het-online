@@ -199,10 +199,6 @@
   window.WieGameFeatures = {
     init() {
       cardMode = localStorage.getItem(CARD_MODE_KEY) || "full";
-      document.documentElement.classList.toggle(
-        "wie-daily-challenge",
-        cardMode === "daily"
-      );
       mountTutorial();
       mountCoachTip();
       mountSoundToggle();
@@ -215,10 +211,6 @@
     setCardMode(mode) {
       cardMode = mode === "daily" ? "daily" : "full";
       localStorage.setItem(CARD_MODE_KEY, cardMode);
-      document.documentElement.classList.toggle(
-        "wie-daily-challenge",
-        cardMode === "daily"
-      );
     },
 
     getCardMode() {
