@@ -11,6 +11,8 @@
   let pendingStarts = [];
   let landscapeStableTimer = null;
   let pendingPortraitReturn = false;
+  let chestHomeParent = null;
+  let chestHomeBefore = null;
 
   function isGameScreenActive() {
     return screenGame && !screenGame.classList.contains("hidden");
@@ -119,8 +121,36 @@
     update();
   }
 
+  function syncOpponentChestDock() {
+    const chest = document.getElementById("opponent-chest");
+    const giveUp = document.getElementById("btn-give-up");
+    if (!chest || !screenGame) return;
+
+    const home = document.querySelector("#game-table .player-play-area");
+    const boardFront = home && home.querySelector(".board-stand--front");
+
+    if (isPhoneLike()) {
+      if (!chestHomeParent && home && boardFront) {
+        chestHomeParent = home;
+        chestHomeBefore = boardFront;
+      }
+      if (chest.parentElement !== screenGame) {
+        if (giveUp) screenGame.insertBefore(chest, giveUp);
+        else screenGame.appendChild(chest);
+      }
+      chest.classList.add("opponent-chest--phone-dock");
+    } else {
+      if (chestHomeParent && chestHomeBefore && chest.parentElement !== chestHomeParent) {
+        chestHomeParent.insertBefore(chest, chestHomeBefore);
+      }
+      chest.classList.remove("opponent-chest--phone-dock");
+    }
+  }
+
   function update() {
     if (!overlay) return;
+
+    syncOpponentChestDock();
 
     if (pendingPortraitReturn && !isLandscapeLike()) {
       pendingPortraitReturn = false;

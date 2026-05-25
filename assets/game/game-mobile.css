@@ -493,22 +493,21 @@ html.wie-phone-landscape-game .lang-globe {
   font-size: 0.95rem;
 }
 
-html.wie-phone-landscape-game .screen-game-view.phase-pick-secret #opponent-chest,
-html.wie-phone-landscape-game .screen-game-view.phase-pick-secret #game-table .opponent-chest {
+html.wie-phone-landscape-game .screen-game-view.phase-pick-secret #opponent-chest {
   opacity: 0 !important;
   visibility: hidden !important;
   pointer-events: none !important;
 }
 
-/* Linker dock: grote raad-kist links midden (OPGEVEN blijft linksonder) */
-html.wie-phone-landscape-game #game-table .opponent-chest {
+/* Raad-kist buiten bord-DOM: vast links boven OPGEVEN */
+#screen-game #opponent-chest.opponent-chest--phone-dock {
   position: fixed !important;
   left: max(6px, env(safe-area-inset-left)) !important;
   right: auto !important;
-  top: 50% !important;
-  bottom: auto !important;
-  transform: translateY(-50%) !important;
-  width: var(--landscape-chest-w) !important;
+  top: auto !important;
+  bottom: calc(max(6px, env(safe-area-inset-bottom)) + 46px) !important;
+  transform: none !important;
+  width: clamp(80px, 20vh, 108px) !important;
   z-index: 37 !important;
   margin: 0 !important;
   display: flex !important;
@@ -521,20 +520,27 @@ html.wie-phone-landscape-game #game-table .opponent-chest {
   filter: drop-shadow(0 10px 28px rgba(0, 0, 0, 0.65));
 }
 
-html.wie-phone-landscape-game #game-table .opponent-chest .side-dock-label--guess {
+html.wie-phone-landscape-game #screen-game #opponent-chest.opponent-chest--phone-dock {
+  width: var(--landscape-chest-w) !important;
+  bottom: calc(
+    max(6px, env(safe-area-inset-bottom)) + var(--landscape-give-up-h) + 8px
+  ) !important;
+}
+
+#screen-game #opponent-chest.opponent-chest--phone-dock .side-dock-label--guess {
   display: block;
   font-size: clamp(0.5rem, 2vh, 0.62rem) !important;
 }
 
-html.wie-phone-landscape-game #game-table .opponent-chest .chest-visual {
+#screen-game #opponent-chest.opponent-chest--phone-dock .chest-visual {
   width: 100% !important;
-  min-height: calc(var(--landscape-chest-w) * 1.08);
+  min-height: calc(var(--landscape-chest-w, 96px) * 1.08);
   aspect-ratio: 4 / 5 !important;
   border-radius: 14px !important;
   border-width: 4px !important;
 }
 
-html.wie-phone-landscape-game #game-table .opponent-chest .chest-avatar {
+#screen-game #opponent-chest.opponent-chest--phone-dock .chest-avatar {
   width: 92% !important;
   height: 92% !important;
   object-fit: cover !important;
@@ -542,35 +548,35 @@ html.wie-phone-landscape-game #game-table .opponent-chest .chest-avatar {
   margin-top: 4% !important;
 }
 
-html.wie-phone-landscape-game #game-table .opponent-chest .chest-label {
+#screen-game #opponent-chest.opponent-chest--phone-dock .chest-label {
   display: block !important;
   font-size: clamp(0.44rem, 1.6vh, 0.56rem) !important;
   margin-top: 0 !important;
 }
 
-html.wie-phone-landscape-game #game-table .opponent-chest.chest-guess-ready .chest-visual {
+#screen-game #opponent-chest.opponent-chest--phone-dock.chest-guess-ready .chest-visual {
   box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.55), 0 0 22px rgba(250, 204, 21, 0.35) !important;
 }
 
-html.wie-phone-landscape-game #game-table .opponent-chest.chest-revealed {
-  width: var(--landscape-chest-w) !important;
+#screen-game #opponent-chest.opponent-chest--phone-dock.chest-revealed {
+  width: var(--landscape-chest-w, 96px) !important;
 }
 
-html.wie-phone-landscape-game #game-table .opponent-chest.chest-revealed .chest-visual {
+#screen-game #opponent-chest.opponent-chest--phone-dock.chest-revealed .chest-visual {
   overflow: hidden !important;
 }
 
-html.wie-phone-landscape-game #game-table .chest-reveal-card {
+#screen-game #opponent-chest.opponent-chest--phone-dock .chest-reveal-card {
   width: 100% !important;
   height: 100% !important;
 }
 
-html.wie-phone-landscape-game #game-table .chest-reveal-card .card-face {
+#screen-game #opponent-chest.opponent-chest--phone-dock .chest-reveal-card .card-face {
   width: 100% !important;
   height: 100% !important;
 }
 
-html.wie-phone-landscape-game #game-table .chest-reveal-card .card-name {
+#screen-game #opponent-chest.opponent-chest--phone-dock .chest-reveal-card .card-name {
   font-size: clamp(0.34rem, 1.2vw, 0.46rem) !important;
   padding: 1px !important;
 }
