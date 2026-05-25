@@ -7,7 +7,8 @@
   const CONN_TIMEOUT_MS = 32000;
   const RELAY_PAIR_TIMEOUT_MS = 55000;
   const HOST_PROBE_MS = 3500;
-  const WS_OPEN_TIMEOUT_MS = 22000;
+  const WS_OPEN_TIMEOUT_MS = 12000;
+  const RELAY_PROBE_MS = 4000;
   const PEER_HOST = "0.peerjs.com";
   const PEER_PORT = 443;
   const PEER_PATH = "/peerjs";
@@ -277,24 +278,33 @@
   }
 
   async function probeSignalBase(base) {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), RELAY_PROBE_MS);
     try {
       const res = await fetch(base.replace(/\/$/, "") + "/health", {
         cache: "no-store",
         mode: "cors",
+        signal: ctrl.signal,
       });
       if (!res.ok) return false;
       const data = await res.json().catch(() => ({}));
       return data && data.ok === true;
     } catch (_) {
       return false;
+    } finally {
+      clearTimeout(timer);
     }
   }
 
   async function pickSignalBase() {
-    for (const base of signalUrls()) {
-      if (await probeSignalBase(base)) return base;
-    }
-    return null;
+    const urls = signalUrls();
+    if (!urls.length) return null;
+    const checks = urls.map(async (base) => {
+      const ok = await probeSignalBase(base);
+      return ok ? base : null;
+    });
+    const results = await Promise.all(checks);
+    return results.find(Boolean) || null;
   }
 
   function wsUrlFor(base, code, asRole) {
@@ -363,9 +373,7 @@
     });
   }
 
-  async function connectRelayHost(code) {
-    const base = await pickSignalBase();
-    if (!base) throw new Error("signal-unavailable");
+  async function connectRelayHostAt(base, code) {
     destroyAll();
     backend = "relay";
     role = "host";
@@ -377,6 +385,12 @@
     setConnected(true);
     emit({ type: "connected" });
     return { role, roomCode, backend };
+  }
+
+  async function connectRelayHost(code) {
+    const base = await pickSignalBase();
+    if (!base) throw new Error("signal-unavailable");
+    return connectRelayHostAt(base, code);
   }
 
   async function connectRelayGuest(code) {
@@ -511,20 +525,28 @@
     });
   }
 
-  function createPeerHost(code) {
+  function createPeerHost(code, peerOpts) {
     return new Promise((resolve, reject) => {
       ensurePeerJs();
       destroyAll();
       backend = "peerjs";
       role = "host";
       roomCode = sanitizeCode(code);
-      peer = new Peer(peerId(roomCode), { ...PEER_OPTS });
+      peer = new Peer(peerId(roomCode), { ...(peerOpts || PEER_OPTS) });
       attachHostPeerHandlers();
       waitForPeerOpen(peer, PEER_TIMEOUT_MS)
-        .then(() => resolve({ role, roomCode, backend }))
+        .then(() => {
+          if (!isPeerLive()) throw new Error("peer-timeout");
+          resolve({ role, roomCode, backend });
+        })
         .catch(reject);
     });
   }
+
+  const PEER_HOST_ALT = {
+    ...PEER_OPTS,
+    host: "peerjs.com",
+  };
 
   function joinPeerGuestOnce(code) {
     return new Promise((resolve, reject) => {
@@ -588,37 +610,49 @@
     if (!sanitized) throw new Error("empty-code");
 
     await ensureSignalReady();
-    const bases = signalUrls();
-    if (bases.length) {
-      for (let i = 0; i < 3; i++) {
+
+    const relayBase = await pickSignalBase();
+    if (relayBase) {
+      for (let i = 0; i < 2; i++) {
         try {
           if (i > 0) {
             destroyAll();
-            await sleep(800);
+            await sleep(700);
           }
-          return await connectRelayHost(sanitized);
+          return await connectRelayHostAt(relayBase, sanitized);
         } catch (e) {
           console.warn("relay host", i + 1, e);
         }
       }
     }
 
+    const peerAttempts = [
+      PEER_OPTS,
+      PEER_HOST_ALT,
+      PEER_OPTS,
+    ];
     let lastErr = null;
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < peerAttempts.length; i++) {
       try {
         if (i > 0) {
           destroyAll();
-          await sleep(900 + i * 400);
+          await sleep(800 + i * 300);
         }
-        await createPeerHost(sanitized);
-        if (!isPeerLive()) throw new Error("peer-timeout");
-        return { role: "host", roomCode: sanitized, backend: "peerjs" };
+        return await createPeerHost(sanitized, peerAttempts[i]);
       } catch (e) {
         lastErr = e;
         console.warn("peerjs host", i + 1, e);
       }
     }
     throw lastErr || new Error("peer-error");
+  }
+
+  function isHostReady() {
+    if (role !== "host") return false;
+    if (backend === "relay") {
+      return !!(ws && ws.readyState === WebSocket.OPEN);
+    }
+    return isPeerLive();
   }
 
   async function setupGuest(code) {
@@ -671,16 +705,8 @@
     isOnline: () => role === "host" || role === "guest",
     isHost: () => role === "host",
     isGuest: () => role === "guest",
-    isHostPeerLive: () => {
-      if (role !== "host") return false;
-      if (backend === "relay") return !!(ws && ws.readyState === WebSocket.OPEN);
-      return isPeerLive();
-    },
-    isHostReady: () => {
-      if (role !== "host") return false;
-      if (backend === "relay") return !!(ws && ws.readyState === WebSocket.OPEN);
-      return isPeerLive();
-    },
+    isHostPeerLive: isHostReady,
+    isHostReady,
 
     ensureSignalReady,
     setupHost,

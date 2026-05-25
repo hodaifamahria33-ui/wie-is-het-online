@@ -538,14 +538,14 @@
         window.wieShowOnly("screen-photo-load");
         load.classList.add("active");
         setTimeout(function () {
-          load.classList.remove("active");
-          load.classList.add("hidden");
           if (window.WieIsHetOnline && window.WieIsHetOnline.setupHost) {
             window.WieIsHetOnline.setupHost(code)
               .then(function () {
+                load.classList.remove("active");
+                load.classList.add("hidden");
                 var ok =
-                  (window.WieIsHetOnline.isConnected &&
-                    window.WieIsHetOnline.isConnected()) ||
+                  (window.WieIsHetOnline.isHostReady &&
+                    window.WieIsHetOnline.isHostReady()) ||
                   (window.WieIsHetOnline.isHostPeerLive &&
                     window.WieIsHetOnline.isHostPeerLive());
                 if (ok) finish();
@@ -556,12 +556,16 @@
               })
               .catch(function (e) {
                 console.warn("setupHost", e);
+                load.classList.remove("active");
+                load.classList.add("hidden");
                 if (window.WieIsHetOnline && window.WieIsHetOnline.reset) {
                   window.WieIsHetOnline.reset();
                 }
                 showHostError();
               });
           } else {
+            load.classList.remove("active");
+            load.classList.add("hidden");
             finish();
           }
         }, 1200);
@@ -569,7 +573,7 @@
         window.WieIsHetOnline.setupHost(code)
           .then(function () {
             var ok =
-              (window.WieIsHetOnline.isConnected && window.WieIsHetOnline.isConnected()) ||
+              (window.WieIsHetOnline.isHostReady && window.WieIsHetOnline.isHostReady()) ||
               (window.WieIsHetOnline.isHostPeerLive && window.WieIsHetOnline.isHostPeerLive());
             if (ok) finish();
             else {
@@ -2617,7 +2621,7 @@
     };
   </script>
   <script src="assets/game/online-config.js?v=1"></script>
-  <script src="assets/game/online-room.js?v=53"></script>
+  <script src="assets/game/online-room.js?v=54"></script>
   <script src="assets/game/lobby-room.js?v=41"></script>
   <script src="assets/game/character-traits.js?v=59"></script>
   <script src="assets/game/rank-system.js?v=3"></script>
@@ -2741,6 +2745,7 @@
         btnMakePot: "Potje maken",
         loadingTitle: "Potje wordt gemaakt…",
         loadingSub: "Foto's worden geladen",
+        loadingHostConnect: "Lobby wordt online gezet… even geduld",
         appSplashSub: "Online",
         joinLoadTitle: "Je zit erbij!",
         joinLoadSub: "Lobby wordt geladen…",
@@ -2986,6 +2991,7 @@
         btnMakePot: "Create game",
         loadingTitle: "Creating your game…",
         loadingSub: "Loading photos",
+        loadingHostConnect: "Setting up online lobby… please wait",
         appSplashSub: "Online",
         joinLoadTitle: "You're in!",
         joinLoadSub: "Loading lobby…",
@@ -4189,14 +4195,16 @@
     const joinLoadSub = document.getElementById("join-load-sub");
     const joinLoadCodeEl = document.getElementById("join-load-code");
 
-    function runJoinLoading(code, onDone, kind) {
+    async function runJoinLoading(code, onDone, kind) {
       const isHost = kind === "host";
       const c = String(code || "")
         .toUpperCase()
         .replace(/[^A-Z0-9]/g, "")
         .slice(0, 5);
       if (joinLoadTitle) joinLoadTitle.textContent = isHost ? t("loadingTitle") : t("joinLoadTitle");
-      if (joinLoadSub) joinLoadSub.textContent = isHost ? t("loadingSub") : t("joinLoadSub");
+      if (joinLoadSub) {
+        joinLoadSub.textContent = isHost ? t("loadingHostConnect") : t("joinLoadSub");
+      }
       if (joinLoadCodeEl) {
         joinLoadCodeEl.textContent = c;
         joinLoadCodeEl.style.display = c ? "block" : "none";
@@ -4206,7 +4214,7 @@
       if (barFill) {
         barFill.style.animation = "none";
         void barFill.offsetWidth;
-        barFill.style.animation = "";
+        barFill.style.animation = isHost ? "joinLoadBarPulse 1.4s ease-in-out infinite" : "";
       }
       if (screenPhotoLoad) {
         screenPhotoLoad.style.setProperty("--load-ms", PHOTO_LOAD_MS + "ms");
@@ -4217,17 +4225,19 @@
       }
       screenPhotoLoad.classList.remove("hidden");
       requestAnimationFrame(() => screenPhotoLoad.classList.add("active"));
-      setTimeout(async () => {
-        screenPhotoLoad.classList.remove("active");
-        await new Promise((r) => setTimeout(r, 280));
-        screenPhotoLoad.classList.add("hidden");
-        if (joinedCode) joinedCode.textContent = c || code.toUpperCase();
-        try {
-          await Promise.resolve(onDone());
-        } catch (err) {
-          console.warn("runJoinLoading onDone", err);
-        }
-      }, PHOTO_LOAD_MS);
+      const minShow = isHost ? 900 : PHOTO_LOAD_MS;
+      const started = Date.now();
+      try {
+        await Promise.resolve(onDone());
+      } catch (err) {
+        console.warn("runJoinLoading onDone", err);
+      }
+      const waitLeft = Math.max(0, minShow - (Date.now() - started));
+      if (waitLeft) await new Promise((r) => setTimeout(r, waitLeft));
+      screenPhotoLoad.classList.remove("active");
+      await new Promise((r) => setTimeout(r, 280));
+      screenPhotoLoad.classList.add("hidden");
+      if (joinedCode) joinedCode.textContent = c || code.toUpperCase();
     }
 
     function openGuestJoinLoading(code, connecting) {
@@ -4764,56 +4774,52 @@
       hostPotBusy = true;
       sessionMode = "host";
       sessionCode = pot;
-      const hostReadyPromise =
-        window.WieIsHetOnline && WieIsHetOnline.setupHost
-          ? WieIsHetOnline.setupHost(pot)
-          : Promise.reject(new Error("no-online"));
       runJoinLoading(
         pot,
         async () => {
-          lobbyCode.textContent = pot;
-          busy = false;
-          applyLanguage();
-          let hostOnline = false;
           try {
-            await hostReadyPromise;
-            hostOnline =
-              (WieIsHetOnline.isConnected && WieIsHetOnline.isConnected()) ||
-              (WieIsHetOnline.isHostPeerLive && WieIsHetOnline.isHostPeerLive());
-            if (!hostOnline) {
-              await new Promise((r) => setTimeout(r, 600));
-              hostOnline =
-                (WieIsHetOnline.isConnected && WieIsHetOnline.isConnected()) ||
-                (WieIsHetOnline.isHostPeerLive && WieIsHetOnline.isHostPeerLive());
+            if (joinLoadSub) joinLoadSub.textContent = t("loadingHostConnect");
+            if (!window.WieIsHetOnline || !WieIsHetOnline.setupHost) {
+              throw new Error("no-online");
             }
+            await WieIsHetOnline.setupHost(pot);
+            if (WieIsHetOnline.isHostReady && !WieIsHetOnline.isHostReady()) {
+              await new Promise((r) => setTimeout(r, 500));
+            }
+            if (WieIsHetOnline.isHostReady && !WieIsHetOnline.isHostReady()) {
+              throw new Error("host-not-ready");
+            }
+            lobbyCode.textContent = pot;
+            busy = false;
+            applyLanguage();
+            setLobbyHostStatus(true);
+            wireHostLobby();
+            screenHost.classList.add("hidden");
+            screenHost.classList.remove("transition-out", "transition-active");
+            screenLobby.classList.remove("hidden");
+            screenLobby.classList.add("transition-active");
+            setTimeout(() => screenLobby.classList.remove("transition-active"), 50);
           } catch (e) {
             console.warn("setupHost failed", e);
-            hostOnline = false;
+            failHostPotSetup(pot);
+          } finally {
+            hostPotBusy = false;
           }
-          hostPotBusy = false;
-          if (!hostOnline) {
-            sessionMode = "solo";
-            sessionCode = "";
-            if (WieIsHetOnline) WieIsHetOnline.reset();
-            setLobbyHostStatus(false);
-            screenLobby.classList.add("hidden");
-            screenPhotoLoad.classList.add("hidden");
-            screenHost.classList.remove("hidden");
-            if (hostError) {
-              hostError.textContent = t("lobbyHostFailed");
-            }
-            return;
-          }
-          setLobbyHostStatus(true);
-          wireHostLobby();
-          screenHost.classList.add("hidden");
-          screenHost.classList.remove("transition-out", "transition-active");
-          screenLobby.classList.remove("hidden");
-          screenLobby.classList.add("transition-active");
-          setTimeout(() => screenLobby.classList.remove("transition-active"), 50);
         },
         "host"
       );
+    }
+
+    function failHostPotSetup(pot) {
+      hostPotBusy = false;
+      sessionMode = "solo";
+      sessionCode = "";
+      if (window.WieIsHetOnline) WieIsHetOnline.reset();
+      setLobbyHostStatus(false);
+      if (screenPhotoLoad) screenPhotoLoad.classList.add("hidden");
+      if (screenLobby) screenLobby.classList.add("hidden");
+      if (screenHost) screenHost.classList.remove("hidden");
+      if (hostError) hostError.textContent = t("lobbyHostFailed");
     }
 
     function goHostAndCreatePot() {
