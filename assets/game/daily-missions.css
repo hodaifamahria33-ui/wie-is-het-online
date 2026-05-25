@@ -1,0 +1,261 @@
+/* Dagelijkse challenges scherm */
+
+.screen-daily-missions-view .mode-panel {
+  max-width: min(460px, 94vw);
+}
+
+.screen-daily-missions-view .mode-kicker {
+  color: #fde68a;
+}
+
+.daily-missions-date {
+  margin: 0 0 0.45rem;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #c4b5fd;
+  text-align: center;
+}
+
+.daily-missions-summary {
+  margin: 0 0 1rem;
+  padding: 0.5rem 0.85rem;
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-align: center;
+  color: #fef9c3;
+  background: rgba(120, 53, 15, 0.45);
+  border: 1px solid rgba(251, 191, 36, 0.35);
+  border-radius: 999px;
+}
+
+.daily-missions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+.daily-mission-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.95rem 1rem;
+  border: 2px solid rgba(167, 139, 250, 0.4);
+  border-radius: 18px;
+  background: linear-gradient(
+    145deg,
+    rgba(49, 46, 129, 0.95) 0%,
+    rgba(15, 10, 35, 0.98) 100%
+  );
+  color: #f8fafc;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    transform 0.14s ease,
+    border-color 0.14s ease,
+    box-shadow 0.14s ease;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.4);
+}
+
+.daily-mission-card:hover:not(:disabled) {
+  transform: translateY(-3px);
+  border-color: rgba(250, 204, 21, 0.65);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.5);
+}
+
+.daily-mission-card:active:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.daily-mission-card.is-done {
+  opacity: 0.78;
+  cursor: default;
+  border-color: rgba(34, 197, 94, 0.5);
+  background: linear-gradient(
+    145deg,
+    rgba(20, 83, 45, 0.35) 0%,
+    rgba(15, 10, 35, 0.92) 100%
+  );
+}
+
+.daily-mission-card-icon {
+  font-size: 1.85rem;
+  flex-shrink: 0;
+  width: 2.6rem;
+  text-align: center;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.35));
+}
+
+.daily-mission-card-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.22rem;
+}
+
+.daily-mission-card-title {
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1.2;
+  color: #fff;
+}
+
+.daily-mission-card-desc {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: rgba(226, 232, 240, 0.88);
+  line-height: 1.35;
+}
+
+.daily-mission-card-progress {
+  display: block;
+  height: 6px;
+  margin-top: 0.4rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  overflow: hidden;
+}
+
+.daily-mission-card-bar {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #a855f7, #f59e0b);
+  transition: width 0.35s ease;
+}
+
+.daily-mission-card.is-done .daily-mission-card-bar {
+  background: linear-gradient(90deg, #22c55e, #86efac);
+  width: 100% !important;
+}
+
+.daily-mission-card-meta {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: rgba(253, 224, 71, 0.95);
+  margin-top: 0.2rem;
+  letter-spacing: 0.02em;
+}
+
+.daily-mission-card.is-done .daily-mission-card-meta {
+  color: #86efac;
+}
+
+.daily-mission-card-play,
+.daily-mission-card-check {
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 0.95rem;
+  font-weight: 900;
+  color: #1e1b4b;
+  background: linear-gradient(135deg, #fde047, #f59e0b);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+.daily-mission-card.is-done .daily-mission-card-check {
+  color: #fff;
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+}
+
+/* Speeltimer rechtsboven — elk potje */
+.game-session-timer {
+  position: fixed;
+  top: max(12px, calc(env(safe-area-inset-top, 0px) + 10px));
+  right: max(12px, calc(env(safe-area-inset-right, 0px) + 10px));
+  z-index: 220;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.9rem 0.5rem;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: clamp(0.9rem, 2.8vw, 1.05rem);
+  font-variant-numeric: tabular-nums;
+  color: #fff;
+  background: linear-gradient(
+    135deg,
+    rgba(15, 10, 35, 0.94) 0%,
+    rgba(49, 46, 129, 0.96) 100%
+  );
+  border: 2px solid rgba(250, 204, 21, 0.55);
+  box-shadow:
+    0 8px 28px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+  pointer-events: none;
+  letter-spacing: 0.03em;
+}
+
+.game-session-timer.hidden {
+  display: none !important;
+}
+
+.game-session-timer-icon {
+  font-size: 1rem;
+  opacity: 0.95;
+}
+
+.game-session-timer-value {
+  min-width: 2.8em;
+  text-align: center;
+}
+
+/* Actieve challenge tijdens potje */
+.daily-mission-hud {
+  position: fixed;
+  top: max(54px, calc(env(safe-area-inset-top, 0px) + 50px));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 210;
+  max-width: min(92vw, 380px);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.95rem;
+  border-radius: 999px;
+  font-size: clamp(0.74rem, 2.3vw, 0.84rem);
+  font-weight: 800;
+  color: #fef9c3;
+  background: linear-gradient(
+    135deg,
+    rgba(120, 53, 15, 0.94) 0%,
+    rgba(69, 26, 3, 0.97) 100%
+  );
+  border: 2px solid rgba(251, 191, 36, 0.5);
+  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.45);
+  pointer-events: none;
+  text-align: center;
+}
+
+.daily-mission-hud.hidden {
+  display: none !important;
+}
+
+.daily-mission-hud-text {
+  line-height: 1.25;
+}
+
+@media (max-width: 720px) {
+  .game-session-timer {
+    top: max(10px, calc(env(safe-area-inset-top, 0px) + 8px));
+    right: max(10px, calc(env(safe-area-inset-right, 0px) + 8px));
+    padding: 0.4rem 0.75rem;
+  }
+
+  .daily-mission-hud {
+    top: max(50px, calc(env(safe-area-inset-top, 0px) + 46px));
+    max-width: 88vw;
+  }
+}
+
+html.wie-solo-game .game-turn-badge.is-pick {
+  max-width: 52vw;
+}
+
