@@ -2574,7 +2574,7 @@
     };
   </script>
   <script src="assets/game/online-config.js?v=3"></script>
-  <script src="assets/game/online-room.js?v=58"></script>
+  <script src="assets/game/online-room.js?v=59"></script>
   <script src="assets/game/lobby-room.js?v=41"></script>
   <script src="assets/game/character-traits.js?v=59"></script>
   <script src="assets/game/rank-system.js?v=3"></script>
@@ -4488,16 +4488,13 @@
       hostPotBusy = true;
       if (hostError) hostError.textContent = "";
       if (potCodeInput) potCodeInput.value = pot;
-      sessionMode = "host";
-      sessionCode = pot;
-      if (lobbyCode) lobbyCode.textContent = pot;
       busy = false;
       applyLanguage();
-      try {
-        leaveOnlineSession();
-      } catch (err) {
-        console.warn("leave online", err);
+      if (onlineGameUnsub) {
+        onlineGameUnsub();
+        onlineGameUnsub = null;
       }
+      if (window.WieLobby) WieLobby.reset();
       if (window.WieIsHetOnline) {
         try {
           WieIsHetOnline.reset();
@@ -4505,6 +4502,9 @@
           console.warn("reset online", err);
         }
       }
+      sessionMode = "host";
+      sessionCode = pot;
+      if (lobbyCode) lobbyCode.textContent = pot;
       wireHostLobby();
       document.querySelectorAll("main.screen").forEach((el) => {
         el.classList.remove(
@@ -4541,7 +4541,7 @@
       for (let attempt = 0; attempt < maxAttempts; attempt++) {
         try {
           if (options.onProgress) options.onProgress(attempt, maxAttempts);
-          WieIsHetOnline.reset();
+          if (attempt > 0) WieIsHetOnline.reset();
           await WieIsHetOnline.setupGuest(c);
           if (!WieIsHetOnline.isConnected()) {
             throw new Error("lobby-not-found");

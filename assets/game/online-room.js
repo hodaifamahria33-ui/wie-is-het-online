@@ -435,11 +435,7 @@
   }
 
   async function connectRelayGuestAt(base, code) {
-    lastRelayBase = base;
     const sanitized = sanitizeCode(code);
-    const hostThere = await waitForRelayHostOnline(base, sanitized, RELAY_HOST_WAIT_MS);
-    if (!hostThere) throw new Error("lobby-not-found");
-
     destroyAll();
     lastRelayBase = base;
     backend = "relay";
@@ -679,10 +675,6 @@
       }
     }
 
-    if (hasRelayConfig()) {
-      throw lastErr || new Error("relay-host-failed");
-    }
-
     const peerAttempts = [PEER_OPTS, PEER_HOST_ALT, PEER_OPTS];
     for (let i = 0; i < peerAttempts.length; i++) {
       try {
@@ -732,12 +724,8 @@
       }
     }
 
-    if (hasRelayConfig()) {
-      throw lastErr || new Error("lobby-not-found");
-    }
-
     try {
-      await waitForHostPeer(sanitized, 50000);
+      await waitForHostPeer(sanitized, 35000);
     } catch (e) {
       if (String(e.message).includes("lobby-not-found")) throw e;
     }
