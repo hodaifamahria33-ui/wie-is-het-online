@@ -44,7 +44,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Nunito:wght@600;700;800&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="assets/game/start-screen.css?v=66" />
-  <link rel="stylesheet" href="assets/game/mode-screen.css?v=9" />
+  <link rel="stylesheet" href="assets/game/mode-screen.css?v=10" />
   <link rel="stylesheet" href="assets/game/support-screen.css?v=1" />
   <link rel="stylesheet" href="assets/game/stripe-donate.css?v=1" />
   <link rel="stylesheet" href="assets/game/joined-screen.css?v=5" />
@@ -349,7 +349,6 @@
     window.wieOpenDaily = function (ev) {
       if (ev && ev.preventDefault) ev.preventDefault();
       if (ev && ev.stopPropagation) ev.stopPropagation();
-      if (window.wieApp && window.wieApp.goToDaily) return window.wieApp.goToDaily();
       if (!window.wieSavedName || !window.wieSavedName()) {
         window.wiePendingDaily = true;
         if (window.wieGoBegin) window.wieGoBegin();
@@ -357,24 +356,56 @@
       }
       try {
         if (window.WieGameFeatures) WieGameFeatures.setCardMode("daily");
-        window.wieShowScreen("screen-mode", "screen-bot-diff");
-        if (window.wieApp && window.wieApp.updateDailyNote) window.wieApp.updateDailyNote();
-      } catch (err) {
-        console.error("wieOpenDaily", err);
-        window.wieShowScreen("screen-mode", "screen-bot-diff");
+      } catch (e1) {
+        console.warn("daily setCardMode", e1);
       }
+      window.wieShowScreen("screen-mode", "screen-bot-diff");
+      window.wieShowDailyNote();
     };
     window.wieStartDaily = window.wieOpenDaily;
+    window.wieShowDailyNote = function () {
+      var note = document.getElementById("bot-diff-daily-note");
+      if (!note) return;
+      var lang =
+        localStorage.getItem("wieIsHetLang") === "en" ? "en" : "nl";
+      var d = new Date();
+      var dateLabel = d.toLocaleDateString(lang === "en" ? "en" : "nl", {
+        day: "numeric",
+        month: "short",
+      });
+      if (lang === "en") {
+        note.textContent =
+          "📅 Daily " +
+          dateLabel +
+          " — 16 characters (same board for everyone today)";
+      } else {
+        note.textContent =
+          "📅 Daily " +
+          dateLabel +
+          " — 16 personages (zelfde bord voor iedereen vandaag)";
+      }
+      note.classList.remove("hidden");
+    };
     window.wieShowScreen = function (fromId, toId) {
-      var from = document.getElementById(fromId);
+      var from = fromId ? document.getElementById(fromId) : null;
       var to = document.getElementById(toId);
       if (!to) return;
+      document.documentElement.classList.remove("app-booting");
+      var splash = document.getElementById("screen-app-splash");
+      if (splash) splash.classList.add("hidden");
+      if (window.wieApp && window.wieApp.clearBusy) window.wieApp.clearBusy();
       document.querySelectorAll("main.screen").forEach(function (el) {
+        el.classList.remove(
+          "transition-out",
+          "transition-in-from-right",
+          "transition-in-from-left",
+          "transition-active"
+        );
         if (el !== to) el.classList.add("hidden");
-        el.classList.remove("transition-out", "transition-in-from-right", "transition-in-from-left", "transition-active");
       });
       if (from) from.classList.add("hidden");
       to.classList.remove("hidden");
+      to.classList.add("transition-active");
     };
     window.wieShowOnly = function (screenId) {
       window.wieShowScreen("", screenId);
@@ -3408,11 +3439,16 @@
       }
       if (window.wiePendingDaily) {
         window.wiePendingDaily = false;
+        busy = false;
         if (window.WieGameFeatures) WieGameFeatures.setCardMode("daily");
-        showScreenNow(screenName, screenBotDiff);
-        window.requestAnimationFrame(function () {
-          updateBotDiffDailyNote();
-        });
+        if (typeof window.wieShowScreen === "function") {
+          window.wieShowScreen("screen-name", "screen-bot-diff");
+        } else {
+          showScreenNow(screenName, screenBotDiff);
+        }
+        if (typeof window.wieShowDailyNote === "function") {
+          window.wieShowDailyNote();
+        }
         return;
       }
       busy = false;
@@ -3479,26 +3515,22 @@
     }
 
     function goToDailyChallenge() {
-      try {
-        if (!getSavedPlayerName()) {
-          window.wiePendingDaily = true;
-          goToNameScreen();
-          return;
-        }
-        busy = false;
-        if (window.WieGameFeatures) WieGameFeatures.setCardMode("daily");
-        if (typeof window.wieShowScreen === "function") {
-          window.wieShowScreen("screen-mode", "screen-bot-diff");
-        } else {
-          showScreenNow(screenMode, screenBotDiff);
-        }
+      if (typeof window.wieOpenDaily === "function") {
+        window.wieOpenDaily();
+        return;
+      }
+      busy = false;
+      if (!getSavedPlayerName()) {
+        window.wiePendingDaily = true;
+        goToNameScreen();
+        return;
+      }
+      if (window.WieGameFeatures) WieGameFeatures.setCardMode("daily");
+      showScreenNow(screenMode, screenBotDiff);
+      if (typeof window.wieShowDailyNote === "function") {
+        window.wieShowDailyNote();
+      } else {
         updateBotDiffDailyNote();
-      } catch (err) {
-        console.error("goToDailyChallenge", err);
-        busy = false;
-        if (typeof window.wieShowScreen === "function") {
-          window.wieShowScreen("screen-mode", "screen-bot-diff");
-        }
       }
     }
 
@@ -5322,6 +5354,9 @@
     };
 
     window.wieApp = {
+      clearBusy: function () {
+        busy = false;
+      },
       goName: goToNameScreen,
       continueName: continueFromNameScreen,
       nameBack: nameBackToStart,
