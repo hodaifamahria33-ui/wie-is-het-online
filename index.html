@@ -58,7 +58,7 @@
   <link rel="stylesheet" href="assets/game/character-variety.css?v=55" />
   <link rel="stylesheet" href="assets/game/game-extras.css?v=62" />
   <link rel="stylesheet" href="assets/game/game-mobile.css?v=17" />
-  <link rel="stylesheet" href="assets/game/game-features.css?v=4" />
+  <link rel="stylesheet" href="assets/game/game-features.css?v=5" />
   <link rel="stylesheet" href="assets/game/orientation-lock.css?v=7" />
   <link rel="stylesheet" href="assets/game/answer-coach.css?v=1" />
   <link rel="stylesheet" href="assets/game/rank-ui.css?v=6" />
@@ -285,7 +285,6 @@
         }
       }
       if (window.wiePendingDaily) {
-        window.wiePendingDaily = false;
         if (window.wieApp && window.wieApp.continueName) return window.wieApp.continueName();
         return;
       }
@@ -3399,10 +3398,11 @@
       }
       if (window.wiePendingDaily) {
         window.wiePendingDaily = false;
-        busy = false;
         if (window.WieGameFeatures) WieGameFeatures.setCardMode("daily");
-        updateBotDiffDailyNote();
-        transition(screenName, screenBotDiff, "transition-in-from-right");
+        showScreenNow(screenName, screenBotDiff);
+        window.requestAnimationFrame(function () {
+          updateBotDiffDailyNote();
+        });
         return;
       }
       busy = false;
@@ -3431,6 +3431,34 @@
       setTimeout(refreshRankDisplays, 340);
     }
 
+    let dailyNavLock = false;
+
+    /** Direct schermwissel — geen animatie (voorkomt freeze op mobiel). */
+    function showScreenNow(from, to) {
+      if (!to) return;
+      busy = false;
+      document.querySelectorAll("main.screen").forEach((el) => {
+        el.classList.remove(
+          "transition-out",
+          "transition-in-from-right",
+          "transition-in-from-left",
+          "transition-active"
+        );
+        if (el !== to) el.classList.add("hidden");
+      });
+      if (from) {
+        from.classList.add("hidden");
+        from.classList.remove(
+          "transition-out",
+          "transition-in-from-right",
+          "transition-in-from-left",
+          "transition-active"
+        );
+      }
+      to.classList.remove("hidden");
+      to.classList.add("transition-active");
+    }
+
     function goToBotDiffScreen() {
       if (busy) return;
       if (!getSavedPlayerName()) {
@@ -3443,15 +3471,23 @@
     }
 
     function goToDailyChallenge() {
-      if (busy) return;
+      if (dailyNavLock) return;
+      dailyNavLock = true;
+      window.setTimeout(function () {
+        dailyNavLock = false;
+      }, 450);
+
       if (!getSavedPlayerName()) {
+        dailyNavLock = false;
         window.wiePendingDaily = true;
         goToNameScreen();
         return;
       }
       if (window.WieGameFeatures) WieGameFeatures.setCardMode("daily");
-      updateBotDiffDailyNote();
-      transition(screenMode, screenBotDiff, "transition-in-from-right");
+      showScreenNow(screenMode, screenBotDiff);
+      window.requestAnimationFrame(function () {
+        updateBotDiffDailyNote();
+      });
     }
 
     if (playerNameInput) {
@@ -4898,9 +4934,7 @@
 
     function transition(from, to, enterClass) {
       if (!from || !to) return;
-      if (busy) {
-        busy = false;
-      }
+      if (busy) return;
       busy = true;
 
       to.classList.remove("hidden");

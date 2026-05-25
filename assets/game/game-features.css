@@ -129,6 +129,12 @@ html.wie-phone-landscape-game .game-coach-tip {
   transform: none;
 }
 
+/* Voorkom dubbel-tik / freeze op modus-knoppen */
+.mode-choice {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
 /* Mode: stats + daily */
 .mode-stats-line {
   margin: 0 0 0.65rem;
