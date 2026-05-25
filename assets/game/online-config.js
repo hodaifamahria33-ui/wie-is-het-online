@@ -36,6 +36,8 @@
   async function discover() {
     window.WIE_ONLINE = window.WIE_ONLINE || {};
     window.WIE_RANKED = window.WIE_RANKED || {};
+    const presetUrl = String(window.WIE_ONLINE.signalUrl || "").replace(/\/$/, "");
+    const presetRanked = String(window.WIE_RANKED.matchmakerUrl || "").replace(/\/$/, "");
 
     const ordered = bases();
     for (const base of ordered) {
@@ -48,11 +50,17 @@
       }
     }
 
-    window.WIE_ONLINE.signalUrl = "";
-    window.WIE_RANKED.matchmakerUrl = "";
+    if (presetUrl) {
+      window.WIE_ONLINE.signalUrl = presetUrl;
+      window.WIE_RANKED.matchmakerUrl =
+        presetRanked || presetUrl + "/ranked";
+    } else {
+      window.WIE_ONLINE.signalUrl = "";
+      window.WIE_RANKED.matchmakerUrl = "";
+    }
     window.WIE_ONLINE.__discovered = false;
     window.WIE_ONLINE.__signalLive = false;
-    return null;
+    return presetUrl || null;
   }
 
   window.WieOnlineConfig = {

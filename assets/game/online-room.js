@@ -305,6 +305,12 @@
   }
 
   async function pickSignalBase() {
+    const cfg = window.WIE_ONLINE || {};
+    const preset = cfg.signalUrl ? String(cfg.signalUrl).replace(/\/$/, "") : "";
+    if (preset) {
+      if (await probeSignalBase(preset)) return preset;
+      return preset;
+    }
     const urls = signalUrls();
     if (!urls.length) return null;
     const checks = urls.map(async (base) => {
