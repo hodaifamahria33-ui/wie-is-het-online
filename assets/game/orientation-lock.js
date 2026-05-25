@@ -1,5 +1,6 @@
 /**
- * Mobiel: alleen tijdens het spel landscape; lobby/menu blijft vrij (elke stand).
+ * Mobiel: landscape tijdens spel; na potje terug naar portrait (menu/lobby).
+ * Lobby vóór het spel: geen draai-overlay.
  */
 (function () {
   const PHONE_SHORT_SIDE_PX = 520;
@@ -9,6 +10,7 @@
   let overlay = null;
   let pendingStarts = [];
   let landscapeStableTimer = null;
+  let pendingPortraitReturn = false;
 
   function isGameScreenActive() {
     return screenGame && !screenGame.classList.contains("hidden");
@@ -31,16 +33,47 @@
     return isGameScreenActive() && isPhoneLike() && !isLandscapeLike();
   }
 
+  function needsRotateToPortrait() {
+    return (
+      pendingPortraitReturn &&
+      !isGameScreenActive() &&
+      isPhoneLike() &&
+      isLandscapeLike()
+    );
+  }
+
   function t(key) {
     return typeof window.wieMsg === "function" ? window.wieMsg(key) : key;
   }
 
-  function applyOverlayCopy() {
+  function applyOverlayCopy(mode) {
     if (!overlay) return;
     const titleEl = document.getElementById("orientation-lock-title");
     const subEl = overlay.querySelector(".orientation-lock-sub");
-    if (titleEl) titleEl.textContent = t("rotatePhoneTitle");
-    if (subEl) subEl.textContent = t("rotatePhoneSub");
+    if (mode === "portrait") {
+      if (titleEl) titleEl.textContent = t("rotatePhoneBackTitle");
+      if (subEl) subEl.textContent = t("rotatePhoneBackSub");
+    } else {
+      if (titleEl) titleEl.textContent = t("rotatePhoneTitle");
+      if (subEl) subEl.textContent = t("rotatePhoneSub");
+    }
+  }
+
+  function onGameScreenVisibilityChange() {
+    if (!screenGame) return;
+    if (isGameScreenActive()) {
+      pendingPortraitReturn = false;
+      return;
+    }
+    if (!isPhoneLike()) {
+      pendingPortraitReturn = false;
+      return;
+    }
+    if (isLandscapeLike()) {
+      pendingPortraitReturn = true;
+    } else {
+      pendingPortraitReturn = false;
+    }
   }
 
   function flushPendingStarts() {
@@ -89,22 +122,39 @@
   function update() {
     if (!overlay) return;
 
+    if (pendingPortraitReturn && !isLandscapeLike()) {
+      pendingPortraitReturn = false;
+    }
+
     const toLandscape = needsRotateToLandscape();
+    const toPortrait = needsRotateToPortrait();
+    const lock = toLandscape || toPortrait;
     const landscapeGame =
       isGameScreenActive() && isPhoneLike() && isLandscapeLike();
 
-    overlay.classList.remove("orientation-lock--to-portrait");
-    overlay.classList.toggle("orientation-lock--to-landscape", toLandscape);
-    if (toLandscape) applyOverlayCopy();
+    overlay.classList.remove(
+      "orientation-lock--to-landscape",
+      "orientation-lock--to-portrait"
+    );
+    if (toLandscape) {
+      overlay.classList.add("orientation-lock--to-landscape");
+      applyOverlayCopy("landscape");
+    } else if (toPortrait) {
+      overlay.classList.add("orientation-lock--to-portrait");
+      applyOverlayCopy("portrait");
+    }
 
-    overlay.classList.toggle("hidden", !toLandscape);
-    overlay.setAttribute("aria-hidden", toLandscape ? "false" : "true");
+    overlay.classList.toggle("hidden", !lock);
+    overlay.setAttribute("aria-hidden", lock ? "false" : "true");
     document.documentElement.classList.toggle("wie-game-portrait-lock", toLandscape);
     document.documentElement.classList.toggle(
       "wie-phone-landscape-game",
       landscapeGame
     );
-    document.documentElement.classList.remove("wie-phone-portrait-return-lock");
+    document.documentElement.classList.toggle(
+      "wie-phone-portrait-return-lock",
+      toPortrait
+    );
 
     if (!toLandscape && landscapeGame) {
       scheduleLandscapeReady();
@@ -118,6 +168,7 @@
     if (!prev || prev.__wieOrientHook) return;
     window.wieShowOnly = function (screenId) {
       prev(screenId);
+      onGameScreenVisibilityChange();
       window.setTimeout(update, 0);
       window.setTimeout(update, 200);
       window.setTimeout(update, 450);
@@ -151,7 +202,10 @@
     }
 
     if (screenGame) {
-      const obs = new MutationObserver(update);
+      const obs = new MutationObserver(() => {
+        onGameScreenVisibilityChange();
+        update();
+      });
       obs.observe(screenGame, { attributes: true, attributeFilter: ["class"] });
     }
 
@@ -163,6 +217,12 @@
     refresh: update,
     waitForLandscape,
     cancelPendingStarts,
+    requestPortraitReturn: function () {
+      if (isPhoneLike() && isLandscapeLike() && !isGameScreenActive()) {
+        pendingPortraitReturn = true;
+        update();
+      }
+    },
     isPhoneLike,
     isLandscapeLike,
     needsRotateLock: needsRotateToLandscape,
