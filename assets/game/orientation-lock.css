@@ -87,6 +87,26 @@
   }
 }
 
+/* Na potje: terug naar portrait */
+.orientation-lock--to-portrait .orientation-lock-icon {
+  animation: orientationPhoneTiltBack 2.2s ease-in-out infinite;
+}
+
+@keyframes orientationPhoneTiltBack {
+  0%,
+  100% {
+    transform: rotate(-90deg) scale(1.04);
+  }
+  40%,
+  55% {
+    transform: rotate(0deg) scale(1.04);
+  }
+}
+
+html.wie-phone-portrait-return-lock {
+  overflow: hidden;
+}
+
 .orientation-lock-title {
   margin: 0 0 0.55rem;
   font-size: clamp(1.15rem, 4.5vw, 1.45rem);

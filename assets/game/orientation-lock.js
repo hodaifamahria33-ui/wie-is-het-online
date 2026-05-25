@@ -1,5 +1,5 @@
 /**
- * Mobiel: bij start potje eerst draaien naar landscape, daarna pas countdown/spel.
+ * Mobiel: landscape om te spelen; na potje weer portrait voor menu.
  */
 (function () {
   const LOCK_CLASS = "orientation-locked";
@@ -13,7 +13,6 @@
     return screenGame && !screenGame.classList.contains("hidden");
   }
 
-  /** Werkt in portrait én landscape (korte zijde van het scherm). */
   function isPhoneLike() {
     const shortSide = Math.min(window.innerWidth, window.innerHeight);
     if (shortSide > PHONE_SHORT_SIDE_PX) return false;
@@ -27,12 +26,33 @@
     return window.innerHeight >= window.innerWidth;
   }
 
-  function needsRotateLock() {
+  function needsRotateToLandscape() {
     return isGameScreenActive() && isPhoneLike() && isPortrait();
   }
 
+  function needsRotateToPortrait() {
+    return !isGameScreenActive() && isPhoneLike() && !isPortrait();
+  }
+
+  function t(key) {
+    return typeof window.wieMsg === "function" ? window.wieMsg(key) : key;
+  }
+
+  function applyOverlayCopy(mode) {
+    if (!overlay) return;
+    const titleEl = document.getElementById("orientation-lock-title");
+    const subEl = overlay.querySelector(".orientation-lock-sub");
+    if (mode === "portrait") {
+      if (titleEl) titleEl.textContent = t("rotatePhoneBackTitle");
+      if (subEl) subEl.textContent = t("rotatePhoneBackSub");
+    } else if (mode === "landscape") {
+      if (titleEl) titleEl.textContent = t("rotatePhoneTitle");
+      if (subEl) subEl.textContent = t("rotatePhoneSub");
+    }
+  }
+
   function flushPendingStarts() {
-    if (needsRotateLock()) return;
+    if (needsRotateToLandscape()) return;
     const run = pendingStarts.splice(0);
     run.forEach((fn) => {
       try {
@@ -47,7 +67,6 @@
     pendingStarts = [];
   }
 
-  /** Wacht op landscape op telefoon; anders direct starten. */
   function waitForLandscape(cb) {
     if (typeof cb !== "function") return;
     if (!isPhoneLike() || !isPortrait()) {
@@ -59,18 +78,43 @@
   }
 
   function update() {
-    if (!screenGame || !overlay) return;
-    const lock = needsRotateLock();
+    if (!overlay) return;
+
+    const toLandscape = needsRotateToLandscape();
+    const toPortrait = needsRotateToPortrait();
+    const lock = toLandscape || toPortrait;
     const landscapeGame =
       isGameScreenActive() && isPhoneLike() && !isPortrait();
 
-    screenGame.classList.toggle(LOCK_CLASS, lock);
+    if (screenGame) {
+      screenGame.classList.toggle(LOCK_CLASS, toLandscape);
+    }
+
+    overlay.classList.remove(
+      "orientation-lock--to-landscape",
+      "orientation-lock--to-portrait"
+    );
+    if (toLandscape) {
+      overlay.classList.add("orientation-lock--to-landscape");
+      applyOverlayCopy("landscape");
+    } else if (toPortrait) {
+      overlay.classList.add("orientation-lock--to-portrait");
+      applyOverlayCopy("portrait");
+    }
+
     overlay.classList.toggle("hidden", !lock);
     overlay.setAttribute("aria-hidden", lock ? "false" : "true");
-    document.documentElement.classList.toggle("wie-game-portrait-lock", lock);
-    document.documentElement.classList.toggle("wie-phone-landscape-game", landscapeGame);
+    document.documentElement.classList.toggle("wie-game-portrait-lock", toLandscape);
+    document.documentElement.classList.toggle(
+      "wie-phone-landscape-game",
+      landscapeGame
+    );
+    document.documentElement.classList.toggle(
+      "wie-phone-portrait-return-lock",
+      toPortrait
+    );
 
-    if (!lock) flushPendingStarts();
+    if (toLandscape) flushPendingStarts();
   }
 
   function hookShowOnly() {
@@ -87,7 +131,11 @@
   function init() {
     screenGame = document.getElementById("screen-game");
     overlay = document.getElementById("orientation-lock");
-    if (!screenGame || !overlay) return;
+    if (!overlay) return;
+
+    if (overlay.parentElement !== document.body) {
+      document.body.appendChild(overlay);
+    }
 
     hookShowOnly();
 
@@ -104,8 +152,10 @@
       window.screen.orientation.addEventListener("change", update);
     }
 
-    const obs = new MutationObserver(update);
-    obs.observe(screenGame, { attributes: true, attributeFilter: ["class"] });
+    if (screenGame) {
+      const obs = new MutationObserver(update);
+      obs.observe(screenGame, { attributes: true, attributeFilter: ["class"] });
+    }
 
     update();
     window.setInterval(update, 800);
@@ -116,7 +166,7 @@
     waitForLandscape,
     cancelPendingStarts,
     isPhoneLike,
-    needsRotateLock,
+    needsRotateLock: needsRotateToLandscape,
   };
 
   if (document.readyState === "loading") {

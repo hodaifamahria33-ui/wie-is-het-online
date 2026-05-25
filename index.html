@@ -58,7 +58,7 @@
   <link rel="stylesheet" href="assets/game/character-variety.css?v=55" />
   <link rel="stylesheet" href="assets/game/game-extras.css?v=59" />
   <link rel="stylesheet" href="assets/game/game-mobile.css?v=9" />
-  <link rel="stylesheet" href="assets/game/orientation-lock.css?v=5" />
+  <link rel="stylesheet" href="assets/game/orientation-lock.css?v=6" />
   <link rel="stylesheet" href="assets/game/answer-coach.css?v=1" />
   <link rel="stylesheet" href="assets/game/rank-ui.css?v=6" />
   <link rel="stylesheet" href="assets/game/game-play.css?v=56" />
@@ -2581,7 +2581,7 @@
   <script src="assets/game/ranked-queue.js?v=3"></script>
   <script src="assets/game/answer-coach.js?v=1"></script>
   <script src="assets/game/stripe-donate.js?v=1"></script>
-  <script src="assets/game/orientation-lock.js?v=5"></script>
+  <script src="assets/game/orientation-lock.js?v=6"></script>
   <script src="assets/game/game-play.js?v=65"></script>
 
   <script>
@@ -2745,6 +2745,9 @@
         rotatePhoneTitle: "Draai je telefoon",
         rotatePhoneSub:
           "Leg je telefoon op de zijkant om te spelen. Zo is er meer ruimte voor het bord.",
+        rotatePhoneBackTitle: "Draai je telefoon terug",
+        rotatePhoneBackSub:
+          "Zet je telefoon weer rechtop, zoals je hem normaal vasthoudt.",
         countdownLabel: "Potje start over",
         countdownGo: "START!",
         btnGiveUp: "OPGEVEN",
@@ -2997,6 +3000,9 @@
         rotatePhoneTitle: "Rotate your phone",
         rotatePhoneSub:
           "Turn your phone sideways to play. That gives the board more room.",
+        rotatePhoneBackTitle: "Rotate your phone back",
+        rotatePhoneBackSub:
+          "Hold your phone upright again, the way you normally use it.",
         countdownLabel: "Game starts in",
         countdownGo: "GO!",
         btnGiveUp: "GIVE UP",
@@ -3916,7 +3922,14 @@
       if (window.WieOrientationLock && typeof WieOrientationLock.cancelPendingStarts === "function") {
         WieOrientationLock.cancelPendingStarts();
       }
-      if (window.WieOrientationLock) WieOrientationLock.refresh();
+      if (window.WieOrientationLock) {
+        window.setTimeout(function () {
+          WieOrientationLock.refresh();
+        }, 0);
+        window.setTimeout(function () {
+          WieOrientationLock.refresh();
+        }, 280);
+      }
       clearCountdown();
       if (gameCountdown) {
         gameCountdown.classList.add("hidden");
