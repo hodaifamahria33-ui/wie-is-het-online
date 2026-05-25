@@ -191,6 +191,135 @@ html.wie-phone-landscape-game.wie-daily-challenge #game-table .player-board {
   max-width: var(--game-board-width);
 }
 
+/* Daily op laptop/desktop: plat bord (geen 3D-clip = leeg scherm) */
+html.wie-daily-challenge #game-table:not(.hidden) {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  overflow: visible !important;
+  z-index: 8 !important;
+}
+
+html.wie-daily-challenge #game-table:not(.hidden) .game-scene {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  perspective: none !important;
+  overflow: visible !important;
+  padding-top: calc(env(safe-area-inset-top, 0px) + 64px) !important;
+  padding-bottom: max(20px, env(safe-area-inset-bottom, 16px)) !important;
+}
+
+html.wie-daily-challenge #game-table .opponent-zone {
+  position: relative !important;
+  display: flex !important;
+  justify-content: center !important;
+  width: 100% !important;
+  transform: none !important;
+}
+
+html.wie-daily-challenge #game-table .board-stack {
+  position: relative !important;
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: min(96vw, 500px) !important;
+  transform: none !important;
+  transform-style: flat !important;
+  margin: 0 auto !important;
+}
+
+html.wie-daily-challenge #game-table .board-stand--front,
+html.wie-daily-challenge #game-table .board-stand--rear {
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  transform: none !important;
+  pointer-events: auto !important;
+  width: 100% !important;
+  max-width: min(96vw, 500px) !important;
+  min-width: 0 !important;
+}
+
+html.wie-daily-challenge #game-table .board-stand--rear .board-tray,
+html.wie-daily-challenge #game-table .board-stand--rear .board-base {
+  visibility: visible !important;
+}
+
+html.wie-daily-challenge #game-table .player-play-area {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  width: 100% !important;
+  gap: 0.5rem !important;
+}
+
+html.wie-daily-challenge #game-table .player-board,
+html.wie-daily-challenge #game-table .opponent-board-back {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+html.wie-daily-challenge #game-table .card-well,
+html.wie-daily-challenge #game-table .card-tile,
+html.wie-daily-challenge #game-table .card-face {
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: none !important;
+}
+
+html.wie-daily-challenge .screen-game-view.phase-pick-secret #opponent-chest {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* Solo/bot: zelfde platte layout als daily (PC + iPad landscape) */
+html.wie-solo-game #game-table:not(.hidden) {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  overflow: visible !important;
+  z-index: 8 !important;
+}
+
+html.wie-solo-game #game-table:not(.hidden) .game-scene {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  perspective: none !important;
+  overflow: visible !important;
+}
+
+html.wie-solo-game #game-table .board-stack {
+  min-width: 0 !important;
+  width: 100% !important;
+  max-width: min(99vw, var(--game-board-width)) !important;
+  transform: none !important;
+}
+
+html.wie-solo-game #game-table .board-stand--front {
+  transform: none !important;
+  min-width: 0 !important;
+  max-width: min(99vw, var(--game-board-width)) !important;
+}
+
+html.wie-solo-game #game-table .player-board,
+html.wie-solo-game #game-table .opponent-board-back,
+html.wie-solo-game #game-table .card-well,
+html.wie-solo-game #game-table .card-tile {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+html.wie-solo-game .screen-game-view.phase-pick-secret #opponent-chest {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
 .btn-start-quick {
   display: block;
   width: min(100%, 280px);

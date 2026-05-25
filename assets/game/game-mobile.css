@@ -13,7 +13,7 @@
   display: none !important;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 900px), ((hover: none) or (pointer: coarse)) and (max-width: 1180px) {
   #game-table {
     --game-board-width: min(calc(100vw - 20px), 440px);
     --game-strip-width: 100%;

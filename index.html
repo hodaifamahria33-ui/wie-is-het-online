@@ -54,11 +54,11 @@
   <link rel="stylesheet" href="assets/game/game-drawers.css?v=48" />
   <link rel="stylesheet" href="assets/game/countdown-screen.css?v=2" />
   <link rel="stylesheet" href="assets/game/game-hud.css?v=44" />
-  <link rel="stylesheet" href="assets/game/game-layout.css?v=56" />
+  <link rel="stylesheet" href="assets/game/game-layout.css?v=57" />
   <link rel="stylesheet" href="assets/game/character-variety.css?v=55" />
   <link rel="stylesheet" href="assets/game/game-extras.css?v=62" />
-  <link rel="stylesheet" href="assets/game/game-mobile.css?v=17" />
-  <link rel="stylesheet" href="assets/game/game-features.css?v=5" />
+  <link rel="stylesheet" href="assets/game/game-mobile.css?v=18" />
+  <link rel="stylesheet" href="assets/game/game-features.css?v=7" />
   <link rel="stylesheet" href="assets/game/orientation-lock.css?v=7" />
   <link rel="stylesheet" href="assets/game/answer-coach.css?v=1" />
   <link rel="stylesheet" href="assets/game/rank-ui.css?v=6" />
@@ -1558,8 +1558,16 @@
     .game-table {
       position: absolute;
       inset: 0;
-      overflow: hidden;
+      overflow: visible;
+      z-index: 8;
       --game-board-width: min(99vw, min(calc(96vh * 2.1), 960px));
+    }
+
+    .game-table:not(.hidden) {
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      pointer-events: auto !important;
     }
 
     .game-table.hidden {
@@ -3800,11 +3808,16 @@
         gameCountdown.style.display = "none";
       }
       refreshActiveCardNames();
-      buildGameBoards();
+      ensureBoardBuilt();
       if (gameTable) {
         gameTable.classList.remove("hidden");
+        gameTable.style.display = "block";
         gameTable.style.visibility = "visible";
         gameTable.style.opacity = "1";
+        gameTable.style.pointerEvents = "auto";
+      }
+      if (sessionMode === "solo") {
+        document.documentElement.classList.add("wie-solo-game");
       }
       if (screenGame) {
         screenGame.classList.remove("hidden");
@@ -4055,6 +4068,49 @@
       });
     }
 
+    function ensureBoardBuilt() {
+      refreshActiveCardNames();
+      if (!CARD_NAMES.length) {
+        CARD_NAMES = CARD_NAMES_BASE.slice();
+      }
+      buildGameBoards();
+      const wells = document.querySelectorAll("#player-board .card-well");
+      if (!wells.length && CARD_NAMES.length) {
+        buildGameBoards();
+      }
+      return wells.length || document.querySelectorAll("#player-board .card-well").length;
+    }
+
+    function launchBotGameNow(isDaily) {
+      clearCountdown();
+      if (sessionKickoffGuard) {
+        clearTimeout(sessionKickoffGuard);
+        sessionKickoffGuard = null;
+      }
+      document.documentElement.classList.add("wie-solo-game");
+      if (window.WieIsHetPlay && WieIsHetPlay.hideEndOverlay) {
+        WieIsHetPlay.hideEndOverlay();
+      }
+      try {
+        if (window.WieIsHetPlay) WieIsHetPlay.reset();
+      } catch (err) {
+        console.warn("play reset", err);
+      }
+      ensureBoardBuilt();
+      try {
+        syncPlayCardNames();
+      } catch (err) {
+        console.warn("syncPlayCardNames", err);
+      }
+      if (gameCountdown) {
+        gameCountdown.classList.add("hidden");
+        gameCountdown.style.display = "none";
+        gameCountdown.style.visibility = "hidden";
+        gameCountdown.style.pointerEvents = "none";
+      }
+      finishCountdownStartPlay();
+    }
+
     function startBotGame(difficulty) {
       startingGame = false;
       busy = false;
@@ -4077,26 +4133,25 @@
       } catch (err) {
         console.warn("leave online", err);
       }
-      if (window.WieIsHetPlay && WieIsHetPlay.hideEndOverlay) {
-        WieIsHetPlay.hideEndOverlay();
-      }
       resetGameScreen();
       showGameScreen();
       document.documentElement.classList.remove("app-booting");
-      window.setTimeout(function () {
+      function kickoff() {
         try {
-          startGameSession({ skipCountdown: isDaily, skipTutorial: isDaily });
+          launchBotGameNow(isDaily);
         } catch (err) {
           console.error("startBotGame", err);
           try {
-            refreshActiveCardNames();
-            buildGameBoards();
+            ensureBoardBuilt();
             finishCountdownStartPlay();
           } catch (err2) {
             console.error("startBotGame fallback", err2);
           }
         }
-      }, 0);
+      }
+      requestAnimationFrame(function () {
+        requestAnimationFrame(kickoff);
+      });
     }
 
     function startSoloGame(difficulty) {
@@ -4215,7 +4270,7 @@
         sessionKickoffGuard = null;
       }
       refreshActiveCardNames();
-      buildGameBoards();
+      ensureBoardBuilt();
       try {
         syncPlayCardNames();
       } catch (err) {
@@ -4237,7 +4292,10 @@
         screenGame.classList.remove("hidden");
         screenGame.classList.add("game-session-active");
       }
-      if (gameTable) gameTable.classList.add("hidden");
+      if (gameTable) {
+        gameTable.classList.add("hidden");
+        gameTable.style.display = "none";
+      }
       if (gameCountdown) {
         gameCountdown.classList.remove("hidden");
         gameCountdown.style.display = "flex";
@@ -4297,6 +4355,7 @@
     window.wieBuildBoards = buildGameBoards;
 
     function resetGameScreen() {
+      document.documentElement.classList.remove("wie-solo-game");
       if (window.WieOrientationLock && typeof WieOrientationLock.cancelPendingStarts === "function") {
         WieOrientationLock.cancelPendingStarts();
       }

@@ -10,18 +10,19 @@
 #game-table .game-scene {
   position: absolute;
   inset: 0;
-  display: grid;
-  place-items: center;
-  align-content: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   padding:
     calc(env(safe-area-inset-top, 0px) + 72px)
     8px
     max(22px, env(safe-area-inset-bottom, 16px));
   box-sizing: border-box;
-  perspective: 1100px;
-  perspective-origin: 50% 45%;
+  perspective: none;
+  perspective-origin: 50% 50%;
   transform: none !important;
-  overflow: hidden;
+  overflow: visible;
 }
 
 /* Ruimte voor banner / vraag-popup — bord blijft groot */
@@ -82,10 +83,10 @@
 
 #game-table .board-stack {
   position: relative;
-  width: var(--game-strip-width);
-  max-width: 99vw;
-  min-width: var(--game-board-width);
-  transform-style: preserve-3d;
+  width: 100%;
+  max-width: min(99vw, var(--game-board-width));
+  min-width: 0;
+  transform-style: flat;
   margin: 0 auto;
   transform: none !important;
 }
@@ -107,11 +108,11 @@
   position: relative;
   z-index: 4;
   width: var(--game-board-width);
-  max-width: var(--game-board-width);
-  min-width: var(--game-board-width);
+  max-width: min(99vw, var(--game-board-width));
+  min-width: 0;
   flex: 0 0 auto;
   pointer-events: auto;
-  transform: perspective(900px) rotateX(calc(var(--board-tilt) * -1));
+  transform: none !important;
   transform-origin: center center;
   filter: drop-shadow(0 24px 56px rgba(0, 0, 0, 0.55));
 }
