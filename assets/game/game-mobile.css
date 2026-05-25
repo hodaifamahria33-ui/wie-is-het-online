@@ -273,8 +273,13 @@ html.wie-phone-landscape-game #game-table {
   min-height: 100svh;
 }
 
+html.wie-phone-landscape-game {
+  --landscape-give-up-h: 40px;
+  --landscape-chest-w: clamp(84px, 22vh, 112px);
+}
+
 html.wie-phone-landscape-game #game-table {
-  --side-slot: clamp(54px, 14vh, 76px);
+  --side-slot: calc(var(--landscape-chest-w) + 16px);
   --hud-top: calc(env(safe-area-inset-top, 0px) + 40px);
   --board-pad-left: calc(var(--side-slot) + max(6px, env(safe-area-inset-left)));
   --board-pad-right: calc(var(--side-slot) + max(6px, env(safe-area-inset-right)));
@@ -310,12 +315,20 @@ html.wie-phone-landscape-game .screen-game-view.phase-flip-active #game-table .g
 }
 
 html.wie-phone-landscape-game #game-table .opponent-zone,
-html.wie-phone-landscape-game #game-table .board-stack,
-html.wie-phone-landscape-game #game-table .player-play-area {
+html.wie-phone-landscape-game #game-table .board-stack {
   width: 100% !important;
   max-width: var(--game-board-width) !important;
   min-width: 0 !important;
   margin: 0 auto;
+}
+
+/* Schatkist uit de bord-rij — alleen vast links, niet over het raster */
+html.wie-phone-landscape-game #game-table .player-play-area {
+  display: block !important;
+  width: 100% !important;
+  max-width: var(--game-board-width) !important;
+  margin: 0 auto !important;
+  position: relative !important;
 }
 
 html.wie-phone-landscape-game #game-table .board-stand--front {
@@ -460,12 +473,14 @@ html.wie-phone-landscape-game .screen-game-view.phase-pick-secret .game-turn-ban
 }
 
 html.wie-phone-landscape-game .screen-game-view .btn-give-up {
-  top: calc(env(safe-area-inset-top, 0px) + 4px) !important;
-  left: max(4px, env(safe-area-inset-left)) !important;
-  padding: 0.24rem 0.42rem !important;
-  font-size: 0.52rem !important;
-  max-width: 26vw;
-  z-index: 191 !important;
+  top: auto !important;
+  bottom: max(6px, env(safe-area-inset-bottom)) !important;
+  left: max(6px, env(safe-area-inset-left)) !important;
+  right: auto !important;
+  padding: 0.38rem 0.62rem !important;
+  font-size: 0.66rem !important;
+  max-width: none;
+  z-index: 192 !important;
 }
 
 html.wie-phone-landscape-game .lang-picker {
@@ -485,32 +500,54 @@ html.wie-phone-landscape-game .screen-game-view.phase-pick-secret #game-table .o
   pointer-events: none !important;
 }
 
-/* Linker dock: raad-tegenstander (niet over het bord) */
+/* Linker dock: grote raad-kist boven OPGEVEN */
 html.wie-phone-landscape-game #game-table .opponent-chest {
   position: fixed !important;
   left: max(6px, env(safe-area-inset-left)) !important;
   right: auto !important;
   top: auto !important;
-  bottom: max(8px, env(safe-area-inset-bottom)) !important;
+  bottom: calc(
+    max(6px, env(safe-area-inset-bottom)) + var(--landscape-give-up-h) + 10px
+  ) !important;
   transform: none !important;
-  width: clamp(50px, 12vh, 64px) !important;
-  z-index: 36 !important;
+  width: var(--landscape-chest-w) !important;
+  z-index: 37 !important;
   margin: 0 !important;
   display: flex !important;
   flex-direction: column !important;
   align-items: center !important;
-  gap: 0.2rem !important;
-  filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.5));
+  gap: 0.28rem !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  filter: drop-shadow(0 10px 28px rgba(0, 0, 0, 0.65));
 }
 
 html.wie-phone-landscape-game #game-table .opponent-chest .side-dock-label--guess {
   display: block;
+  font-size: clamp(0.5rem, 2vh, 0.62rem) !important;
 }
 
 html.wie-phone-landscape-game #game-table .opponent-chest .chest-visual {
   width: 100% !important;
-  border-radius: 12px !important;
-  border-width: 3px !important;
+  min-height: calc(var(--landscape-chest-w) * 1.08);
+  aspect-ratio: 4 / 5 !important;
+  border-radius: 14px !important;
+  border-width: 4px !important;
+}
+
+html.wie-phone-landscape-game #game-table .opponent-chest .chest-avatar {
+  width: 92% !important;
+  height: 92% !important;
+  object-fit: cover !important;
+  object-position: center top !important;
+  margin-top: 4% !important;
+}
+
+html.wie-phone-landscape-game #game-table .opponent-chest .chest-label {
+  display: block !important;
+  font-size: clamp(0.44rem, 1.6vh, 0.56rem) !important;
+  margin-top: 0 !important;
 }
 
 html.wie-phone-landscape-game #game-table .opponent-chest.chest-guess-ready .chest-visual {
@@ -518,7 +555,7 @@ html.wie-phone-landscape-game #game-table .opponent-chest.chest-guess-ready .che
 }
 
 html.wie-phone-landscape-game #game-table .opponent-chest.chest-revealed {
-  width: clamp(50px, 12vh, 64px) !important;
+  width: var(--landscape-chest-w) !important;
 }
 
 html.wie-phone-landscape-game #game-table .opponent-chest.chest-revealed .chest-visual {
