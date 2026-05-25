@@ -1338,7 +1338,7 @@
   function hideEndOverlay() {
     if (winOverlay) {
       winOverlay.classList.add("hidden");
-      winOverlay.classList.remove("active", "lose", "give-up");
+      winOverlay.classList.remove("active", "lose", "give-up", "opponent-gave-up");
       updateRankDeltaOverlay(null);
     }
     const actions = winOverlay?.querySelector(".win-end-actions");
@@ -1511,7 +1511,7 @@
     clearOpponentReveal();
     const rankResult = applyRankResult(true);
     if (winOverlay) {
-      winOverlay.classList.remove("hidden", "lose");
+      winOverlay.classList.remove("hidden", "lose", "give-up", "opponent-gave-up");
       winOverlay.classList.add("active");
       const title = winOverlay.querySelector(".win-title");
       const sub = winOverlay.querySelector(".win-sub");
@@ -1523,6 +1523,42 @@
     }
     if (screenGame) screenGame.classList.add("game-won");
     showEndActions();
+  }
+
+  function showWinOpponentGiveUp() {
+    if (state.phase === PHASE.WON || state.phase === PHASE.LOST) return;
+    hideGiveUpConfirm();
+    state.phase = PHASE.WON;
+    clearInteractivity();
+    hideQuestionPanel();
+    hideBanner();
+    clearOpponentReveal();
+    const rankResult = applyRankResult(true);
+    if (winOverlay) {
+      winOverlay.classList.remove("hidden", "lose", "give-up");
+      winOverlay.classList.add("active", "opponent-gave-up");
+      const title = winOverlay.querySelector(".win-title");
+      const sub = winOverlay.querySelector(".win-sub");
+      const confetti = winOverlay.querySelector(".win-confetti");
+      const reveal = winOverlay.querySelector(".lose-opponent-reveal");
+      if (reveal) reveal.classList.add("hidden");
+      if (confetti) confetti.style.display = "";
+      hideGiveUpActions();
+      if (title) title.textContent = tFn("opponentGaveUpTitle");
+      if (sub) sub.textContent = tFn("opponentGaveUpSub");
+      updateRankDeltaOverlay(rankResult);
+    }
+    if (screenGame) {
+      screenGame.classList.remove("game-give-up-pending", "give-up-shaking");
+      screenGame.classList.add("game-won");
+    }
+    showEndActions();
+  }
+
+  function notifyOpponentGiveUp() {
+    if (!state.online || !window.WieIsHetOnline) return;
+    if (state.phase === PHASE.WON || state.phase === PHASE.LOST) return;
+    window.WieIsHetOnline.send({ type: "giveUp" });
   }
 
   function showLose(revealIndex) {
@@ -1636,6 +1672,10 @@
       ) {
         beginMyTurn();
       }
+    }
+    if (msg.type === "giveUp") {
+      showWinOpponentGiveUp();
+      return;
     }
     if (msg.type === "win") {
       if (typeof msg.secretIndex === "number") {
@@ -1869,6 +1909,7 @@
     hideEndOverlay,
     showGiveUpConfirm,
     hideGiveUpConfirm,
+    notifyOpponentGiveUp,
     getPhase: () => state.phase,
     handleOnlineMessage: onOnlineMessage,
   };

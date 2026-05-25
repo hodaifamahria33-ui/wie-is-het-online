@@ -2,7 +2,7 @@
  * PWA service worker — GitHub Pages friendly (repo subpath).
  * Network-first for HTML; cache same-origin assets for faster reload / basic offline shell.
  */
-const CACHE_NAME = "wieishet-pwa-v24";
+const CACHE_NAME = "wieishet-pwa-v25";
 const PRECACHE = [
   "./",
   "./index.html",

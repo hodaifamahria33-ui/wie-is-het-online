@@ -646,6 +646,29 @@
   display: none !important;
 }
 
+.win-overlay.opponent-gave-up .win-card {
+  background: linear-gradient(165deg, #bbf7d0 0%, #4ade80 40%, #16a34a 100%);
+  box-shadow:
+    0 24px 80px rgba(0, 0, 0, 0.5),
+    0 0 60px rgba(74, 222, 128, 0.55);
+  padding: 2.5rem 2.75rem;
+  max-width: min(92vw, 520px);
+}
+
+.win-overlay.opponent-gave-up .win-title {
+  font-size: clamp(2.4rem, 11vw, 4.2rem);
+  line-height: 1.1;
+  letter-spacing: 0.04em;
+  color: #052e16;
+  margin-bottom: 0.5rem;
+}
+
+.win-overlay.opponent-gave-up .win-sub {
+  font-size: clamp(1.35rem, 6vw, 2rem);
+  color: #14532d;
+  font-weight: 800;
+}
+
 .win-give-up-actions {
   display: flex;
   flex-direction: column;

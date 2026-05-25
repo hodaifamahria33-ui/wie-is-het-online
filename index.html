@@ -56,7 +56,7 @@
   <link rel="stylesheet" href="assets/game/game-hud.css?v=44" />
   <link rel="stylesheet" href="assets/game/game-layout.css?v=56" />
   <link rel="stylesheet" href="assets/game/character-variety.css?v=55" />
-  <link rel="stylesheet" href="assets/game/game-extras.css?v=57" />
+  <link rel="stylesheet" href="assets/game/game-extras.css?v=58" />
   <link rel="stylesheet" href="assets/game/game-mobile.css?v=8" />
   <link rel="stylesheet" href="assets/game/orientation-lock.css?v=4" />
   <link rel="stylesheet" href="assets/game/answer-coach.css?v=1" />
@@ -2582,7 +2582,7 @@
   <script src="assets/game/answer-coach.js?v=1"></script>
   <script src="assets/game/stripe-donate.js?v=1"></script>
   <script src="assets/game/orientation-lock.js?v=4"></script>
-  <script src="assets/game/game-play.js?v=63"></script>
+  <script src="assets/game/game-play.js?v=64"></script>
 
   <script>
     const I18N = {
@@ -2824,6 +2824,8 @@
         loseRevealSub: "Dit was het personage van je tegenstander",
         opponentWas: "Het was:",
         winSub: "Je raadde het personage!",
+        opponentGaveUpTitle: "Tegenstander ging opgeven",
+        opponentGaveUpSub: "Oke",
         chestLabel: "Tegenstander",
         chestHint: "Tik om te raden",
         btnPlayAgain: "Opnieuw spelen",
@@ -3074,6 +3076,8 @@
         loseRevealSub: "This was your opponent's character",
         opponentWas: "It was:",
         winSub: "You guessed the character!",
+        opponentGaveUpTitle: "Opponent gave up",
+        opponentGaveUpSub: "OK",
         chestLabel: "Opponent",
         chestHint: "Tap to guess",
         btnPlayAgain: "Play again",
@@ -4732,6 +4736,13 @@
 
     function leaveGameAfterGiveUp() {
       hideGiveUpDialog();
+      if (window.WieIsHetPlay && typeof WieIsHetPlay.notifyOpponentGiveUp === "function") {
+        try {
+          WieIsHetPlay.notifyOpponentGiveUp();
+        } catch (err) {
+          console.warn("notify give up", err);
+        }
+      }
       resetGameScreen();
       if (sessionMode === "host") {
         transition(screenGame, screenLobby, "transition-in-from-left");
