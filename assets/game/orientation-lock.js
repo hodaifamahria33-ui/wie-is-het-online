@@ -11,10 +11,9 @@
     return screenGame && !screenGame.classList.contains("hidden");
   }
 
+  /** Alleen smalle telefoons — iPad/tablet niet blokkeren. */
   function isPhoneLike() {
-    return window.matchMedia(
-      "(max-width: 900px), (hover: none) and (pointer: coarse) and (max-width: 1200px)"
-    ).matches;
+    return window.matchMedia("(max-width: 600px)").matches;
   }
 
   function isPortrait() {
@@ -23,8 +22,9 @@
     return window.innerHeight >= window.innerWidth;
   }
 
+  /** Portrait mag — mobiel CSS ondersteunt staand spelen; geen fullscreen-blok. */
   function needsRotateLock() {
-    return isGameScreenActive() && isPhoneLike() && isPortrait();
+    return false;
   }
 
   function update() {

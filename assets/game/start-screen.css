@@ -284,7 +284,7 @@ html.start-screen-active body {
 
 .screen-start .start-bottom {
   position: relative;
-  z-index: 6;
+  z-index: 10;
   width: 100%;
   max-width: min(100%, 720px);
   flex-shrink: 0;
@@ -308,6 +308,7 @@ html.start-screen-active body {
 
 .screen-start .btn-start-begin {
   position: relative;
+  z-index: 12;
   display: inline-block;
   min-width: min(88vw, 340px);
   padding: 1.1rem 2.5rem;
@@ -321,6 +322,8 @@ html.start-screen-active body {
   letter-spacing: 0.14em;
   text-transform: uppercase;
   cursor: pointer;
+  touch-action: manipulation;
+  -webkit-touch-callout: none;
   animation: startBtnGlow 2.2s ease-in-out infinite;
   transition: transform 0.18s ease, filter 0.18s ease;
   -webkit-tap-highlight-color: transparent;
@@ -344,21 +347,51 @@ html.start-screen-active body {
 }
 
 .screen-start .start-support-bar--inline {
-  position: absolute !important;
-  left: auto;
-  right: max(0px, env(safe-area-inset-right));
-  bottom: 0;
+  position: relative !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
   transform: none !important;
-  margin: 0;
-  flex-wrap: nowrap;
-  justify-content: flex-end;
+  margin: 0.65rem 0 0;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 0.4rem;
-  width: auto;
-  max-width: calc(100% - 1rem);
+  width: 100%;
+  max-width: 100%;
+  z-index: 8;
 }
 
 .screen-start .start-actions {
-  padding-bottom: 2.75rem;
+  padding-bottom: 0.35rem;
+}
+
+/* Korte schermen (telefoon landscape, iPad): START blijft zichtbaar */
+@media (max-height: 520px) {
+  .screen-start .start-stage {
+    min-height: 0;
+    max-height: 52vh;
+    flex: 0 1 auto;
+  }
+
+  .screen-start .start-char-ring {
+    --orbit-r: min(28vw, 140px);
+  }
+
+  .screen-start .start-title.start-title--hub {
+    font-size: clamp(1.45rem, 7vw, 2rem) !important;
+  }
+
+  .screen-start .start-scene {
+    justify-content: flex-end;
+    padding-top: max(4px, env(safe-area-inset-top));
+  }
+}
+
+@media (max-width: 900px) and (max-height: 700px) {
+  .screen-start .start-stage {
+    min-height: 0;
+    max-height: 58vh;
+  }
 }
 
 @media (max-width: 380px) {

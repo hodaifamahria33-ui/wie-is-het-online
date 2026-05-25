@@ -16,6 +16,14 @@
   </style>
   <script>
     document.documentElement.classList.add("app-booting");
+    window.setTimeout(function () {
+      document.documentElement.classList.remove("app-booting");
+      var splash = document.getElementById("screen-app-splash");
+      if (splash) {
+        splash.classList.add("hidden");
+        splash.classList.remove("app-splash--out");
+      }
+    }, 3200);
   </script>
   <title>wiehasit.com — online Wie-is-het spel</title>
   <meta name="application-name" content="wiehasit.com" />
@@ -35,7 +43,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Nunito:wght@600;700;800&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/game/start-screen.css?v=65" />
+  <link rel="stylesheet" href="assets/game/start-screen.css?v=66" />
   <link rel="stylesheet" href="assets/game/mode-screen.css?v=8" />
   <link rel="stylesheet" href="assets/game/support-screen.css?v=1" />
   <link rel="stylesheet" href="assets/game/stripe-donate.css?v=1" />
@@ -50,7 +58,7 @@
   <link rel="stylesheet" href="assets/game/character-variety.css?v=55" />
   <link rel="stylesheet" href="assets/game/game-extras.css?v=57" />
   <link rel="stylesheet" href="assets/game/game-mobile.css?v=8" />
-  <link rel="stylesheet" href="assets/game/orientation-lock.css?v=3" />
+  <link rel="stylesheet" href="assets/game/orientation-lock.css?v=4" />
   <link rel="stylesheet" href="assets/game/answer-coach.css?v=1" />
   <link rel="stylesheet" href="assets/game/rank-ui.css?v=6" />
   <link rel="stylesheet" href="assets/game/game-play.css?v=55" />
@@ -226,6 +234,12 @@
       document.documentElement.style.backgroundColor = on ? "#05030a" : "#1a0f2e";
     };
     window.wieGoBegin = function () {
+      if (window.__wieGoBeginBusy) return;
+      window.__wieGoBeginBusy = true;
+      window.setTimeout(function () {
+        window.__wieGoBeginBusy = false;
+      }, 500);
+      document.documentElement.classList.remove("app-booting");
       if (window.wieApp && window.wieApp.goName) return window.wieApp.goName();
       if (window.WieStartMusic && window.WieStartMusic.stop) window.WieStartMusic.stop();
       if (window.wieSetStartBg) window.wieSetStartBg(false);
@@ -277,6 +291,36 @@
       window.wieShowScreen("screen-name", "screen-start");
     };
     window.wieShowMode = window.wieGoBegin;
+    window.wieSavedName = function () {
+      try {
+        var s = localStorage.getItem("wiePlayerName");
+        return s && String(s).trim() ? String(s).trim().slice(0, 16) : "";
+      } catch (e) {
+        return "";
+      }
+    };
+    window.wieGoPlayOnline = function () {
+      if (!window.wieSavedName()) {
+        window.wieGoBegin();
+        return;
+      }
+      window.wieShowScreen("screen-mode", "screen-menu");
+    };
+    window.wieGoPlayBot = function () {
+      if (!window.wieSavedName()) {
+        window.wieGoBegin();
+        return;
+      }
+      window.wieShowScreen("screen-mode", "screen-bot-diff");
+    };
+    window.wieGoPlayRanked = function () {
+      if (!window.wieSavedName()) {
+        window.wieGoBegin();
+        return;
+      }
+      if (window.wieApp && window.wieApp.goRanked) return window.wieApp.goRanked();
+      window.wieShowScreen("screen-mode", "screen-ranked");
+    };
     window.wieShowScreen = function (fromId, toId) {
       var from = document.getElementById(fromId);
       var to = document.getElementById(toId);
@@ -2003,6 +2047,7 @@
             type="button"
             data-i18n="btnBegin"
             data-i18n-aria="btnBeginAria"
+            onclick="window.wieGoBegin()"
           >
             START
           </button>
@@ -2072,21 +2117,21 @@
       <p class="mode-sub" data-i18n="modeSub">Kies één modus — daarna ga je verder</p>
       <p id="mode-rank-badge" class="mode-rank-badge hidden" aria-live="polite"></p>
       <div class="mode-choices" role="group" aria-label="Spelmodus">
-        <button id="btn-play-online" class="mode-choice mode-choice--online" type="button">
+        <button id="btn-play-online" class="mode-choice mode-choice--online" type="button" onclick="window.wieGoPlayOnline()">
           <span class="mode-choice-icon" aria-hidden="true">🌐</span>
           <span class="mode-choice-text">
             <span class="mode-choice-label" data-i18n="btnPlayOnline">Met vrienden</span>
             <span class="mode-choice-desc" data-i18n="modeOnlineDesc">Speel tegen echte mensen online</span>
           </span>
         </button>
-        <button id="btn-play-bot" class="mode-choice mode-choice--bot" type="button">
+        <button id="btn-play-bot" class="mode-choice mode-choice--bot" type="button" onclick="window.wieGoPlayBot()">
           <span class="mode-choice-icon" aria-hidden="true">🤖</span>
           <span class="mode-choice-text">
             <span class="mode-choice-label" data-i18n="btnPlayBot">Tegen de bot</span>
             <span class="mode-choice-desc" data-i18n="modeBotDesc">Oefenen solo — geen rank</span>
           </span>
         </button>
-        <button id="btn-play-ranked" class="mode-choice mode-choice--ranked" type="button">
+        <button id="btn-play-ranked" class="mode-choice mode-choice--ranked" type="button" onclick="window.wieGoPlayRanked()">
           <span class="mode-choice-icon" aria-hidden="true">🏆</span>
           <span class="mode-choice-text">
             <span class="mode-choice-label" data-i18n="btnPlayRanked">Ranked spel</span>
@@ -2574,7 +2619,7 @@
   <script src="assets/game/ranked-queue.js?v=1"></script>
   <script src="assets/game/answer-coach.js?v=1"></script>
   <script src="assets/game/stripe-donate.js?v=1"></script>
-  <script src="assets/game/orientation-lock.js?v=3"></script>
+  <script src="assets/game/orientation-lock.js?v=4"></script>
   <script src="assets/game/game-play.js?v=61"></script>
 
   <script>
@@ -3151,8 +3196,6 @@
     const screenSupport = document.getElementById("screen-support");
     const playerNameInput = document.getElementById("player-name-input");
     const nameError = document.getElementById("name-error");
-    const btnBeginEl = document.getElementById("btn-begin");
-
     const START_RING_COLORS = ["blue", "pink", "orange", "green", "yellow"];
 
     function buildStartCharRing() {
@@ -3201,14 +3244,6 @@
       if (!WieStartMusic.isMuted()) WieStartMusic.play();
     }
 
-    if (btnBeginEl) {
-      btnBeginEl.addEventListener("click", (e) => {
-        e.stopPropagation();
-        tryStartMusic();
-        goToNameScreen();
-      });
-    }
-
     if (screenStart) {
       screenStart.addEventListener("click", () => {
         tryStartMusic();
@@ -3238,6 +3273,16 @@
     }
 
     window.wieGetPlayerName = getSavedPlayerName;
+    window.wieGoBegin = function () {
+      if (window.__wieGoBeginBusy) return;
+      window.__wieGoBeginBusy = true;
+      window.setTimeout(function () {
+        window.__wieGoBeginBusy = false;
+      }, 500);
+      document.documentElement.classList.remove("app-booting");
+      tryStartMusic();
+      goToNameScreen();
+    };
     window.wieSavePlayerName = function (name) {
       const n = String(name || "")
         .trim()
@@ -4676,9 +4721,6 @@
       }
       return code;
     }
-
-    let joinBusy = false;
-    let hostPotBusy = false;
 
     function createHostPot(rawCode) {
       if (hostPotBusy) return;

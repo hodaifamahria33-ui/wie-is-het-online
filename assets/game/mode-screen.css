@@ -128,6 +128,8 @@
   width: 100%;
   margin: 0;
   padding: 1rem 1.1rem;
+  touch-action: manipulation;
+  -webkit-touch-callout: none;
   border: none;
   border-radius: 18px;
   text-align: left;
