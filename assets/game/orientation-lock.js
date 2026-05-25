@@ -1,5 +1,5 @@
 /**
- * Mobiel: landscape om te spelen; na potje weer portrait voor menu.
+ * Mobiel: alleen tijdens het spel landscape; lobby/menu blijft vrij (elke stand).
  */
 (function () {
   const PHONE_SHORT_SIDE_PX = 520;
@@ -31,25 +31,16 @@
     return isGameScreenActive() && isPhoneLike() && !isLandscapeLike();
   }
 
-  function needsRotateToPortrait() {
-    return !isGameScreenActive() && isPhoneLike() && !isLandscapeLike();
-  }
-
   function t(key) {
     return typeof window.wieMsg === "function" ? window.wieMsg(key) : key;
   }
 
-  function applyOverlayCopy(mode) {
+  function applyOverlayCopy() {
     if (!overlay) return;
     const titleEl = document.getElementById("orientation-lock-title");
     const subEl = overlay.querySelector(".orientation-lock-sub");
-    if (mode === "portrait") {
-      if (titleEl) titleEl.textContent = t("rotatePhoneBackTitle");
-      if (subEl) subEl.textContent = t("rotatePhoneBackSub");
-    } else if (mode === "landscape") {
-      if (titleEl) titleEl.textContent = t("rotatePhoneTitle");
-      if (subEl) subEl.textContent = t("rotatePhoneSub");
-    }
+    if (titleEl) titleEl.textContent = t("rotatePhoneTitle");
+    if (subEl) subEl.textContent = t("rotatePhoneSub");
   }
 
   function flushPendingStarts() {
@@ -99,34 +90,21 @@
     if (!overlay) return;
 
     const toLandscape = needsRotateToLandscape();
-    const toPortrait = needsRotateToPortrait();
-    const lock = toLandscape || toPortrait;
     const landscapeGame =
       isGameScreenActive() && isPhoneLike() && isLandscapeLike();
 
-    overlay.classList.remove(
-      "orientation-lock--to-landscape",
-      "orientation-lock--to-portrait"
-    );
-    if (toLandscape) {
-      overlay.classList.add("orientation-lock--to-landscape");
-      applyOverlayCopy("landscape");
-    } else if (toPortrait) {
-      overlay.classList.add("orientation-lock--to-portrait");
-      applyOverlayCopy("portrait");
-    }
+    overlay.classList.remove("orientation-lock--to-portrait");
+    overlay.classList.toggle("orientation-lock--to-landscape", toLandscape);
+    if (toLandscape) applyOverlayCopy();
 
-    overlay.classList.toggle("hidden", !lock);
-    overlay.setAttribute("aria-hidden", lock ? "false" : "true");
+    overlay.classList.toggle("hidden", !toLandscape);
+    overlay.setAttribute("aria-hidden", toLandscape ? "false" : "true");
     document.documentElement.classList.toggle("wie-game-portrait-lock", toLandscape);
     document.documentElement.classList.toggle(
       "wie-phone-landscape-game",
       landscapeGame
     );
-    document.documentElement.classList.toggle(
-      "wie-phone-portrait-return-lock",
-      toPortrait
-    );
+    document.documentElement.classList.remove("wie-phone-portrait-return-lock");
 
     if (!toLandscape && landscapeGame) {
       scheduleLandscapeReady();
