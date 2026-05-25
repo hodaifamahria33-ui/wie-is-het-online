@@ -83,9 +83,9 @@
   let cardNames = [];
 
   const MALE_NAMES =
-    /^(MrBeast|PewDiePie|Markiplier|Jacksepticeye|KSI|Ninja|Dream|Vanoss|DanTDM|Ludwig|xQc|IShowSpeed|Enzo|Gio|Kalvijn|MKBHD|Logan Paul)$/i;
+    /^(MrBeast|PewDiePie|Markiplier|Jacksepticeye|KSI|Ninja|Dream|DanTDM|Ludwig|xQc|IShowSpeed|MKBHD|Logan Paul|TommyInnit|CoryxKenshin|Rhett)$/i;
   const FEMALE_NAMES =
-    /^(Pokimane|Valkyrae|iJustine|SSSniperWolf|LaurDIY|Emma|Aphmau|Jelly|Zoella|Tana|Nikkie|Safiya|Gibi|Rosanna|Jess)$/i;
+    /^(Pokimane|Valkyrae|SSSniperWolf|Emma|Nikkie|Safiya|Rosanna|Charli|Addison|Lilly|Liza|Jaiden|Michelle|Wengie|Miranda|Bethany)$/i;
 
   function isMaleCharacter(name) {
     if (window.WieCharacterArt && typeof WieCharacterArt.isGirl === "function") {

@@ -115,6 +115,18 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
 }
 
+#game-table .card-face.card-face--boy,
+#game-table .card-face:has(.card-photo--boy) {
+  background: linear-gradient(180deg, #dbeafe 0%, #3b82f6 55%, #1e3a8a 100%) !important;
+  border-color: rgba(147, 197, 253, 0.85) !important;
+}
+
+#game-table .card-face.card-face--girl,
+#game-table .card-face:has(.card-photo--girl) {
+  background: linear-gradient(180deg, #fce7f3 0%, #f472b6 55%, #be185d 100%) !important;
+  border-color: rgba(251, 207, 232, 0.9) !important;
+}
+
 #game-table .card-photo.card-photo--portrait:not(.card-photo--boy):not(.card-photo--girl) {
   background: linear-gradient(180deg, #1e1b4b 0%, #312e81 55%, #0f0a1e 100%) !important;
 }

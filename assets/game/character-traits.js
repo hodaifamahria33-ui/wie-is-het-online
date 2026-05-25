@@ -1,84 +1,87 @@
 /**
- * Gekleurde geanimeerde portretten — lokaal opgeslagen (altijd zichtbaar).
+ * Gekleurde geanimeerde portretten — mega bekende YouTubers wereldwijd.
+ * Jongen = blauwe achtergrond, meid = roze achtergrond.
  */
 (function () {
   const PORTRAITS = "assets/portraits/";
-  const AVATAR_CACHE = "yt-likeness-v9-loganpaul";
+  const AVATAR_CACHE = "yt-likeness-v10-global";
   const REMOTE_STYLE = "adventurer";
   const AVATAR_SIZE = 256;
+  const BOY_BG = "60a5fa,3b82f6,1e3a8a";
+  const GIRL_BG = "fbcfe8,f472b6,be185d";
 
   /* Sync met scripts/download-portraits.mjs */
   const ROSTER = [
-    { name: "MrBeast", slug: "mrbeast", seed: "MrBeast-Jimmy", female: false, bg: "f59e0b,ea580c,92400e", hair: "short05", beard: "variant03", skinColor: "f2d3b1", hairColor: "562306", eyes: "variant10" },
-    { name: "Pokimane", slug: "pokimane", seed: "Pokimane-Imane", female: true, bg: "ec4899,f472b6,9d174d", hair: "long20", skinColor: "ecad80", hairColor: "592454", eyes: "variant14" },
-    { name: "PewDiePie", slug: "pewdiepie", seed: "PewDiePie-Felix", female: false, bg: "3b82f6,2563eb,1e3a8a", hair: "short11", beard: "variant08", glasses: "variant03", skinColor: "f2d3b1", hairColor: "e5d7a3" },
-    { name: "Valkyrae", slug: "valkyrae", seed: "Valkyrae-Rae", female: true, bg: "a855f7,7c3aed,4c1d95", hair: "long14", skinColor: "f2d3b1", hairColor: "0e0e0e", eyes: "variant18" },
-    { name: "Markiplier", slug: "markiplier", seed: "Markiplier-Mark", female: false, bg: "ef4444,dc2626,7f1d1d", hair: "short08", beard: "variant06", skinColor: "ecad80", hairColor: "0e0e0e", eyes: "variant08" },
-    { name: "iJustine", slug: "ijustine", seed: "iJustine-Justine", female: true, bg: "f472b6,ec4899,be185d", hair: "long08", glasses: "variant04", skinColor: "f2d3b1", hairColor: "e5d7a3", eyes: "variant12" },
-    { name: "Jacksepticeye", slug: "jacksepticeye", seed: "Jacksepticeye-Sean", female: false, bg: "22c55e,16a34a,14532d", hair: "short16", beard: "variant02", skinColor: "f2d3b1", hairColor: "3eac2c", eyes: "variant16" },
-    { name: "SSSniperWolf", slug: "sssniperwolf", seed: "SSSniperWolf-Lia", female: true, bg: "f97316,ea580c,c2410c", hair: "long18", skinColor: "ecad80", hairColor: "592454", eyes: "variant20" },
-    { name: "KSI", slug: "ksi", seed: "KSI-JJ", female: false, bg: "eab308,ca8a04,854d0e", hair: "short02", beard: "variant07", skinColor: "9e5622", hairColor: "0e0e0e", eyes: "variant06" },
-    { name: "LaurDIY", slug: "laurdiy", seed: "LaurDIY-Lauren", female: true, bg: "fde047,facc15,a16207", hair: "long22", skinColor: "f2d3b1", hairColor: "b9a05f", eyes: "variant11" },
-    { name: "Ninja", slug: "ninja", seed: "Ninja-Tyler", female: false, bg: "06b6d4,0284c7,1e3a8a", hair: "short12", skinColor: "f2d3b1", hairColor: "85c2c6", eyes: "variant22" },
-    { name: "Emma", slug: "emma", seed: "Emma-Chamberlain", female: true, bg: "fda4af,f43f5e,9f1239", hair: "long06", skinColor: "f2d3b1", hairColor: "592454", eyes: "variant15" },
-    { name: "Dream", slug: "dream", seed: "Dream-Mask", female: false, bg: "34d399,10b981,065f46", hair: "short06", skinColor: "f2d3b1", hairColor: "afafaf", eyes: "variant24" },
-    { name: "Aphmau", slug: "aphmau", seed: "Aphmau-Jess", female: true, bg: "c084fc,a78bfa,6d28d9", hair: "long12", skinColor: "ecad80", hairColor: "592454", eyes: "variant13" },
-    { name: "Vanoss", slug: "vanoss", seed: "VanossGaming", female: false, bg: "64748b,475569,1e293b", hair: "short14", beard: "variant04", glasses: "variant01", skinColor: "f2d3b1", hairColor: "0e0e0e", eyes: "variant09" },
-    { name: "Jelly", slug: "jelly", seed: "Jelly-Jelle", female: true, bg: "38bdf8,0ea5e9,0369a1", hair: "long16", skinColor: "f2d3b1", hairColor: "cb6820", eyes: "variant17" },
-    { name: "DanTDM", slug: "dantdm", seed: "DanTDM-Dan", female: false, bg: "818cf8,6366f1,4338ca", hair: "short10", beard: "variant01", glasses: "variant04", skinColor: "f2d3b1", hairColor: "ac6511", eyes: "variant14" },
-    { name: "Zoella", slug: "zoella", seed: "Zoella-Zoe", female: true, bg: "fb923c,fdba74,c2410c", hair: "long24", skinColor: "ecad80", hairColor: "592454", eyes: "variant19" },
-    { name: "Ludwig", slug: "ludwig", seed: "Ludwig-Ahgren", female: false, bg: "fbbf24,f59e0b,b45309", hair: "short18", beard: "variant05", skinColor: "f2d3b1", hairColor: "e5d7a3", eyes: "variant12" },
-    { name: "Tana", slug: "tana", seed: "Tana-Mongeau", female: true, bg: "f43f5e,e11d48,9f1239", hair: "long10", glasses: "variant03", skinColor: "f2d3b1", hairColor: "0e0e0e", eyes: "variant21" },
-    { name: "xQc", slug: "xqc", seed: "xQc-Felix", female: false, bg: "94a3b8,64748b,334155", hair: "short01", beard: "variant02", skinColor: "f2d3b1", hairColor: "afafaf", eyes: "variant07" },
-    { name: "Nikkie", slug: "nikkie", seed: "NikkieTutorials", female: true, bg: "e879f9,d946ef,a21caf", hair: "long04", glasses: "variant05", skinColor: "f2d3b1", hairColor: "e5d7a3", eyes: "variant16" },
-    { name: "IShowSpeed", slug: "ishowspeed", seed: "IShowSpeed-Darren", female: false, bg: "ef4444,dc2626,991b1b", hair: "short15", skinColor: "9e5622", hairColor: "0e0e0e", eyes: "variant18" },
-    { name: "Logan Paul", slug: "loganpaul", seed: "Logan-Paul-Maverick", female: false, bg: "fbbf24,f59e0b,dc2626", hair: "short11", skinColor: "f2d3b1", hairColor: "e5d7a3", eyes: "variant12" },
-    { name: "Enzo", slug: "enzo", seed: "Enzo-Knol", female: false, bg: "f97316,ea580c,c2410c", hair: "short09", beard: "variant02", skinColor: "f2d3b1", hairColor: "562306", eyes: "variant11" },
-    { name: "Safiya", slug: "safiya", seed: "Safiya-Nygaard", female: true, bg: "a78bfa,8b5cf6,6d28d9", hair: "long26", glasses: "variant02", skinColor: "9e5622", hairColor: "0e0e0e", eyes: "variant15" },
-    { name: "Gio", slug: "gio", seed: "Gio-Scott", female: false, bg: "60a5fa,3b82f6,1d4ed8", hair: "short07", beard: "variant03", skinColor: "ecad80", hairColor: "562306", eyes: "variant10" },
-    { name: "Gibi", slug: "gibi", seed: "Gibi-ASMR", female: true, bg: "fda4af,f9a8d4,db2777", hair: "long26", skinColor: "f2d3b1", hairColor: "592454", eyes: "variant12" },
-    { name: "Kalvijn", slug: "kalvijn", seed: "Kalvijn-Dutch", female: false, bg: "fb7185,e11d48,be123c", hair: "short13", beard: "variant04", glasses: "variant03", skinColor: "f2d3b1", hairColor: "cb6820", eyes: "variant13" },
-    { name: "Rosanna", slug: "rosanna", seed: "Rosanna-Pansino", female: true, bg: "fcd34d,fbbf24,d97706", hair: "long25", skinColor: "f2d3b1", hairColor: "ab2a18", eyes: "variant18" },
-    { name: "MKBHD", slug: "mkbhd", seed: "MKBHD-Marques", female: false, bg: "1e293b,0f172a,020617", hair: "short03", beard: "variant02", glasses: "variant05", skinColor: "763900", hairColor: "0e0e0e", eyes: "variant05" },
-    { name: "Jess", slug: "jess", seed: "Jess-Jessica", female: true, bg: "4ade80,22c55e,15803d", hair: "long21", skinColor: "ecad80", hairColor: "6a4e35", eyes: "variant14" },
+    { name: "MrBeast", slug: "mrbeast", seed: "MrBeast-Jimmy", female: false, bg: BOY_BG, hair: "short05", beard: "variant03", skinColor: "f2d3b1", hairColor: "562306", eyes: "variant10" },
+    { name: "PewDiePie", slug: "pewdiepie", seed: "PewDiePie-Felix", female: false, bg: BOY_BG, hair: "short11", beard: "variant08", glasses: "variant03", skinColor: "f2d3b1", hairColor: "e5d7a3" },
+    { name: "Markiplier", slug: "markiplier", seed: "Markiplier-Mark", female: false, bg: BOY_BG, hair: "short08", beard: "variant06", skinColor: "ecad80", hairColor: "0e0e0e", eyes: "variant08" },
+    { name: "Jacksepticeye", slug: "jacksepticeye", seed: "Jacksepticeye-Sean", female: false, bg: BOY_BG, hair: "short16", beard: "variant02", skinColor: "f2d3b1", hairColor: "3eac2c", eyes: "variant16" },
+    { name: "KSI", slug: "ksi", seed: "KSI-JJ", female: false, bg: BOY_BG, hair: "short02", beard: "variant07", skinColor: "9e5622", hairColor: "0e0e0e", eyes: "variant06" },
+    { name: "Ninja", slug: "ninja", seed: "Ninja-Tyler", female: false, bg: BOY_BG, hair: "short12", skinColor: "f2d3b1", hairColor: "85c2c6", eyes: "variant22" },
+    { name: "Dream", slug: "dream", seed: "Dream-Mask", female: false, bg: BOY_BG, hair: "short06", skinColor: "f2d3b1", hairColor: "afafaf", eyes: "variant24" },
+    { name: "DanTDM", slug: "dantdm", seed: "DanTDM-Dan", female: false, bg: BOY_BG, hair: "short10", beard: "variant01", glasses: "variant04", skinColor: "f2d3b1", hairColor: "ac6511", eyes: "variant14" },
+    { name: "Ludwig", slug: "ludwig", seed: "Ludwig-Ahgren", female: false, bg: BOY_BG, hair: "short18", beard: "variant05", skinColor: "f2d3b1", hairColor: "e5d7a3", eyes: "variant12" },
+    { name: "xQc", slug: "xqc", seed: "xQc-Felix", female: false, bg: BOY_BG, hair: "short01", beard: "variant02", skinColor: "f2d3b1", hairColor: "afafaf", eyes: "variant07" },
+    { name: "IShowSpeed", slug: "ishowspeed", seed: "IShowSpeed-Darren", female: false, bg: BOY_BG, hair: "short15", skinColor: "9e5622", hairColor: "0e0e0e", eyes: "variant18" },
+    { name: "Logan Paul", slug: "loganpaul", seed: "Logan-Paul-Maverick", female: false, bg: BOY_BG, hair: "short11", skinColor: "f2d3b1", hairColor: "e5d7a3", eyes: "variant12" },
+    { name: "MKBHD", slug: "mkbhd", seed: "MKBHD-Marques", female: false, bg: BOY_BG, hair: "short03", beard: "variant02", glasses: "variant05", skinColor: "763900", hairColor: "0e0e0e", eyes: "variant05" },
+    { name: "TommyInnit", slug: "tommyinnit", seed: "TommyInnit-Thomas", female: false, bg: BOY_BG, hair: "short09", skinColor: "f2d3b1", hairColor: "cb6820", eyes: "variant11" },
+    { name: "CoryxKenshin", slug: "coryxkenshin", seed: "CoryxKenshin-Cory", female: false, bg: BOY_BG, hair: "short07", beard: "variant04", skinColor: "9e5622", hairColor: "0e0e0e", eyes: "variant09" },
+    { name: "Rhett", slug: "rhett", seed: "Rhett-Link-McLaughlin", female: false, bg: BOY_BG, hair: "short13", beard: "variant03", glasses: "variant02", skinColor: "f2d3b1", hairColor: "562306", eyes: "variant13" },
+    { name: "Pokimane", slug: "pokimane", seed: "Pokimane-Imane", female: true, bg: GIRL_BG, hair: "long20", skinColor: "ecad80", hairColor: "592454", eyes: "variant14" },
+    { name: "Valkyrae", slug: "valkyrae", seed: "Valkyrae-Rae", female: true, bg: GIRL_BG, hair: "long14", skinColor: "f2d3b1", hairColor: "0e0e0e", eyes: "variant18" },
+    { name: "SSSniperWolf", slug: "sssniperwolf", seed: "SSSniperWolf-Lia", female: true, bg: GIRL_BG, hair: "long18", skinColor: "ecad80", hairColor: "592454", eyes: "variant20" },
+    { name: "Emma", slug: "emma", seed: "Emma-Chamberlain", female: true, bg: GIRL_BG, hair: "long06", skinColor: "f2d3b1", hairColor: "592454", eyes: "variant15" },
+    { name: "Nikkie", slug: "nikkie", seed: "NikkieTutorials", female: true, bg: GIRL_BG, hair: "long04", glasses: "variant05", skinColor: "f2d3b1", hairColor: "e5d7a3", eyes: "variant16" },
+    { name: "Safiya", slug: "safiya", seed: "Safiya-Nygaard", female: true, bg: GIRL_BG, hair: "long26", glasses: "variant02", skinColor: "9e5622", hairColor: "0e0e0e", eyes: "variant15" },
+    { name: "Rosanna", slug: "rosanna", seed: "Rosanna-Pansino", female: true, bg: GIRL_BG, hair: "long25", skinColor: "f2d3b1", hairColor: "ab2a18", eyes: "variant18" },
+    { name: "Charli", slug: "charli", seed: "Charli-DAmelio", female: true, bg: GIRL_BG, hair: "long10", skinColor: "f2d3b1", hairColor: "0e0e0e", eyes: "variant21" },
+    { name: "Addison", slug: "addison", seed: "Addison-Rae", female: true, bg: GIRL_BG, hair: "long22", skinColor: "f2d3b1", hairColor: "592454", eyes: "variant11" },
+    { name: "Lilly", slug: "lilly", seed: "Lilly-Singh-Superwoman", female: true, bg: GIRL_BG, hair: "long08", skinColor: "9e5622", hairColor: "0e0e0e", eyes: "variant12" },
+    { name: "Liza", slug: "liza", seed: "Liza-Koshy", female: true, bg: GIRL_BG, hair: "long16", skinColor: "9e5622", hairColor: "592454", eyes: "variant17" },
+    { name: "Jaiden", slug: "jaiden", seed: "Jaiden-Animations", female: true, bg: GIRL_BG, hair: "long12", skinColor: "f2d3b1", hairColor: "0e0e0e", eyes: "variant13" },
+    { name: "Michelle", slug: "michelle", seed: "Michelle-Phan", female: true, bg: GIRL_BG, hair: "long24", skinColor: "ecad80", hairColor: "592454", eyes: "variant19" },
+    { name: "Wengie", slug: "wengie", seed: "Wengie-Wendy", female: true, bg: GIRL_BG, hair: "long21", skinColor: "f2d3b1", hairColor: "6a4e35", eyes: "variant14" },
+    { name: "Miranda", slug: "miranda", seed: "Miranda-Sings-Colleen", female: true, bg: GIRL_BG, hair: "long26", skinColor: "f2d3b1", hairColor: "e5d7a3", eyes: "variant12" },
+    { name: "Bethany", slug: "bethany", seed: "Bethany-Mota", female: true, bg: GIRL_BG, hair: "long18", skinColor: "ecad80", hairColor: "b9a05f", eyes: "variant20" },
   ];
 
   const CARD_NAMES = ROSTER.map((c) => c.name);
 
   /** Content-tags voor YouTuber-vragen (sync met game-play.js evaluateQuestion). */
   const CREATOR_TAGS = {
-    MrBeast: ["vlog"],
-    Pokimane: ["gaming", "stream"],
+    MrBeast: ["vlog", "challenge"],
     PewDiePie: ["gaming"],
-    Valkyrae: ["gaming", "stream"],
     Markiplier: ["gaming"],
-    iJustine: ["tech", "beauty"],
     Jacksepticeye: ["gaming"],
-    SSSniperWolf: ["vlog"],
     KSI: ["gaming", "music"],
-    LaurDIY: ["beauty"],
     Ninja: ["gaming", "stream"],
-    Emma: ["vlog"],
     Dream: ["gaming", "minecraft"],
-    Aphmau: ["gaming", "minecraft"],
-    Vanoss: ["gaming"],
-    Jelly: ["gaming", "dutch"],
     DanTDM: ["gaming", "minecraft"],
-    Zoella: ["beauty", "vlog"],
     Ludwig: ["gaming", "stream"],
-    Tana: ["vlog"],
     xQc: ["gaming", "stream"],
-    Nikkie: ["beauty"],
     IShowSpeed: ["gaming", "stream"],
     "Logan Paul": ["vlog", "boxing"],
-    Enzo: ["dutch", "vlog"],
-    Safiya: ["vlog", "beauty"],
-    Gio: ["gaming"],
-    Gibi: ["beauty"],
-    Kalvijn: ["dutch", "gaming"],
-    Rosanna: ["beauty"],
     MKBHD: ["tech"],
-    Jess: ["beauty", "vlog"],
+    TommyInnit: ["gaming", "minecraft"],
+    CoryxKenshin: ["gaming"],
+    Rhett: ["vlog", "comedy"],
+    Pokimane: ["gaming", "stream"],
+    Valkyrae: ["gaming", "stream"],
+    SSSniperWolf: ["vlog"],
+    Emma: ["vlog"],
+    Nikkie: ["beauty"],
+    Safiya: ["vlog", "beauty"],
+    Rosanna: ["beauty"],
+    Charli: ["vlog", "dance"],
+    Addison: ["vlog", "dance"],
+    Lilly: ["comedy", "vlog"],
+    Liza: ["comedy", "vlog"],
+    Jaiden: ["animation", "vlog"],
+    Michelle: ["beauty"],
+    Wengie: ["beauty", "vlog"],
+    Miranda: ["comedy", "music"],
+    Bethany: ["beauty", "fashion"],
   };
 
   const TRAITS = {};
@@ -101,7 +104,7 @@
       female: false,
       slug,
       portrait: PORTRAITS + slug + ".png",
-      avatar: { name, slug, bg: "6366f1,8b5cf6,312e81", hair: "short05", skinColor: "f2d3b1", hairColor: "562306" },
+      avatar: { name, slug, bg: BOY_BG, hair: "short05", skinColor: "f2d3b1", hairColor: "562306" },
       tags: [],
     };
   }
@@ -116,14 +119,15 @@
 
   function buildRemotePortraitUrl(cfg) {
     const p = new URLSearchParams();
+    const girl = !!cfg.female;
     p.set("seed", cfg.seed || cfg.name);
     p.set("size", String(AVATAR_SIZE));
     p.set("backgroundType", "gradientLinear");
-    p.set("backgroundColor", cfg.bg || "6366f1,8b5cf6,312e81");
+    p.set("backgroundColor", cfg.bg || (girl ? GIRL_BG : BOY_BG));
     p.set("backgroundRotation", "0,360");
     p.set("skinColor", cfg.skinColor || "f2d3b1");
     p.set("hairColor", cfg.hairColor || "562306");
-    p.set("hair", cfg.hair || "short05");
+    p.set("hair", cfg.hair || (girl ? "long14" : "short05"));
     if (cfg.eyes) p.set("eyes", cfg.eyes);
     if (cfg.glasses) {
       p.append("glasses", cfg.glasses);
@@ -133,7 +137,7 @@
       p.append("beard", cfg.beard);
       p.set("beardProbability", "100");
     }
-    if (cfg.female) {
+    if (girl) {
       p.append("features", "blush");
       p.set("featuresProbability", "85");
     }
@@ -158,7 +162,13 @@
     if (!photoWrap) return;
     const girl = isGirl(name);
     const t = getTraits(name);
-    photoWrap.classList.remove("card-photo--real", "card-photo--avatar", "card-photo--creator");
+    photoWrap.classList.remove(
+      "card-photo--real",
+      "card-photo--avatar",
+      "card-photo--creator",
+      "card-photo--boy",
+      "card-photo--girl"
+    );
     if (t.customPhoto) {
       photoWrap.classList.add("card-photo--portrait", "card-photo--real", "card-photo--color");
       photoWrap.classList.add(girl ? "card-photo--girl" : "card-photo--boy");
@@ -177,6 +187,13 @@
     if (t.avatar && t.avatar.beard) {
       photoWrap.classList.add("card-photo--has-beard");
     }
+  }
+
+  function decorateCardFace(cardFace, name) {
+    if (!cardFace) return;
+    const girl = isGirl(name);
+    cardFace.classList.remove("card-face--boy", "card-face--girl");
+    cardFace.classList.add(girl ? "card-face--girl" : "card-face--boy");
   }
 
   function applyImgFilter(img, name) {
@@ -243,6 +260,7 @@
     cardAvatarFallbackUrl,
     buildRemotePortraitUrl,
     decoratePhotoWrap,
+    decorateCardFace,
     applyImgFilter,
     createFallbackFace,
     onImageError,
