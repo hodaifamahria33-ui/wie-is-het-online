@@ -4,12 +4,15 @@
 (function () {
   const PEER_PREFIX = "wieishet-";
   const PEER_TIMEOUT_MS = 28000;
-  const CONN_TIMEOUT_MS = 22000;
+  const CONN_TIMEOUT_MS = 32000;
+  const RELAY_PAIR_TIMEOUT_MS = 55000;
   const HOST_PROBE_MS = 3500;
-  const WS_OPEN_TIMEOUT_MS = 20000;
-  const PEER_CLOUD = "https://0.peerjs.com";
+  const WS_OPEN_TIMEOUT_MS = 22000;
+  const PEER_HOST = "0.peerjs.com";
+  const PEER_PORT = 443;
   const PEER_PATH = "/peerjs";
   const PEER_KEY = "peerjs";
+  const PEER_SECURE = true;
 
   const ICE_SERVERS = [
     { urls: "stun:stun.l.google.com:19302" },
@@ -32,9 +35,13 @@
     },
   ];
 
-  /** Alleen ICE — PeerJS cloud defaults (host/path/key) werken het best op mobiel. */
   const PEER_OPTS = {
     debug: 0,
+    host: PEER_HOST,
+    port: PEER_PORT,
+    path: PEER_PATH,
+    key: PEER_KEY,
+    secure: PEER_SECURE,
     config: { iceServers: ICE_SERVERS },
   };
 
@@ -55,6 +62,14 @@
     if (cfg.signalUrl) list.push(String(cfg.signalUrl).replace(/\/$/, ""));
     if (cfg.signalUrlFallback) {
       list.push(String(cfg.signalUrlFallback).replace(/\/$/, ""));
+    }
+    if (Array.isArray(cfg.signalUrlCandidates)) {
+      cfg.signalUrlCandidates.forEach((u) => {
+        if (u) list.push(String(u).replace(/\/$/, ""));
+      });
+    }
+    if (window.WieOnlineConfig && typeof WieOnlineConfig.bases === "function") {
+      WieOnlineConfig.bases().forEach((u) => list.push(u));
     }
     return [...new Set(list.filter(Boolean))];
   }
@@ -87,7 +102,14 @@
   async function probeHostPeer(code) {
     const id = peerId(code);
     const url =
-      PEER_CLOUD + PEER_PATH + "/" + PEER_KEY + "/peers/" + encodeURIComponent(id);
+      (PEER_SECURE ? "https" : "http") +
+      "://" +
+      PEER_HOST +
+      PEER_PATH +
+      "/" +
+      PEER_KEY +
+      "/peers/" +
+      encodeURIComponent(id);
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), HOST_PROBE_MS);
     try {
@@ -107,12 +129,18 @@
   }
 
   async function waitForHostPeer(code, maxMs) {
-    const deadline = Date.now() + (maxMs || 12000);
+    const deadline = Date.now() + (maxMs || 18000);
+    let falseStreak = 0;
     while (Date.now() < deadline) {
       const probe = await probeHostPeer(code);
       if (probe === true) return true;
-      if (probe === false) throw new Error("lobby-not-found");
-      await sleep(650);
+      if (probe === false) {
+        falseStreak += 1;
+        if (falseStreak >= 4) throw new Error("lobby-not-found");
+      } else {
+        falseStreak = 0;
+      }
+      await sleep(700);
     }
     return false;
   }
@@ -362,7 +390,7 @@
     ws = socket;
     attachWsHandlers(socket);
     await waitForWsOpen(socket, WS_OPEN_TIMEOUT_MS);
-    await waitForPeerConnected(CONN_TIMEOUT_MS);
+    await waitForPeerConnected(RELAY_PAIR_TIMEOUT_MS);
     return { role, roomCode, backend };
   }
 
@@ -498,19 +526,17 @@
     });
   }
 
-  function joinPeerGuest(code) {
+  function joinPeerGuestOnce(code) {
     return new Promise((resolve, reject) => {
       ensurePeerJs();
-      destroyAll();
-      backend = "peerjs";
-      role = "guest";
-      roomCode = sanitizeCode(code);
-      peer = new Peer({ ...PEER_OPTS });
-      peer.on("error", (err) => console.warn("guest peer error", err));
+      if (!peer || peer.destroyed) {
+        peer = new Peer({ ...PEER_OPTS });
+        peer.on("error", (err) => console.warn("guest peer error", err));
+      }
       waitForPeerOpen(peer, PEER_TIMEOUT_MS)
-        .then(() => sleep(500))
+        .then(() => sleep(400))
         .then(() => {
-          const c = peer.connect(peerId(roomCode), {
+          const c = peer.connect(peerId(code), {
             reliable: true,
             serialization: "json",
           });
@@ -532,10 +558,36 @@
     });
   }
 
+  async function joinPeerGuest(code) {
+    const sanitized = sanitizeCode(code);
+    let lastErr = null;
+    for (let i = 0; i < 5; i++) {
+      try {
+        if (i > 0) {
+          destroyAll();
+          await sleep(900 + i * 350);
+        } else {
+          destroyAll();
+        }
+        backend = "peerjs";
+        role = "guest";
+        roomCode = sanitized;
+        peer = new Peer({ ...PEER_OPTS });
+        peer.on("error", (err) => console.warn("guest peer error", err));
+        return await joinPeerGuestOnce(sanitized);
+      } catch (e) {
+        lastErr = e;
+        console.warn("peer guest attempt", i + 1, e);
+      }
+    }
+    throw lastErr || new Error("lobby-not-found");
+  }
+
   async function setupHost(code) {
     const sanitized = sanitizeCode(code);
     if (!sanitized) throw new Error("empty-code");
 
+    await ensureSignalReady();
     const bases = signalUrls();
     if (bases.length) {
       for (let i = 0; i < 3; i++) {
@@ -573,6 +625,7 @@
     const sanitized = sanitizeCode(code);
     if (!sanitized) throw new Error("empty-code");
 
+    await ensureSignalReady();
     if (signalUrls().length) {
       for (let i = 0; i < 4; i++) {
         try {
@@ -588,12 +641,22 @@
       }
     }
 
-    await waitForHostPeer(sanitized, 14000);
+    try {
+      await waitForHostPeer(sanitized, 20000);
+    } catch (e) {
+      if (String(e.message).includes("lobby-not-found")) throw e;
+    }
     await joinPeerGuest(sanitized);
     if (!connected || (backend === "peerjs" && (!conn || !conn.open))) {
       throw new Error("lobby-not-found");
     }
     return { role: "guest", roomCode: sanitized, backend };
+  }
+
+  async function ensureSignalReady() {
+    if (window.WieOnlineConfig && typeof WieOnlineConfig.discover === "function") {
+      await WieOnlineConfig.discover();
+    }
   }
 
   window.WieIsHetOnline = {
@@ -613,7 +676,13 @@
       if (backend === "relay") return !!(ws && ws.readyState === WebSocket.OPEN);
       return isPeerLive();
     },
+    isHostReady: () => {
+      if (role !== "host") return false;
+      if (backend === "relay") return !!(ws && ws.readyState === WebSocket.OPEN);
+      return isPeerLive();
+    },
 
+    ensureSignalReady,
     setupHost,
     probeHostOnline: probeHostPeer,
     setupGuest,

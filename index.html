@@ -112,9 +112,8 @@
       },
     };
     window.WIE_RANKED = {
-      /** Zet hier je matchmaker URL voor ranked vs echte spelers (Cloudflare Worker). Leeg = ranked bot. */
       matchmakerUrl: "",
-      queueTimeoutMs: 12000,
+      queueTimeoutMs: 22000,
     };
     window.wieSupportReturnTo = "screen-start";
     window.wieShowToast = function (msg) {
@@ -544,12 +543,13 @@
           if (window.WieIsHetOnline && window.WieIsHetOnline.setupHost) {
             window.WieIsHetOnline.setupHost(code)
               .then(function () {
-                if (
-                  window.WieIsHetOnline.isHostPeerLive &&
-                  window.WieIsHetOnline.isHostPeerLive()
-                ) {
-                  finish();
-                } else {
+                var ok =
+                  (window.WieIsHetOnline.isConnected &&
+                    window.WieIsHetOnline.isConnected()) ||
+                  (window.WieIsHetOnline.isHostPeerLive &&
+                    window.WieIsHetOnline.isHostPeerLive());
+                if (ok) finish();
+                else {
                   if (window.WieIsHetOnline.reset) window.WieIsHetOnline.reset();
                   showHostError();
                 }
@@ -568,12 +568,11 @@
       } else if (window.WieIsHetOnline && window.WieIsHetOnline.setupHost) {
         window.WieIsHetOnline.setupHost(code)
           .then(function () {
-            if (
-              window.WieIsHetOnline.isHostPeerLive &&
-              window.WieIsHetOnline.isHostPeerLive()
-            ) {
-              finish();
-            } else {
+            var ok =
+              (window.WieIsHetOnline.isConnected && window.WieIsHetOnline.isConnected()) ||
+              (window.WieIsHetOnline.isHostPeerLive && window.WieIsHetOnline.isHostPeerLive());
+            if (ok) finish();
+            else {
               if (window.WieIsHetOnline.reset) window.WieIsHetOnline.reset();
               showHostError();
             }
@@ -2609,14 +2608,20 @@
   <link rel="stylesheet" href="assets/game/game-screen-theme.css?v=6" />
   <script src="assets/game/start-music.js?v=43"></script>
   <script>
-    /* Zet signalUrl na deploy: cd workers/online-signal && npx wrangler deploy */
-    window.WIE_ONLINE = { signalUrl: "" };
+    window.WIE_ONLINE = {
+      signalUrl: "",
+      signalUrlCandidates: [
+        "https://wieishet-online-signal.hodaifamahria33.workers.dev",
+        "https://wieishet-online-signal.hodaifamahria33-ui.workers.dev",
+      ],
+    };
   </script>
-  <script src="assets/game/online-room.js?v=52"></script>
+  <script src="assets/game/online-config.js?v=1"></script>
+  <script src="assets/game/online-room.js?v=53"></script>
   <script src="assets/game/lobby-room.js?v=41"></script>
   <script src="assets/game/character-traits.js?v=58"></script>
   <script src="assets/game/rank-system.js?v=2"></script>
-  <script src="assets/game/ranked-queue.js?v=1"></script>
+  <script src="assets/game/ranked-queue.js?v=2"></script>
   <script src="assets/game/answer-coach.js?v=1"></script>
   <script src="assets/game/stripe-donate.js?v=1"></script>
   <script src="assets/game/orientation-lock.js?v=4"></script>
@@ -3731,9 +3736,13 @@
             busy = false;
             applyLanguage();
             if (window.WieIsHetOnline) {
-              WieIsHetOnline.setupHost(sessionCode)
+              ensureOnlineBackend()
+                .then(() => WieIsHetOnline.setupHost(sessionCode))
                 .then(() => wireHostLobby())
-                .catch(() => wireHostLobby());
+                .catch((e) => {
+                  console.warn("ranked host setup", e);
+                  wireHostLobby();
+                });
             } else {
               wireHostLobby();
             }
@@ -3758,8 +3767,9 @@
       );
     }
 
-    function startRankedSearch() {
+    async function startRankedSearch() {
       if (!window.WieRankedQueue) return;
+      await ensureOnlineBackend();
       const statusEl = document.getElementById("rank-queue-status");
       transition(screenRanked, screenRankedQueue, "transition-in-from-right");
       WieRankedQueue.start(
@@ -4321,8 +4331,24 @@
       prepareGuestLobby(code);
     }
 
+    async function ensureOnlineBackend() {
+      if (window.WieOnlineConfig && WieOnlineConfig.discover) {
+        await WieOnlineConfig.discover();
+      }
+      if (
+        window.WIE_RANKED &&
+        window.WIE_ONLINE &&
+        window.WIE_ONLINE.signalUrl &&
+        !window.WIE_RANKED.matchmakerUrl
+      ) {
+        window.WIE_RANKED.matchmakerUrl =
+          String(window.WIE_ONLINE.signalUrl).replace(/\/$/, "") + "/ranked";
+      }
+    }
+
     async function runGuestJoinFlow(code) {
       if (joinBusy) return;
+      await ensureOnlineBackend();
       if (typeof window.Peer !== "function" && !window.WieIsHetOnline) {
         if (joinError) joinError.textContent = t("joinFailed");
         if (joinedStatus) setJoinedStatus("joinFailed", true);
@@ -4441,7 +4467,7 @@
       setJoinedStatus("joinConnecting", false);
       if (joinError) joinError.textContent = t("joinConnecting");
       if (btnJoinRetry) btnJoinRetry.classList.add("hidden");
-      const maxAttempts = 8;
+      const maxAttempts = 12;
       let lastErr = null;
       for (let attempt = 0; attempt < maxAttempts; attempt++) {
         try {
@@ -4722,8 +4748,9 @@
       return code;
     }
 
-    function createHostPot(rawCode) {
+    async function createHostPot(rawCode) {
       if (hostPotBusy) return;
+      await ensureOnlineBackend();
       const pot = String(rawCode || "")
         .toUpperCase()
         .replace(/[^A-Z0-9]/g, "")
@@ -4751,11 +4778,13 @@
           try {
             await hostReadyPromise;
             hostOnline =
-              WieIsHetOnline.isHostPeerLive && WieIsHetOnline.isHostPeerLive();
+              (WieIsHetOnline.isConnected && WieIsHetOnline.isConnected()) ||
+              (WieIsHetOnline.isHostPeerLive && WieIsHetOnline.isHostPeerLive());
             if (!hostOnline) {
-              await new Promise((r) => setTimeout(r, 400));
+              await new Promise((r) => setTimeout(r, 600));
               hostOnline =
-                WieIsHetOnline.isHostPeerLive && WieIsHetOnline.isHostPeerLive();
+                (WieIsHetOnline.isConnected && WieIsHetOnline.isConnected()) ||
+                (WieIsHetOnline.isHostPeerLive && WieIsHetOnline.isHostPeerLive());
             }
           } catch (e) {
             console.warn("setupHost failed", e);

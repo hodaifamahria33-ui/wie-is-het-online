@@ -143,6 +143,19 @@
     cancel();
     active = true;
 
+    if (window.WieOnlineConfig && typeof WieOnlineConfig.discover === "function") {
+      await WieOnlineConfig.discover();
+    }
+    if (
+      window.WIE_ONLINE &&
+      window.WIE_ONLINE.signalUrl &&
+      window.WIE_RANKED &&
+      !window.WIE_RANKED.matchmakerUrl
+    ) {
+      window.WIE_RANKED.matchmakerUrl =
+        String(window.WIE_ONLINE.signalUrl).replace(/\/$/, "") + "/ranked";
+    }
+
     let match = null;
     if (cfg().matchmakerUrl) {
       match = await tryMatchmaker(onStatus);

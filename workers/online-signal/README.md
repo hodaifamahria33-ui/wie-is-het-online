@@ -1,23 +1,30 @@
-# Online signaling (WebSocket relay)
+# Online server (join + ranked)
 
-Betrouwbaarder dan alleen PeerJS op mobiel.
+Eén Cloudflare Worker voor:
 
-## Deploy (eenmalig)
+- **WebSocket relay** — potje met code (betrouwbaarder dan alleen PeerJS)
+- **Ranked matchmaking** — `/ranked/join`, `/ranked/status`, `/ranked/leave`
 
-1. Maak een [Cloudflare API token](https://developers.cloudflare.com/fundamentals/api/get-started/create-token/) (Workers edit).
-2. In PowerShell:
+## Deploy (±2 minuten)
 
 ```powershell
-$env:CLOUDFLARE_API_TOKEN = "jouw-token"
-cd workers/online-signal
+cd workers\online-signal
+npx wrangler login
 npx wrangler deploy
 ```
 
-3. Kopieer de URL (bijv. `https://wieishet-online-signal.jouwnaam.workers.dev`).
-4. Zet in `index.html`:
+Of vanuit de projectmap:
 
-```html
-window.WIE_ONLINE = { signalUrl: "https://jouw-worker.workers.dev" };
+```powershell
+powershell -File scripts\deploy-online.ps1
 ```
 
-5. Push naar GitHub en hard refresh op telefoon.
+Kopieer de URL (bijv. `https://wieishet-online-signal.jouwnaam.workers.dev`). Het deploy-script zet die automatisch in `index.html`.
+
+Daarna push naar GitHub en hard refresh op telefoon.
+
+## Test
+
+- `https://jouw-worker.workers.dev/health` → `{"ok":true}`
+- Host: potje maken → vriend joint met code
+- Ranked: twee browsers → Zoek ranked match → zelfde code / host+gast

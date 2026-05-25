@@ -1,6 +1,7 @@
 import { Room } from "./room.js";
+import { RankedQueue } from "./ranked-queue.js";
 
-export { Room };
+export { Room, RankedQueue };
 
 export default {
   async fetch(request, env) {
@@ -11,14 +12,22 @@ export default {
         status: 204,
         headers: {
           "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "GET, OPTIONS",
+          "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
           "Access-Control-Allow-Headers": "Content-Type",
         },
       });
     }
 
+    if (url.pathname.startsWith("/ranked")) {
+      const id = env.RANKED.idFromName("global");
+      const stub = env.RANKED.get(id);
+      const rankedUrl = new URL(request.url);
+      rankedUrl.pathname = rankedUrl.pathname.replace(/^\/ranked/, "") || "/";
+      return stub.fetch(new Request(rankedUrl.toString(), request));
+    }
+
     if (url.pathname === "/health" || url.pathname.endsWith("/health")) {
-      return new Response(JSON.stringify({ ok: true }), {
+      return new Response(JSON.stringify({ ok: true, service: "signal" }), {
         headers: {
           "Content-Type": "application/json",
           "Access-Control-Allow-Origin": "*",
