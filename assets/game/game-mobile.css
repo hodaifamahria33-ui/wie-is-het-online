@@ -779,85 +779,166 @@ html.wie-phone-landscape-game .game-turn-banner {
   padding: 0.28rem 0.5rem !important;
 }
 
-/* Win/verlies-popup op telefoon: compact + knoppen zichtbaar */
-@media (max-width: 720px) {
+/* Win/verlies-popup: telefoon portrait én landscape (laag/breed scherm) */
+@media (max-width: 720px),
+  (max-height: 540px) and (max-width: 960px),
+  (pointer: coarse) and (max-height: 600px) {
   .win-overlay {
     align-items: center !important;
-    justify-content: center !important;
-    padding: max(6px, env(safe-area-inset-top)) 8px max(6px, env(safe-area-inset-bottom)) !important;
+    justify-content: safe center !important;
+    padding:
+      max(6px, env(safe-area-inset-top))
+      max(8px, env(safe-area-inset-right))
+      max(6px, env(safe-area-inset-bottom))
+      max(8px, env(safe-area-inset-left)) !important;
+    overflow-x: hidden !important;
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch;
   }
 
   .win-overlay .win-card,
   .win-overlay.active .win-card {
-    padding: 0.7rem 0.85rem 0.8rem !important;
-    max-width: min(88vw, 280px) !important;
+    padding: 0.65rem 0.75rem 0.7rem !important;
+    max-width: min(92vw, 260px) !important;
     width: 100% !important;
-    max-height: min(88dvh, 88svh) !important;
+    max-height: min(90dvh, 90svh, calc(100% - 12px)) !important;
     overflow-y: auto !important;
+    overflow-x: hidden !important;
     box-sizing: border-box !important;
+    border-width: 3px !important;
+    border-radius: 16px !important;
+  }
+
+  .win-overlay.active .win-card {
+    animation: winInPhone 0.55s cubic-bezier(0.34, 1.2, 0.64, 1) forwards;
+  }
+
+  @keyframes winInPhone {
+    0% {
+      transform: scale(0.85);
+      opacity: 0;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
   }
 
   .win-overlay .win-title {
-    font-size: clamp(1.2rem, 5.5vw, 1.65rem) !important;
-    margin-bottom: 0.2rem !important;
-    line-height: 1.1 !important;
+    font-size: clamp(1rem, 4.2vmin, 1.45rem) !important;
+    margin-bottom: 0.15rem !important;
+    line-height: 1.08 !important;
+    letter-spacing: 0.04em !important;
   }
 
   .win-overlay .win-sub {
-    font-size: clamp(0.72rem, 2.8vw, 0.88rem) !important;
-    line-height: 1.25 !important;
+    font-size: clamp(0.65rem, 2.6vmin, 0.82rem) !important;
+    line-height: 1.2 !important;
+  }
+
+  .win-overlay .win-rank-delta {
+    font-size: clamp(0.62rem, 2.4vmin, 0.78rem) !important;
+    margin-top: 0.25rem !important;
   }
 
   .win-overlay .lose-opponent-reveal {
-    margin-top: 0.45rem !important;
-    padding-top: 0.45rem !important;
+    margin-top: 0.35rem !important;
+    padding-top: 0.35rem !important;
+    border-top-width: 1px !important;
+  }
+
+  .win-overlay .lose-reveal-face {
+    margin-bottom: 0.25rem !important;
   }
 
   .win-overlay .lose-reveal-face .card-face {
-    width: clamp(56px, 16vw, 76px) !important;
-    max-width: 76px !important;
+    width: clamp(48px, 14vmin, 68px) !important;
+    max-width: 68px !important;
   }
 
   .win-overlay .lose-reveal-face .card-photo,
   .win-overlay .lose-reveal-face .card-img {
-    max-height: 3.25rem !important;
+    max-height: clamp(2.5rem, 12vmin, 3.25rem) !important;
+  }
+
+  .win-overlay .lose-reveal-face .card-name {
+    font-size: clamp(0.38rem, 1.8vmin, 0.5rem) !important;
   }
 
   .win-overlay .lose-reveal-name {
-    font-size: clamp(0.75rem, 3vw, 0.95rem) !important;
-    letter-spacing: 0.05em !important;
+    font-size: clamp(0.68rem, 2.8vmin, 0.88rem) !important;
+    letter-spacing: 0.04em !important;
   }
 
   .win-overlay .lose-reveal-label {
-    font-size: 0.65rem !important;
-    margin-bottom: 0.25rem !important;
+    font-size: clamp(0.58rem, 2.2vmin, 0.65rem) !important;
+    margin-bottom: 0.2rem !important;
   }
 
   .win-overlay .win-end-actions,
   .win-overlay .win-give-up-actions {
-    margin-top: 0.55rem !important;
-    gap: 0.4rem !important;
+    margin-top: 0.45rem !important;
+    gap: 0.35rem !important;
     width: 100% !important;
     max-width: 100% !important;
   }
 
   .win-overlay .btn-win-action {
-    padding: 0.45rem 0.6rem !important;
-    font-size: clamp(0.62rem, 2.5vw, 0.75rem) !important;
+    padding: 0.42rem 0.55rem !important;
+    font-size: clamp(0.58rem, 2.4vmin, 0.72rem) !important;
+    border-radius: 10px !important;
+    border-width: 2px !important;
   }
 
   .win-overlay.opponent-gave-up .win-card {
-    padding: 0.85rem 1rem !important;
-    max-width: min(88vw, 300px) !important;
+    padding: 0.7rem 0.8rem !important;
+    max-width: min(92vw, 270px) !important;
   }
 
   .win-overlay.opponent-gave-up .win-title {
-    font-size: clamp(1.25rem, 5vw, 1.75rem) !important;
+    font-size: clamp(1.05rem, 4.5vmin, 1.5rem) !important;
+    margin-bottom: 0.2rem !important;
   }
 
   .win-overlay.opponent-gave-up .win-sub {
-    font-size: clamp(0.8rem, 3vw, 1rem) !important;
+    font-size: clamp(0.7rem, 2.8vmin, 0.9rem) !important;
   }
+
+  .win-overlay.give-up .win-sub {
+    font-size: clamp(0.68rem, 2.6vmin, 0.85rem) !important;
+  }
+}
+
+/* Zeer klein landscape-scherm (oude/kleine telefoons) */
+@media (max-height: 380px) and (max-width: 960px) {
+  .win-overlay .win-card,
+  .win-overlay.active .win-card {
+    padding: 0.5rem 0.6rem 0.55rem !important;
+    max-width: min(94vw, 240px) !important;
+    max-height: min(96dvh, 96svh) !important;
+  }
+
+  .win-overlay .win-title {
+    font-size: clamp(0.92rem, 4vmin, 1.2rem) !important;
+  }
+
+  .win-overlay .lose-reveal-face .card-face {
+    width: clamp(42px, 12vmin, 56px) !important;
+    max-width: 56px !important;
+  }
+
+  .win-overlay .lose-reveal-face .card-photo,
+  .win-overlay .lose-reveal-face .card-img {
+    max-height: 2.35rem !important;
+  }
+
+  .win-overlay .btn-win-action {
+    padding: 0.36rem 0.5rem !important;
+    font-size: 0.58rem !important;
+  }
+}
+
+/* Zelfde regels als landscape-game class actief is */
+html.wie-phone-landscape-game .win-overlay .win-card {
+  max-width: min(min(92vw, 92svh * 0.55), 255px) !important;
 }
