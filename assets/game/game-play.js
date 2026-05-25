@@ -250,6 +250,12 @@
     else flipWell(well, anim);
   }
 
+  function useCompactSecretReveal() {
+    return window.matchMedia(
+      "(max-width: 900px), ((hover: none) or (pointer: coarse)) and (max-width: 1180px)"
+    ).matches;
+  }
+
   function cloneCardToSecret(well) {
     if (!secretSlot) return;
     Array.from(secretSlot.children).forEach((child) => {
@@ -260,12 +266,23 @@
     const face = well.querySelector(".card-face");
     if (!face) return;
     secretSlot.appendChild(face.cloneNode(true));
-    secretSlot.classList.remove("is-reveal", "is-shrink");
+    secretSlot.classList.remove("is-reveal", "is-shrink", "secret-reveal-skip-hero");
     secretSlot.classList.add("visible");
+    if (screenGame) {
+      screenGame.classList.add("has-secret-visible");
+    }
+
+    if (useCompactSecretReveal()) {
+      secretSlot.classList.add("is-shrink", "secret-reveal-skip-hero");
+      if (screenGame) screenGame.classList.remove("secret-reveal-active");
+      hideBanner();
+      return;
+    }
+
     void secretSlot.offsetWidth;
     secretSlot.classList.add("is-reveal");
     if (screenGame) {
-      screenGame.classList.add("has-secret-visible", "secret-reveal-active");
+      screenGame.classList.add("secret-reveal-active");
     }
     const heroMs = document.documentElement.classList.contains("wie-phone-landscape-game")
       ? 1100
@@ -1328,13 +1345,16 @@
   function enableGuessModeWells() {
     state.playerWells.forEach((w) => {
       const tile = w.querySelector(".card-tile");
-      const canTap =
-        tile &&
-        (!tile.classList.contains("is-down") || w.classList.contains("picked-secret"));
-      if (canTap) {
+      if (tile && !tile.classList.contains("is-down")) {
         w.classList.add("guess-mode", "interactive");
       }
     });
+    if (!useCompactSecretReveal() && state.secretIndex != null) {
+      const secretWell = state.playerWells[state.secretIndex];
+      if (secretWell) {
+        secretWell.classList.add("guess-mode", "interactive");
+      }
+    }
   }
 
   function beginGuessMode() {

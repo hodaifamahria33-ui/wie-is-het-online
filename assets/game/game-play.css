@@ -207,21 +207,24 @@
   pointer-events: none !important;
 }
 
-.screen-game-view.phase-guess #player-board .card-well.picked-secret {
-  opacity: 1 !important;
-  visibility: visible !important;
-  pointer-events: auto !important;
-}
+/* Alleen tijdens raden op desktop/tablet; niet op mobiel (kaart blijft in hoek) */
+@media (min-width: 901px) and (hover: hover) and (pointer: fine) {
+  .screen-game-view.phase-guess #player-board .card-well.picked-secret {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+  }
 
-.screen-game-view.phase-guess #player-board .card-well.picked-secret .card-tile {
-  transform: rotateX(-13deg) !important;
-}
+  .screen-game-view.phase-guess #player-board .card-well.picked-secret .card-tile {
+    transform: rotateX(-13deg) !important;
+  }
 
-.screen-game-view.phase-guess #player-board .card-well.picked-secret.guess-mode {
-  outline: 3px solid rgba(250, 204, 21, 0.9);
-  outline-offset: 2px;
-  border-radius: 12px;
-  z-index: 3;
+  .screen-game-view.phase-guess #player-board .card-well.picked-secret.guess-mode {
+    outline: 3px solid rgba(250, 204, 21, 0.9);
+    outline-offset: 2px;
+    border-radius: 12px;
+    z-index: 3;
+  }
 }
 
 .card-well.opponent-secret-revealed .card-tile.revealed-secret .card-face {

@@ -132,6 +132,48 @@
     transform: scale(1) !important;
   }
 
+  /* Geen gigantische kaart in het midden op telefoon — direct klein in hoek */
+  .secret-card-slot.secret-reveal-skip-hero,
+  .secret-card-slot.secret-reveal-skip-hero.is-reveal,
+  .secret-card-slot.secret-reveal-skip-hero.is-shrink {
+    top: auto !important;
+    left: auto !important;
+    right: max(10px, env(safe-area-inset-right)) !important;
+    bottom: max(96px, calc(env(safe-area-inset-bottom, 0px) + 88px)) !important;
+    width: clamp(64px, 17vw, 88px) !important;
+    max-width: 88px !important;
+    transform: scale(1) !important;
+    animation: none !important;
+  }
+
+  .screen-game-view.secret-reveal-active:has(.secret-reveal-skip-hero)::before {
+    display: none !important;
+  }
+
+  #secret-card-slot .card-name,
+  #game-table .secret-card-slot .card-name,
+  .secret-card-slot .card-name {
+    font-size: clamp(0.5rem, 2.5vw, 0.66rem) !important;
+    line-height: 1.2 !important;
+    padding: 3px 2px 4px !important;
+    letter-spacing: 0.02em !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+    text-align: center !important;
+    min-height: 2em !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  #secret-card-slot .card-face,
+  #game-table .secret-card-slot .card-face,
+  .secret-card-slot .card-face {
+    aspect-ratio: 4 / 5 !important;
+    width: 100% !important;
+    height: auto !important;
+  }
+
   #game-table .board-tray {
     padding: 8px 9px 10px;
     border-radius: 16px;
