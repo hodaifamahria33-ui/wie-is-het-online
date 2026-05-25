@@ -44,7 +44,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Nunito:wght@600;700;800&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="assets/game/start-screen.css?v=66" />
-  <link rel="stylesheet" href="assets/game/mode-screen.css?v=8" />
+  <link rel="stylesheet" href="assets/game/mode-screen.css?v=9" />
   <link rel="stylesheet" href="assets/game/support-screen.css?v=1" />
   <link rel="stylesheet" href="assets/game/stripe-donate.css?v=1" />
   <link rel="stylesheet" href="assets/game/joined-screen.css?v=5" />
@@ -346,15 +346,25 @@
       }
       if (window.wieApp && window.wieApp.startBotGame) window.wieApp.startBotGame("easy");
     };
-    window.wieStartDaily = function () {
+    window.wieOpenDaily = function (ev) {
+      if (ev && ev.preventDefault) ev.preventDefault();
+      if (ev && ev.stopPropagation) ev.stopPropagation();
       if (window.wieApp && window.wieApp.goToDaily) return window.wieApp.goToDaily();
-      if (!window.wieSavedName()) {
+      if (!window.wieSavedName || !window.wieSavedName()) {
         window.wiePendingDaily = true;
-        window.wieGoBegin();
+        if (window.wieGoBegin) window.wieGoBegin();
         return;
       }
-      window.wieShowScreen("screen-mode", "screen-bot-diff");
+      try {
+        if (window.WieGameFeatures) WieGameFeatures.setCardMode("daily");
+        window.wieShowScreen("screen-mode", "screen-bot-diff");
+        if (window.wieApp && window.wieApp.updateDailyNote) window.wieApp.updateDailyNote();
+      } catch (err) {
+        console.error("wieOpenDaily", err);
+        window.wieShowScreen("screen-mode", "screen-bot-diff");
+      }
     };
+    window.wieStartDaily = window.wieOpenDaily;
     window.wieShowScreen = function (fromId, toId) {
       var from = document.getElementById(fromId);
       var to = document.getElementById(toId);
@@ -2139,7 +2149,7 @@
             <span class="mode-choice-desc" data-i18n="modeRankedDesc">Win ranked punten &amp; stijg in rank</span>
           </span>
         </button>
-        <button id="btn-daily-challenge" class="mode-choice mode-choice--daily" type="button">
+        <button id="btn-daily-challenge" class="mode-choice mode-choice--daily" type="button" onclick="window.wieOpenDaily(event)">
           <span class="mode-choice-icon" aria-hidden="true">📅</span>
           <span class="mode-choice-text">
             <span class="mode-choice-label" data-i18n="btnDailyChallenge">Daily challenge</span>
@@ -3431,8 +3441,6 @@
       setTimeout(refreshRankDisplays, 340);
     }
 
-    let dailyNavLock = false;
-
     /** Direct schermwissel — geen animatie (voorkomt freeze op mobiel). */
     function showScreenNow(from, to) {
       if (!to) return;
@@ -3471,23 +3479,27 @@
     }
 
     function goToDailyChallenge() {
-      if (dailyNavLock) return;
-      dailyNavLock = true;
-      window.setTimeout(function () {
-        dailyNavLock = false;
-      }, 450);
-
-      if (!getSavedPlayerName()) {
-        dailyNavLock = false;
-        window.wiePendingDaily = true;
-        goToNameScreen();
-        return;
-      }
-      if (window.WieGameFeatures) WieGameFeatures.setCardMode("daily");
-      showScreenNow(screenMode, screenBotDiff);
-      window.requestAnimationFrame(function () {
+      try {
+        if (!getSavedPlayerName()) {
+          window.wiePendingDaily = true;
+          goToNameScreen();
+          return;
+        }
+        busy = false;
+        if (window.WieGameFeatures) WieGameFeatures.setCardMode("daily");
+        if (typeof window.wieShowScreen === "function") {
+          window.wieShowScreen("screen-mode", "screen-bot-diff");
+        } else {
+          showScreenNow(screenMode, screenBotDiff);
+        }
         updateBotDiffDailyNote();
-      });
+      } catch (err) {
+        console.error("goToDailyChallenge", err);
+        busy = false;
+        if (typeof window.wieShowScreen === "function") {
+          window.wieShowScreen("screen-mode", "screen-bot-diff");
+        }
+      }
     }
 
     if (playerNameInput) {
@@ -4984,7 +4996,6 @@
     });
 
     onClick("btn-play-bot", goToBotDiffScreen);
-    onClick("btn-daily-challenge", goToDailyChallenge);
 
     onClick("btn-play-ranked", goToRankedScreen);
 
@@ -5331,6 +5342,7 @@
       startBotGame,
       goToBotDiff: goToBotDiffScreen,
       goToDaily: goToDailyChallenge,
+      updateDailyNote: updateBotDiffDailyNote,
       startRankedSearch,
       goRanked: goToRankedScreen,
       startSoloGame,
