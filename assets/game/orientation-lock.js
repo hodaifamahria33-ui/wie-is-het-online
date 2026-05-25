@@ -148,9 +148,8 @@
   }
 
   function update() {
-    if (!overlay) return;
-
     syncOpponentChestDock();
+    if (!overlay) return;
 
     if (pendingPortraitReturn && !isLandscapeLike()) {
       pendingPortraitReturn = false;
