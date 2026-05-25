@@ -48,6 +48,56 @@
 
   const CARD_NAMES = ROSTER.map((c) => c.name);
 
+  /** Korte labels op smalle landscape-kaarten (8 kolommen). */
+  const SHORT_LABELS = {
+    MrBeast: "MRBEAST",
+    PewDiePie: "PEWDIEPIE",
+    Markiplier: "MARK",
+    Jacksepticeye: "JACK",
+    KSI: "KSI",
+    Ninja: "NINJA",
+    Dream: "DREAM",
+    DanTDM: "DANTDM",
+    Ludwig: "LUDWIG",
+    xQc: "XQC",
+    IShowSpeed: "SPEED",
+    "Logan Paul": "LOGAN",
+    MKBHD: "MKBHD",
+    TommyInnit: "TOMMY",
+    CoryxKenshin: "CORY",
+    Rhett: "RHETT",
+    Pokimane: "POKI",
+    Valkyrae: "RAE",
+    SSSniperWolf: "LIA",
+    Emma: "EMMA",
+    Nikkie: "NIKKIE",
+    Safiya: "SAFIYA",
+    Rosanna: "ROSANNA",
+    Charli: "CHARLI",
+    Addison: "ADDISON",
+    Lilly: "LILLY",
+    Liza: "LIZA",
+    Jaiden: "JAIDEN",
+    Michelle: "MICHELLE",
+    Wengie: "WENGIE",
+    Miranda: "MIRANDA",
+    Bethany: "BETHANY",
+  };
+
+  function isPhoneLandscapeGrid() {
+    const shortSide = Math.min(window.innerWidth, window.innerHeight);
+    return (
+      shortSide <= 520 &&
+      window.innerWidth > window.innerHeight &&
+      document.documentElement.classList.contains("wie-phone-landscape-game")
+    );
+  }
+
+  function getCardLabel(name) {
+    if (isPhoneLandscapeGrid() && SHORT_LABELS[name]) return SHORT_LABELS[name];
+    return name;
+  }
+
   /** Content-tags voor YouTuber-vragen (sync met game-play.js evaluateQuestion). */
   const CREATOR_TAGS = {
     MrBeast: ["vlog", "challenge"],
@@ -253,6 +303,7 @@
 
   window.WieCharacterArt = {
     CARD_NAMES,
+    getCardLabel,
     getTraits,
     isGirl,
     hasCreatorTag,

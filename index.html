@@ -57,7 +57,7 @@
   <link rel="stylesheet" href="assets/game/game-layout.css?v=56" />
   <link rel="stylesheet" href="assets/game/character-variety.css?v=55" />
   <link rel="stylesheet" href="assets/game/game-extras.css?v=59" />
-  <link rel="stylesheet" href="assets/game/game-mobile.css?v=8" />
+  <link rel="stylesheet" href="assets/game/game-mobile.css?v=9" />
   <link rel="stylesheet" href="assets/game/orientation-lock.css?v=5" />
   <link rel="stylesheet" href="assets/game/answer-coach.css?v=1" />
   <link rel="stylesheet" href="assets/game/rank-ui.css?v=6" />
@@ -2576,7 +2576,7 @@
   <script src="assets/game/online-config.js?v=3"></script>
   <script src="assets/game/online-room.js?v=59"></script>
   <script src="assets/game/lobby-room.js?v=41"></script>
-  <script src="assets/game/character-traits.js?v=60"></script>
+  <script src="assets/game/character-traits.js?v=61"></script>
   <script src="assets/game/rank-system.js?v=3"></script>
   <script src="assets/game/ranked-queue.js?v=3"></script>
   <script src="assets/game/answer-coach.js?v=1"></script>
@@ -3462,7 +3462,10 @@
         }
         const label = document.createElement("span");
         label.className = "card-name";
-        label.textContent = name;
+        label.textContent =
+          window.WieCharacterArt && WieCharacterArt.getCardLabel
+            ? WieCharacterArt.getCardLabel(name)
+            : name;
         face.append(photoWrap, label);
         tile.appendChild(face);
         well.appendChild(tile);
