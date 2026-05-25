@@ -942,3 +942,32 @@ html.wie-phone-landscape-game .game-turn-banner {
 html.wie-phone-landscape-game .win-overlay .win-card {
   max-width: min(min(92vw, 92svh * 0.55), 255px) !important;
 }
+
+/* Daily 4×4 — telefoon landscape: kleinere namen */
+html.wie-phone-landscape-game.wie-daily-challenge #game-table .card-well {
+  min-height: 0;
+}
+
+html.wie-phone-landscape-game.wie-daily-challenge #game-table .card-name {
+  font-size: clamp(0.34rem, 1.5vh, 0.48rem) !important;
+  padding: 1px !important;
+  min-height: 0 !important;
+  line-height: 1.1 !important;
+}
+
+/* Daily — iPad / tablet (geen phone-landscape class) */
+@media (min-width: 601px) and (max-width: 1100px) {
+  html.wie-daily-challenge #game-table .game-scene {
+    padding-top: calc(env(safe-area-inset-top, 0px) + 52px) !important;
+    padding-bottom: max(12px, env(safe-area-inset-bottom)) !important;
+  }
+
+  html.wie-daily-challenge #game-table .opponent-board-back,
+  html.wie-daily-challenge #game-table .player-board {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    grid-template-rows: repeat(4, minmax(0, 1fr)) !important;
+    max-width: min(520px, 72vw) !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+}
