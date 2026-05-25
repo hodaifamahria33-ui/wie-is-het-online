@@ -2,12 +2,13 @@
  * Mobiel: landscape om te spelen; na potje weer portrait voor menu.
  */
 (function () {
-  const LOCK_CLASS = "orientation-locked";
   const PHONE_SHORT_SIDE_PX = 520;
+  const LANDSCAPE_STABLE_MS = 280;
 
   let screenGame = null;
   let overlay = null;
   let pendingStarts = [];
+  let landscapeStableTimer = null;
 
   function isGameScreenActive() {
     return screenGame && !screenGame.classList.contains("hidden");
@@ -20,18 +21,18 @@
     return window.matchMedia("(max-width: 600px)").matches;
   }
 
-  function isPortrait() {
-    if (window.matchMedia("(orientation: portrait)").matches) return true;
-    if (window.matchMedia("(orientation: landscape)").matches) return false;
-    return window.innerHeight >= window.innerWidth;
+  function isLandscapeLike() {
+    if (window.matchMedia("(orientation: landscape)").matches) return true;
+    if (window.matchMedia("(orientation: portrait)").matches) return false;
+    return window.innerWidth > window.innerHeight;
   }
 
   function needsRotateToLandscape() {
-    return isGameScreenActive() && isPhoneLike() && isPortrait();
+    return isGameScreenActive() && isPhoneLike() && !isLandscapeLike();
   }
 
   function needsRotateToPortrait() {
-    return !isGameScreenActive() && isPhoneLike() && !isPortrait();
+    return !isGameScreenActive() && isPhoneLike() && !isLandscapeLike();
   }
 
   function t(key) {
@@ -63,13 +64,30 @@
     });
   }
 
+  function scheduleLandscapeReady() {
+    clearTimeout(landscapeStableTimer);
+    if (!isGameScreenActive() || !isPhoneLike()) {
+      flushPendingStarts();
+      return;
+    }
+    if (!isLandscapeLike()) return;
+    landscapeStableTimer = window.setTimeout(() => {
+      if (isGameScreenActive() && isPhoneLike() && isLandscapeLike()) {
+        flushPendingStarts();
+      }
+      update();
+    }, LANDSCAPE_STABLE_MS);
+  }
+
   function cancelPendingStarts() {
     pendingStarts = [];
+    clearTimeout(landscapeStableTimer);
+    landscapeStableTimer = null;
   }
 
   function waitForLandscape(cb) {
     if (typeof cb !== "function") return;
-    if (!isPhoneLike() || !isPortrait()) {
+    if (!isPhoneLike() || isLandscapeLike()) {
       cb();
       return;
     }
@@ -84,11 +102,7 @@
     const toPortrait = needsRotateToPortrait();
     const lock = toLandscape || toPortrait;
     const landscapeGame =
-      isGameScreenActive() && isPhoneLike() && !isPortrait();
-
-    if (screenGame) {
-      screenGame.classList.toggle(LOCK_CLASS, toLandscape);
-    }
+      isGameScreenActive() && isPhoneLike() && isLandscapeLike();
 
     overlay.classList.remove(
       "orientation-lock--to-landscape",
@@ -114,7 +128,11 @@
       toPortrait
     );
 
-    if (toLandscape) flushPendingStarts();
+    if (!toLandscape && landscapeGame) {
+      scheduleLandscapeReady();
+    } else if (!toLandscape && !landscapeGame) {
+      flushPendingStarts();
+    }
   }
 
   function hookShowOnly() {
@@ -124,6 +142,7 @@
       prev(screenId);
       window.setTimeout(update, 0);
       window.setTimeout(update, 200);
+      window.setTimeout(update, 450);
     };
     window.wieShowOnly.__wieOrientHook = true;
   }
@@ -140,8 +159,9 @@
     hookShowOnly();
 
     window.addEventListener("orientationchange", () => {
-      window.setTimeout(update, 50);
-      window.setTimeout(update, 350);
+      window.setTimeout(update, 40);
+      window.setTimeout(update, 200);
+      window.setTimeout(update, 450);
     });
     window.addEventListener("resize", update);
     if (window.visualViewport) {
@@ -166,6 +186,7 @@
     waitForLandscape,
     cancelPendingStarts,
     isPhoneLike,
+    isLandscapeLike,
     needsRotateLock: needsRotateToLandscape,
   };
 

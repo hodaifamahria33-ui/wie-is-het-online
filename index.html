@@ -58,7 +58,7 @@
   <link rel="stylesheet" href="assets/game/character-variety.css?v=55" />
   <link rel="stylesheet" href="assets/game/game-extras.css?v=60" />
   <link rel="stylesheet" href="assets/game/game-mobile.css?v=10" />
-  <link rel="stylesheet" href="assets/game/orientation-lock.css?v=6" />
+  <link rel="stylesheet" href="assets/game/orientation-lock.css?v=7" />
   <link rel="stylesheet" href="assets/game/answer-coach.css?v=1" />
   <link rel="stylesheet" href="assets/game/rank-ui.css?v=6" />
   <link rel="stylesheet" href="assets/game/game-play.css?v=56" />
@@ -2583,7 +2583,7 @@
   <script src="assets/game/ranked-queue.js?v=3"></script>
   <script src="assets/game/answer-coach.js?v=1"></script>
   <script src="assets/game/stripe-donate.js?v=1"></script>
-  <script src="assets/game/orientation-lock.js?v=6"></script>
+  <script src="assets/game/orientation-lock.js?v=7"></script>
   <script src="assets/game/game-play.js?v=65"></script>
 
   <script>
@@ -3906,12 +3906,16 @@
       }
       if (gameTable) gameTable.classList.add("hidden");
       if (gameCountdown) {
-        gameCountdown.classList.add("hidden");
-        gameCountdown.style.display = "";
+        gameCountdown.classList.remove("hidden");
+        gameCountdown.style.display = "flex";
       }
       if (window.WieOrientationLock) WieOrientationLock.refresh();
       function beginAfterRotate() {
         if (window.WieOrientationLock) WieOrientationLock.refresh();
+        if (gameCountdown) {
+          gameCountdown.classList.remove("hidden");
+          gameCountdown.style.display = "flex";
+        }
         runCountdownThenTable();
       }
       if (window.WieOrientationLock && typeof WieOrientationLock.waitForLandscape === "function") {
