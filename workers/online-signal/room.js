@@ -17,12 +17,27 @@ export class Room {
       });
     }
 
+    if (url.searchParams.get("peek") === "1") {
+      const host = !!this.getRoleSocket("host");
+      const guest = !!this.getRoleSocket("guest");
+      return json(
+        {
+          ok: true,
+          host,
+          guest,
+          paired: host && guest,
+          count: this.state.getWebSockets().length,
+        },
+        200
+      );
+    }
+
     if (url.pathname.endsWith("/health")) {
       return json({ ok: true }, 200);
     }
 
     if (request.headers.get("Upgrade") !== "websocket") {
-      return json({ ok: true, room: true }, 200);
+      return json({ ok: true, room: true, host: !!this.getRoleSocket("host"), guest: !!this.getRoleSocket("guest") }, 200);
     }
 
     const role = url.searchParams.get("role") === "host" ? "host" : "guest";
@@ -32,24 +47,30 @@ export class Room {
     this.state.acceptWebSocket(server);
     server.serializeAttachment({ role, joinedAt: Date.now() });
 
-  const existing = this.state.getWebSockets();
-  const sameRole = existing.filter((s) => s.deserializeAttachment()?.role === role);
-  if (sameRole.length >= 1) {
-    try {
-      sameRole[0].close(4000, "replaced");
-    } catch (_) {}
-  }
+    const existing = this.state.getWebSockets();
+    const sameRole = existing.filter((s) => {
+      if (s === server) return false;
+      return s.deserializeAttachment()?.role === role;
+    });
+    for (const old of sameRole) {
+      try {
+        old.close(4000, "replaced");
+      } catch (_) {}
+    }
 
     this.broadcast(server, { type: "peer-joined", role });
+    this.maybeConnectPair();
 
+    return new Response(null, { status: 101, webSocket: client });
+  }
+
+  maybeConnectPair() {
     const hostSock = this.getRoleSocket("host");
     const guestSock = this.getRoleSocket("guest");
     if (hostSock && guestSock) {
       this.sendJson(hostSock, { type: "connected", role: "host" });
       this.sendJson(guestSock, { type: "connected", role: "guest" });
     }
-
-    return new Response(null, { status: 101, webSocket: client });
   }
 
   async webSocketMessage(ws, message) {

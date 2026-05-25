@@ -5,7 +5,8 @@
   const PEER_PREFIX = "wieishet-";
   const PEER_TIMEOUT_MS = 28000;
   const CONN_TIMEOUT_MS = 32000;
-  const RELAY_PAIR_TIMEOUT_MS = 55000;
+  const RELAY_PAIR_TIMEOUT_MS = 90000;
+  const RELAY_HOST_WAIT_MS = 70000;
   const HOST_PROBE_MS = 3500;
   const WS_OPEN_TIMEOUT_MS = 12000;
   const RELAY_PROBE_MS = 4000;
@@ -54,6 +55,7 @@
   let peer = null;
   let conn = null;
   let hostReconnectTimer = null;
+  let lastRelayBase = null;
   const listeners = new Set();
   const pendingOutbox = [];
 
@@ -304,13 +306,15 @@
     }
   }
 
+  function hasRelayConfig() {
+    const cfg = window.WIE_ONLINE || {};
+    return !!(cfg.signalUrl || (cfg.signalUrlCandidates && cfg.signalUrlCandidates.length));
+  }
+
   async function pickSignalBase() {
     const cfg = window.WIE_ONLINE || {};
     const preset = cfg.signalUrl ? String(cfg.signalUrl).replace(/\/$/, "") : "";
-    if (preset) {
-      if (await probeSignalBase(preset)) return preset;
-      return preset;
-    }
+    if (preset) return preset;
     const urls = signalUrls();
     if (!urls.length) return null;
     const checks = urls.map(async (base) => {
@@ -318,7 +322,30 @@
       return ok ? base : null;
     });
     const results = await Promise.all(checks);
-    return results.find(Boolean) || null;
+    return results.find(Boolean) || urls[0] || null;
+  }
+
+  async function peekRoom(base, code) {
+    try {
+      const u = new URL(base.replace(/\/$/, "") + "/");
+      u.searchParams.set("code", sanitizeCode(code));
+      u.searchParams.set("peek", "1");
+      const res = await fetch(u.toString(), { cache: "no-store", mode: "cors" });
+      if (!res.ok) return null;
+      return await res.json();
+    } catch (_) {
+      return null;
+    }
+  }
+
+  async function waitForRelayHostOnline(base, code, maxMs) {
+    const deadline = Date.now() + (maxMs || RELAY_HOST_WAIT_MS);
+    while (Date.now() < deadline) {
+      const info = await peekRoom(base, code);
+      if (info && info.host) return true;
+      await sleep(800);
+    }
+    return false;
   }
 
   function wsUrlFor(base, code, asRole) {
@@ -379,9 +406,9 @@
     socket.addEventListener("close", () => {
       setConnected(false);
       emit({ type: "disconnected" });
-      if (role === "host" && roomCode && backend === "relay") {
+      if (role === "host" && roomCode && backend === "relay" && lastRelayBase) {
         hostReconnectTimer = window.setTimeout(() => {
-          connectRelayHost(roomCode).catch(() => {});
+          connectRelayHostAt(lastRelayBase, roomCode).catch(() => {});
         }, 2000);
       }
     });
@@ -389,6 +416,7 @@
 
   async function connectRelayHostAt(base, code) {
     destroyAll();
+    lastRelayBase = base;
     backend = "relay";
     role = "host";
     roomCode = sanitizeCode(code);
@@ -396,8 +424,7 @@
     ws = socket;
     attachWsHandlers(socket);
     await waitForWsOpen(socket, WS_OPEN_TIMEOUT_MS);
-    setConnected(true);
-    emit({ type: "connected" });
+    emit({ type: "host-waiting" });
     return { role, roomCode, backend };
   }
 
@@ -408,10 +435,16 @@
   }
 
   async function connectRelayGuestAt(base, code) {
+    lastRelayBase = base;
+    const sanitized = sanitizeCode(code);
+    const hostThere = await waitForRelayHostOnline(base, sanitized, RELAY_HOST_WAIT_MS);
+    if (!hostThere) throw new Error("lobby-not-found");
+
     destroyAll();
+    lastRelayBase = base;
     backend = "relay";
     role = "guest";
-    roomCode = sanitizeCode(code);
+    roomCode = sanitized;
     const socket = new WebSocket(wsUrlFor(base, roomCode, "guest"));
     ws = socket;
     attachWsHandlers(socket);
@@ -630,26 +663,27 @@
     await ensureSignalReady();
 
     const relayBase = await pickSignalBase();
+    let lastErr = null;
     if (relayBase) {
-      for (let i = 0; i < 2; i++) {
+      for (let i = 0; i < 6; i++) {
         try {
           if (i > 0) {
             destroyAll();
-            await sleep(700);
+            await sleep(600 + i * 300);
           }
           return await connectRelayHostAt(relayBase, sanitized);
         } catch (e) {
+          lastErr = e;
           console.warn("relay host", i + 1, e);
         }
       }
     }
 
-    const peerAttempts = [
-      PEER_OPTS,
-      PEER_HOST_ALT,
-      PEER_OPTS,
-    ];
-    let lastErr = null;
+    if (hasRelayConfig()) {
+      throw lastErr || new Error("relay-host-failed");
+    }
+
+    const peerAttempts = [PEER_OPTS, PEER_HOST_ALT, PEER_OPTS];
     for (let i = 0; i < peerAttempts.length; i++) {
       try {
         if (i > 0) {
@@ -679,20 +713,27 @@
 
     await ensureSignalReady();
     const relayBase = await pickSignalBase();
+    let lastErr = null;
+
     if (relayBase) {
-      for (let i = 0; i < 2; i++) {
+      for (let i = 0; i < 6; i++) {
         try {
           if (i > 0) {
             destroyAll();
-            await sleep(700);
+            await sleep(800 + i * 400);
           }
           return await connectRelayGuestAt(relayBase, sanitized);
         } catch (e) {
+          lastErr = e;
           console.warn("relay guest", i + 1, e);
           const msg = String(e && e.message ? e.message : e);
           if (msg.includes("lobby-not-found")) throw e;
         }
       }
+    }
+
+    if (hasRelayConfig()) {
+      throw lastErr || new Error("lobby-not-found");
     }
 
     try {
@@ -719,8 +760,13 @@
     getRoomCode: () => roomCode,
     getBackend: () => backend,
     isConnected: () => {
-      if (backend === "relay") return connected && ws && ws.readyState === WebSocket.OPEN;
+      if (backend === "relay") return connected;
       return connected && !!(conn && conn.open);
+    },
+    async peekRoomCode(code) {
+      const base = lastRelayBase || (await pickSignalBase());
+      if (!base) return null;
+      return peekRoom(base, code);
     },
     isOnline: () => role === "host" || role === "guest",
     isHost: () => role === "host",

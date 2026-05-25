@@ -2574,7 +2574,7 @@
     };
   </script>
   <script src="assets/game/online-config.js?v=3"></script>
-  <script src="assets/game/online-room.js?v=57"></script>
+  <script src="assets/game/online-room.js?v=58"></script>
   <script src="assets/game/lobby-room.js?v=41"></script>
   <script src="assets/game/character-traits.js?v=59"></script>
   <script src="assets/game/rank-system.js?v=3"></script>
@@ -2714,7 +2714,8 @@
         joinConnected: "Verbonden! Wacht tot de host START GAME drukt.",
         joinWrongCode: "Verkeerde code",
         joinLobbyNotFound: "Verkeerde code",
-        joinHostNotReady: "Host is nog niet online. Laat je vriend eerst op Maak potje drukken en in de lobby blijven.",
+        joinHostNotReady: "Host is nog niet online. Laat je vriend eerst op Maak potje drukken en wacht tot Online — vrienden kunnen joinen.",
+        joinWaitingHost: "Wachten tot host online is…",
         joinFailed: "Kon host niet bereiken. Host moet eerst een potje maken en in de lobby blijven.",
         joinFailedHint: "Zelfde code · zelfde link (hodaifamahria33-ui.github.io). WiFi aan, geen privé-tab.",
         btnJoinRetry: "OPNIEUW VERBINDEN",
@@ -2963,7 +2964,8 @@
         joinConnected: "Connected! Wait for the host to press START GAME.",
         joinWrongCode: "Wrong code",
         joinLobbyNotFound: "Wrong code",
-        joinHostNotReady: "Host is not online yet. Your friend must tap Create game and stay in the lobby.",
+        joinHostNotReady: "Host is not online yet. Your friend must create a game and wait until Online — friends can join.",
+        joinWaitingHost: "Waiting for host to come online…",
         joinFailed: "Could not reach the host. Host must create a game and stay in the lobby.",
         joinFailedHint: "Same code · same link. Use WiFi, not a private browser tab.",
         btnJoinRetry: "RECONNECT",
@@ -4532,9 +4534,9 @@
       const c = code.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 5);
       if (!c || !window.WieIsHetOnline) throw new Error("no-online");
       setJoinedStatus("joinConnecting", false);
-      if (joinError) joinError.textContent = t("joinConnecting");
+      if (joinError) joinError.textContent = t("joinWaitingHost");
       if (btnJoinRetry) btnJoinRetry.classList.add("hidden");
-      const maxAttempts = 12;
+      const maxAttempts = 8;
       let lastErr = null;
       for (let attempt = 0; attempt < maxAttempts; attempt++) {
         try {
