@@ -103,6 +103,12 @@
   font-weight: 600;
 }
 
+.screen-game-view.orientation-locked #game-countdown,
+html.wie-game-portrait-lock #game-countdown {
+  display: none !important;
+  visibility: hidden !important;
+}
+
 .screen-game-view.orientation-locked #game-table,
 .screen-game-view.orientation-locked #game-countdown,
 .screen-game-view.orientation-locked .question-drawer:not(.hidden),

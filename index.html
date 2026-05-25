@@ -58,7 +58,7 @@
   <link rel="stylesheet" href="assets/game/character-variety.css?v=55" />
   <link rel="stylesheet" href="assets/game/game-extras.css?v=59" />
   <link rel="stylesheet" href="assets/game/game-mobile.css?v=8" />
-  <link rel="stylesheet" href="assets/game/orientation-lock.css?v=4" />
+  <link rel="stylesheet" href="assets/game/orientation-lock.css?v=5" />
   <link rel="stylesheet" href="assets/game/answer-coach.css?v=1" />
   <link rel="stylesheet" href="assets/game/rank-ui.css?v=6" />
   <link rel="stylesheet" href="assets/game/game-play.css?v=55" />
@@ -2581,7 +2581,7 @@
   <script src="assets/game/ranked-queue.js?v=3"></script>
   <script src="assets/game/answer-coach.js?v=1"></script>
   <script src="assets/game/stripe-donate.js?v=1"></script>
-  <script src="assets/game/orientation-lock.js?v=4"></script>
+  <script src="assets/game/orientation-lock.js?v=5"></script>
   <script src="assets/game/game-play.js?v=65"></script>
 
   <script>
@@ -3862,6 +3862,7 @@
 
     function showGameScreen() {
       busy = false;
+      if (window.WieOrientationLock) WieOrientationLock.refresh();
       document.querySelectorAll("main.screen").forEach((el) => {
         el.classList.remove(
           "transition-out",
@@ -3889,13 +3890,30 @@
         WieIsHetPlay.wireBoards();
       }
       if (gameTable) gameTable.classList.add("hidden");
-      runCountdownThenTable();
+      if (gameCountdown) {
+        gameCountdown.classList.add("hidden");
+        gameCountdown.style.display = "";
+      }
+      if (window.WieOrientationLock) WieOrientationLock.refresh();
+      function beginAfterRotate() {
+        if (window.WieOrientationLock) WieOrientationLock.refresh();
+        runCountdownThenTable();
+      }
+      if (window.WieOrientationLock && typeof WieOrientationLock.waitForLandscape === "function") {
+        WieOrientationLock.waitForLandscape(beginAfterRotate);
+      } else {
+        beginAfterRotate();
+      }
     }
 
     window.wieRunCountdown = runCountdownThenTable;
     window.wieBuildBoards = buildGameBoards;
 
     function resetGameScreen() {
+      if (window.WieOrientationLock && typeof WieOrientationLock.cancelPendingStarts === "function") {
+        WieOrientationLock.cancelPendingStarts();
+      }
+      if (window.WieOrientationLock) WieOrientationLock.refresh();
       clearCountdown();
       if (gameCountdown) {
         gameCountdown.classList.add("hidden");
