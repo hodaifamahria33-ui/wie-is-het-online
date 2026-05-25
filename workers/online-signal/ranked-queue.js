@@ -34,6 +34,26 @@ export class RankedQueue {
     return cors(JSON.stringify({ ok: true, service: "ranked" }));
   }
 
+  pendingKey(playerId) {
+    return "pending:" + playerId;
+  }
+
+  async storePending(playerId, payload) {
+    await this.state.storage.put(this.pendingKey(playerId), JSON.stringify(payload));
+  }
+
+  async takePending(playerId) {
+    if (!playerId) return null;
+    const raw = await this.state.storage.get(this.pendingKey(playerId));
+    if (!raw) return null;
+    await this.state.storage.delete(this.pendingKey(playerId));
+    try {
+      return JSON.parse(raw);
+    } catch (_) {
+      return null;
+    }
+  }
+
   async getQueue() {
     const raw = await this.state.storage.get("queue");
     if (!raw) return new Map();
@@ -55,6 +75,7 @@ export class RankedQueue {
     const queue = await this.getQueue();
     queue.delete(playerId);
     await this.saveQueue(queue);
+    await this.state.storage.delete(this.pendingKey(playerId));
   }
 
   randomCode() {
@@ -66,33 +87,54 @@ export class RankedQueue {
     return out;
   }
 
-  matchPayload(playerId, me, them) {
+  ratingOk(me, them, waitMs) {
+    const diff = Math.abs((them.rating || 1000) - (me.rating || 1000));
+    if (diff <= 500) return true;
+    if (waitMs >= 6000 && diff <= 900) return true;
+    if (waitMs >= 12000) return true;
+    return false;
+  }
+
+  async finalizePair(playerId, me, themId, them, queue) {
     const code = this.randomCode();
-    const iAmHost = (me.rating || 1000) >= (them.rating || 1000);
-    return {
+    const hostIsMe = (me.rating || 1000) >= (them.rating || 1000);
+    const payloadMe = {
       status: "matched",
       code,
-      role: iAmHost ? "host" : "guest",
+      role: hostIsMe ? "host" : "guest",
       opponentRating: them.rating || 1000,
       opponentName: them.name || "Speler",
     };
+    const payloadThem = {
+      status: "matched",
+      code,
+      role: hostIsMe ? "guest" : "host",
+      opponentRating: me.rating || 1000,
+      opponentName: me.name || "Speler",
+    };
+    queue.delete(playerId);
+    queue.delete(themId);
+    await this.saveQueue(queue);
+    await this.storePending(playerId, payloadMe);
+    await this.storePending(themId, payloadThem);
+    return payloadMe;
   }
 
   async tryPair(playerId, queue) {
     const me = queue.get(playerId);
     if (!me) return null;
     const now = Date.now();
+    const waitMs = now - (me.ts || 0);
+
     for (const [id, them] of queue.entries()) {
       if (id === playerId) continue;
       if (now - (them.ts || 0) > 120000) {
         queue.delete(id);
+        await this.state.storage.delete(this.pendingKey(id));
         continue;
       }
-      if (Math.abs((them.rating || 1000) - (me.rating || 1000)) <= 400) {
-        queue.delete(id);
-        queue.delete(playerId);
-        await this.saveQueue(queue);
-        return this.matchPayload(playerId, me, them);
+      if (this.ratingOk(me, them, Math.min(waitMs, now - (them.ts || 0)))) {
+        return this.finalizePair(playerId, me, id, them, queue);
       }
     }
     return null;
@@ -102,10 +144,21 @@ export class RankedQueue {
     const id = String(body.playerId || "").trim();
     if (!id) return { error: "missing id" };
 
+    const rawPending = await this.state.storage.get(this.pendingKey(id));
+    if (rawPending) {
+      try {
+        const existing = JSON.parse(rawPending);
+        if (existing && existing.status === "matched") return existing;
+      } catch (_) {}
+    }
+
     const queue = await this.getQueue();
     const now = Date.now();
     for (const [pid, entry] of queue.entries()) {
-      if (now - (entry.ts || 0) > 120000) queue.delete(pid);
+      if (now - (entry.ts || 0) > 120000) {
+        queue.delete(pid);
+        await this.state.storage.delete(this.pendingKey(pid));
+      }
     }
 
     queue.set(id, {
@@ -123,9 +176,14 @@ export class RankedQueue {
 
   async handleStatus(playerId) {
     if (!playerId) return { status: "idle" };
+
+    const pending = await this.takePending(playerId);
+    if (pending && pending.status === "matched") return pending;
+
     const queue = await this.getQueue();
     const matched = await this.tryPair(playerId, queue);
     if (matched) return matched;
+
     if (!queue.has(playerId)) return { status: "idle" };
     return { status: "queued", queueSize: queue.size };
   }

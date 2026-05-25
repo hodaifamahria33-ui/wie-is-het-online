@@ -2,6 +2,9 @@
  * Ranked matchmaking — probeert echte speler, anders ranked bot.
  */
 (function () {
+  const DEFAULT_MATCHMAKER =
+    "https://wieishet-online-signal.hodaifamahria33.workers.dev/ranked";
+
   let active = false;
   let pollTimer = null;
   let searchTimer = null;
@@ -14,6 +17,26 @@
   function t(key) {
     if (typeof window.wieT === "function") return window.wieT(key);
     return key;
+  }
+
+  function ensureMatchmakerUrl() {
+    window.WIE_RANKED = window.WIE_RANKED || {};
+    const ranked = window.WIE_RANKED;
+    const preset = String(ranked.matchmakerUrl || "").replace(/\/$/, "");
+    const signal = window.WIE_ONLINE && window.WIE_ONLINE.signalUrl
+      ? String(window.WIE_ONLINE.signalUrl).replace(/\/$/, "") + "/ranked"
+      : "";
+
+    if (preset) {
+      ranked.matchmakerUrl = preset;
+      return preset;
+    }
+    if (signal) {
+      ranked.matchmakerUrl = signal;
+      return signal;
+    }
+    ranked.matchmakerUrl = DEFAULT_MATCHMAKER;
+    return DEFAULT_MATCHMAKER;
   }
 
   function clearTimers() {
@@ -34,7 +57,7 @@
   function cancel() {
     active = false;
     clearTimers();
-    const url = cfg().matchmakerUrl;
+    const url = cfg().matchmakerUrl || DEFAULT_MATCHMAKER;
     if (url && window.WieRank) {
       fetch(url + "/leave?playerId=" + encodeURIComponent(WieRank.getPlayerId()), {
         method: "POST",
@@ -49,9 +72,23 @@
     });
   }
 
-    async function tryMatchmaker(onStatus) {
-    const base = cfg().matchmakerUrl;
-    if (!base || !window.WieRank) return null;
+  async function fetchRanked(path, options) {
+    const base = ensureMatchmakerUrl();
+    if (!base) return null;
+    for (let i = 0; i < 3; i++) {
+      try {
+        const res = await fetch(base + path, options);
+        if (res.ok) return res;
+      } catch (e) {
+        console.warn("ranked fetch", i + 1, path, e);
+        if (i < 2) await wait(500 + i * 400);
+      }
+    }
+    return null;
+  }
+
+  async function tryMatchmaker(onStatus) {
+    if (!window.WieRank) return null;
 
     const playerId = WieRank.getPlayerId();
     const profile = WieRank.loadProfile();
@@ -64,17 +101,13 @@
     onStatus(t("rankQueueSearchingOnline"));
 
     let joinData = null;
-    try {
-      const joinRes = await fetch(base + "/join", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ playerId, name, rating: profile.rating }),
-        signal: abortCtrl.signal,
-      });
-      if (joinRes.ok) joinData = await joinRes.json();
-    } catch {
-      return null;
-    }
+    const joinRes = await fetchRanked("/join", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ playerId, name, rating: profile.rating }),
+      signal: abortCtrl.signal,
+    });
+    if (joinRes) joinData = await joinRes.json().catch(() => null);
 
     if (joinData && joinData.status === "matched" && joinData.code) {
       return {
@@ -85,7 +118,7 @@
       };
     }
 
-    const timeoutMs = cfg().queueTimeoutMs || 14000;
+    const timeoutMs = cfg().queueTimeoutMs || 28000;
     const started = Date.now();
 
     return new Promise((resolve) => {
@@ -101,11 +134,11 @@
           return;
         }
         try {
-          const res = await fetch(
-            base + "/status?playerId=" + encodeURIComponent(playerId),
+          const res = await fetchRanked(
+            "/status?playerId=" + encodeURIComponent(playerId),
             { signal: abortCtrl.signal }
           );
-          if (!res.ok) return;
+          if (!res) return;
           const data = await res.json();
           if (data.status === "matched" && data.code) {
             clearTimers();
@@ -121,7 +154,7 @@
         } catch {
           /* keep polling */
         }
-      }, 1200);
+      }, 900);
     });
   }
 
@@ -146,15 +179,7 @@
     if (window.WieOnlineConfig && typeof WieOnlineConfig.discover === "function") {
       await WieOnlineConfig.discover();
     }
-    if (
-      window.WIE_ONLINE &&
-      window.WIE_ONLINE.signalUrl &&
-      window.WIE_RANKED &&
-      !window.WIE_RANKED.matchmakerUrl
-    ) {
-      window.WIE_RANKED.matchmakerUrl =
-        String(window.WIE_ONLINE.signalUrl).replace(/\/$/, "") + "/ranked";
-    }
+    ensureMatchmakerUrl();
 
     let match = null;
     if (cfg().matchmakerUrl) {

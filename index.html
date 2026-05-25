@@ -113,7 +113,7 @@
     };
     window.WIE_RANKED = {
       matchmakerUrl: "https://wieishet-online-signal.hodaifamahria33.workers.dev/ranked",
-      queueTimeoutMs: 22000,
+      queueTimeoutMs: 28000,
     };
     window.wieSupportReturnTo = "screen-start";
     window.wieShowToast = function (msg) {
@@ -2185,7 +2185,7 @@
         </div>
       </div>
       <div class="rank-panel-actions">
-        <button id="btn-ranked-search" class="btn mode-btn rank-btn rank-btn--primary" type="button" data-i18n="btnRankedSearch">Zoek ranked match</button>
+        <button id="btn-ranked-search" class="btn mode-btn rank-btn rank-btn--primary" type="button" data-i18n="btnRankedSearch" onclick="if(window.wieApp&amp;&amp;window.wieApp.startRankedSearch){window.wieApp.startRankedSearch();}return false;">Zoek ranked match</button>
         <button id="btn-ranked-leaderboard" class="btn mode-btn rank-btn rank-btn--ghost" type="button" data-i18n="btnRankTiers">Rank ladder bekijken</button>
         <button id="btn-ranked-back" class="btn mode-btn-back rank-btn-back back" type="button" data-i18n="btnBack">Terug</button>
       </div>
@@ -2578,7 +2578,7 @@
   <script src="assets/game/lobby-room.js?v=41"></script>
   <script src="assets/game/character-traits.js?v=59"></script>
   <script src="assets/game/rank-system.js?v=3"></script>
-  <script src="assets/game/ranked-queue.js?v=2"></script>
+  <script src="assets/game/ranked-queue.js?v=3"></script>
   <script src="assets/game/answer-coach.js?v=1"></script>
   <script src="assets/game/stripe-donate.js?v=1"></script>
   <script src="assets/game/orientation-lock.js?v=4"></script>
@@ -3692,6 +3692,13 @@
       rankedOpponentRating = match.opponentRating || 1000;
       sessionCode = match.code;
       rankedAutoStartPending = true;
+      if (window.wieShowToast) {
+        wieShowToast(
+          (match.opponentName || t("rankOpponent")) +
+            " — " +
+            (match.role === "host" ? "jij host" : "joinen…")
+        );
+      }
       if (match.role === "host") {
         if (screenRankedQueue) screenRankedQueue.classList.add("hidden");
         enterHostLobby(sessionCode);
