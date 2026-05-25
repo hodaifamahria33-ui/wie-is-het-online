@@ -177,17 +177,18 @@
   #secret-card-slot .card-name,
   #game-table .secret-card-slot .card-name,
   .secret-card-slot .card-name {
-    font-size: clamp(0.5rem, 2.5vw, 0.66rem) !important;
+    font-size: clamp(0.68rem, 3.2vw, 0.88rem) !important;
     line-height: 1.2 !important;
-    padding: 3px 2px 4px !important;
-    letter-spacing: 0.02em !important;
+    padding: 4px 3px 5px !important;
+    letter-spacing: 0.03em !important;
     white-space: normal !important;
     word-break: break-word !important;
     text-align: center !important;
-    min-height: 2em !important;
+    min-height: 2.35em !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8) !important;
   }
 
   #secret-card-slot .card-face,
@@ -218,18 +219,20 @@
   }
 
   #game-table .card-name {
-    font-size: clamp(0.52rem, 2.85vw, 0.68rem);
-    padding: 3px 2px;
-    letter-spacing: 0.01em;
-    line-height: 1.15;
+    font-size: clamp(0.72rem, 3.8vw, 0.92rem) !important;
+    padding: 4px 3px 5px !important;
+    letter-spacing: 0.03em !important;
+    line-height: 1.2 !important;
     white-space: normal;
     word-break: break-word;
     hyphens: auto;
-    min-height: 2.15em;
+    min-height: 2.4em !important;
     display: flex;
     align-items: center;
     justify-content: center;
     text-align: center;
+    font-weight: 800 !important;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.75) !important;
   }
 
   .screen-game-view .btn-give-up {
@@ -307,7 +310,7 @@
   }
 
   #game-table .card-name {
-    font-size: 0.5rem;
+    font-size: clamp(0.66rem, 3.4vw, 0.84rem) !important;
   }
 }
 
@@ -489,10 +492,12 @@ html.wie-phone-landscape-game #game-table .card-photo.card-photo--real .card-img
 
 html.wie-phone-landscape-game #game-table .card-name {
   flex: 0 0 auto;
-  font-size: clamp(0.34rem, 1.35vw, 0.48rem) !important;
-  padding: 1px 1px 2px !important;
-  min-height: 1.35em !important;
-  line-height: 1.05 !important;
+  font-size: clamp(0.58rem, 2.2vw, 0.76rem) !important;
+  padding: 3px 2px 4px !important;
+  min-height: 1.85em !important;
+  line-height: 1.15 !important;
+  font-weight: 800 !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.75) !important;
   hyphens: none !important;
   word-break: break-word !important;
   white-space: normal !important;
@@ -697,7 +702,7 @@ html.wie-phone-landscape-game #game-table .secret-card-slot .card-face {
 
 html.wie-phone-landscape-game #secret-card-slot .card-name,
 html.wie-phone-landscape-game #game-table .secret-card-slot .card-name {
-  font-size: clamp(0.42rem, 1.8vw, 0.58rem) !important;
+  font-size: clamp(0.62rem, 2.4vw, 0.8rem) !important;
   font-weight: 800;
 }
 
@@ -1015,10 +1020,11 @@ html.wie-phone-landscape-game.wie-daily-challenge #game-table .card-well {
 }
 
 html.wie-phone-landscape-game.wie-daily-challenge #game-table .card-name {
-  font-size: clamp(0.34rem, 1.5vh, 0.48rem) !important;
-  padding: 1px !important;
-  min-height: 0 !important;
-  line-height: 1.1 !important;
+  font-size: clamp(0.56rem, 2vh, 0.72rem) !important;
+  padding: 2px 2px 3px !important;
+  min-height: 1.7em !important;
+  line-height: 1.15 !important;
+  font-weight: 800 !important;
 }
 
 /* Daily — iPad / tablet (geen phone-landscape class) */

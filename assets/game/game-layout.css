@@ -151,8 +151,10 @@
 }
 
 #game-table .card-name {
-  font-size: clamp(0.5rem, 1.5vw, 0.75rem);
-  padding: 4px 2px;
+  font-size: clamp(0.58rem, 1.75vw, 0.82rem);
+  padding: 5px 3px 6px;
+  min-height: 1.85em;
+  line-height: 1.2;
 }
 
 #game-table .player-play-area {

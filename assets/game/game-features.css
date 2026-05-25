@@ -576,8 +576,10 @@ html.wie-phone-landscape-game .sound-toggle {
   }
 
   html.wie-daily-challenge #game-table .card-name {
-    font-size: clamp(0.42rem, 2.5vw, 0.58rem) !important;
-    min-height: 1.85em !important;
+    font-size: clamp(0.68rem, 3.5vw, 0.88rem) !important;
+    min-height: 2.35em !important;
+    font-weight: 800 !important;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.75) !important;
   }
 }
 
@@ -590,7 +592,8 @@ html.wie-phone-landscape-game .sound-toggle {
   }
 
   html.wie-daily-challenge #game-table .card-name {
-    font-size: clamp(0.48rem, 1.4vw, 0.62rem) !important;
+    font-size: clamp(0.62rem, 2vw, 0.8rem) !important;
+    min-height: 2em !important;
   }
 }
 
