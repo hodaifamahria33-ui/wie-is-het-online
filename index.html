@@ -54,15 +54,16 @@
   <link rel="stylesheet" href="assets/game/game-drawers.css?v=48" />
   <link rel="stylesheet" href="assets/game/countdown-screen.css?v=2" />
   <link rel="stylesheet" href="assets/game/game-hud.css?v=44" />
-  <link rel="stylesheet" href="assets/game/game-layout.css?v=57" />
+  <link rel="stylesheet" href="assets/game/game-layout.css?v=58" />
   <link rel="stylesheet" href="assets/game/character-variety.css?v=55" />
-  <link rel="stylesheet" href="assets/game/game-extras.css?v=62" />
+  <link rel="stylesheet" href="assets/game/game-extras.css?v=63" />
   <link rel="stylesheet" href="assets/game/game-mobile.css?v=18" />
   <link rel="stylesheet" href="assets/game/game-features.css?v=7" />
   <link rel="stylesheet" href="assets/game/orientation-lock.css?v=7" />
   <link rel="stylesheet" href="assets/game/answer-coach.css?v=1" />
   <link rel="stylesheet" href="assets/game/rank-ui.css?v=6" />
   <link rel="stylesheet" href="assets/game/game-play.css?v=56" />
+  <link rel="stylesheet" href="assets/game/game-board-fix.css?v=2" />
   <meta name="description" content="wiehasit.com — gratis online Wie-is-het spel. Maak een potje, deel de code, raad het personage met vrienden of tegen de bot." />
   <meta name="keywords" content="wiehasit.com, wie has it, wie is het online, raadspel, gratis spel" />
   <meta property="og:type" content="website" />
@@ -2240,9 +2241,9 @@
       <h2 data-i18n-html="botDiffTitle">Kies je <span class="mode-accent">niveau</span></h2>
       <p class="mode-sub" data-i18n="botDiffSub">Hoe slim moet de tegenstander zijn?</p>
       <p id="bot-diff-daily-note" class="mode-sub mode-daily-note hidden" aria-live="polite"></p>
-      <button id="btn-bot-easy" class="btn mode-btn mode-btn--easy" type="button" data-i18n="btnEasy">Makkelijk</button>
-      <button id="btn-bot-medium" class="btn mode-btn mode-btn--medium" type="button" data-i18n="btnMedium">Gemiddeld</button>
-      <button id="btn-bot-hard" class="btn mode-btn mode-btn--hard" type="button" data-i18n="btnHard">Moeilijk</button>
+      <button id="btn-bot-easy" class="btn mode-btn mode-btn--easy" type="button" data-i18n="btnEasy" onclick="window.wieStartBotGame('easy', event)">Makkelijk</button>
+      <button id="btn-bot-medium" class="btn mode-btn mode-btn--medium" type="button" data-i18n="btnMedium" onclick="window.wieStartBotGame('medium', event)">Gemiddeld</button>
+      <button id="btn-bot-hard" class="btn mode-btn mode-btn--hard" type="button" data-i18n="btnHard" onclick="window.wieStartBotGame('hard', event)">Moeilijk</button>
       <button id="btn-bot-back" class="btn mode-btn-back back" type="button" data-i18n="btnBack" onclick="window.wieShowScreen('screen-bot-diff','screen-mode')">Terug</button>
     </section>
   </main>
@@ -3809,46 +3810,40 @@
       }
       refreshActiveCardNames();
       ensureBoardBuilt();
-      if (gameTable) {
-        gameTable.classList.remove("hidden");
-        gameTable.style.display = "block";
-        gameTable.style.visibility = "visible";
-        gameTable.style.opacity = "1";
-        gameTable.style.pointerEvents = "auto";
-      }
       if (sessionMode === "solo") {
         document.documentElement.classList.add("wie-solo-game");
-      }
-      if (screenGame) {
-        screenGame.classList.remove("hidden");
-        screenGame.classList.add("game-session-active");
-      }
-      try {
-        syncPlayCardNames();
-      } catch (err) {
-        console.warn("syncPlayCardNames finish", err);
-      }
-      if (window.WieIsHetPlay) {
+        forceShowGameBoard();
         try {
-          WieIsHetPlay.wireBoards();
+          syncPlayCardNames();
         } catch (err) {
-          console.warn("wireBoards finish", err);
+          console.warn("syncPlayCardNames finish", err);
+        }
+        beginSoloPickPhase();
+      } else {
+        if (gameTable) {
+          gameTable.classList.remove("hidden");
+          gameTable.style.display = "block";
+          gameTable.style.visibility = "visible";
+          gameTable.style.opacity = "1";
+          gameTable.style.pointerEvents = "auto";
+        }
+        if (screenGame) {
+          screenGame.classList.remove("hidden");
+          screenGame.classList.add("game-session-active");
         }
         try {
-          WieIsHetPlay.beginPickSecretPhase();
+          syncPlayCardNames();
         } catch (err) {
-          console.error("beginPickSecretPhase", err);
-          const banner = document.getElementById("game-turn-banner");
-          if (banner) {
-            banner.textContent = t("phasePickSecret");
-            banner.classList.remove("hidden");
-          }
-          if (screenGame) {
-            screenGame.classList.add("phase-pick-secret", "turn-player");
+          console.warn("syncPlayCardNames finish", err);
+        }
+        if (window.WieIsHetPlay) {
+          try {
+            WieIsHetPlay.wireBoards();
+            WieIsHetPlay.beginPickSecretPhase();
+          } catch (err) {
+            console.error("beginPickSecretPhase", err);
           }
         }
-      } else if (screenGame) {
-        screenGame.classList.add("phase-pick-secret", "turn-player");
       }
       const stack = document.querySelector("#game-table .board-stack");
       if (stack) stack.style.transform = "";
@@ -4074,11 +4069,92 @@
         CARD_NAMES = CARD_NAMES_BASE.slice();
       }
       buildGameBoards();
-      const wells = document.querySelectorAll("#player-board .card-well");
+      let wells = document.querySelectorAll("#player-board .card-well");
       if (!wells.length && CARD_NAMES.length) {
         buildGameBoards();
+        wells = document.querySelectorAll("#player-board .card-well");
       }
-      return wells.length || document.querySelectorAll("#player-board .card-well").length;
+      return wells.length;
+    }
+
+    function forceShowGameBoard() {
+      if (!gameTable || !screenGame) return 0;
+      document.documentElement.classList.add("wie-solo-game");
+      document.documentElement.classList.remove("app-booting");
+
+      screenGame.classList.remove("hidden");
+      screenGame.classList.add("game-session-active", "phase-pick-secret");
+
+      gameTable.classList.remove("hidden");
+      gameTable.style.display = "block";
+      gameTable.style.visibility = "visible";
+      gameTable.style.opacity = "1";
+      gameTable.style.pointerEvents = "auto";
+      gameTable.style.overflow = "visible";
+      gameTable.style.zIndex = "20";
+
+      const scene = gameTable.querySelector(".game-scene");
+      if (scene) {
+        scene.style.display = "flex";
+        scene.style.alignItems = "center";
+        scene.style.justifyContent = "center";
+        scene.style.perspective = "none";
+        scene.style.overflow = "visible";
+        scene.style.transform = "none";
+      }
+
+      const stack = gameTable.querySelector(".board-stack");
+      if (stack) {
+        stack.style.minWidth = "0";
+        stack.style.maxWidth = "min(96vw, 720px)";
+        stack.style.width = "100%";
+        stack.style.transform = "none";
+      }
+
+      gameTable.querySelectorAll(".board-stand--front, .board-stand--player").forEach((el) => {
+        el.style.transform = "none";
+        el.style.minWidth = "0";
+        el.style.visibility = "visible";
+        el.style.opacity = "1";
+      });
+
+      const playerBoard = document.getElementById("player-board");
+      if (playerBoard) {
+        playerBoard.style.display = "grid";
+        playerBoard.style.visibility = "visible";
+        playerBoard.style.opacity = "1";
+      }
+
+      if (gameCountdown) {
+        gameCountdown.classList.add("hidden");
+        gameCountdown.style.display = "none";
+        gameCountdown.style.visibility = "hidden";
+        gameCountdown.style.pointerEvents = "none";
+      }
+
+      return document.querySelectorAll("#player-board .card-well").length;
+    }
+
+    function beginSoloPickPhase() {
+      const badge = document.getElementById("game-turn-badge");
+      const badgeText = document.getElementById("game-turn-badge-text");
+      if (window.WieIsHetPlay) {
+        try {
+          WieIsHetPlay.wireBoards();
+          WieIsHetPlay.beginPickSecretPhase();
+          return;
+        } catch (err) {
+          console.warn("beginPickSecretPhase", err);
+        }
+      }
+      if (badge && badgeText) {
+        badge.classList.remove("hidden");
+        badge.classList.add("is-pick");
+        badgeText.textContent = t("phasePickSecret");
+      }
+      document.querySelectorAll("#player-board .card-well").forEach((w) => {
+        w.classList.add("interactive");
+      });
     }
 
     function launchBotGameNow(isDaily) {
@@ -4108,10 +4184,26 @@
         gameCountdown.style.visibility = "hidden";
         gameCountdown.style.pointerEvents = "none";
       }
-      finishCountdownStartPlay();
+      const cardCount = forceShowGameBoard();
+      if (!cardCount) ensureBoardBuilt();
+      forceShowGameBoard();
+      beginSoloPickPhase();
+      applyLanguage();
+      window.setTimeout(function () {
+        if (document.querySelectorAll("#player-board .card-well").length < 1) {
+          ensureBoardBuilt();
+          forceShowGameBoard();
+          beginSoloPickPhase();
+        }
+      }, 350);
     }
 
+    let lastBotStartMs = 0;
+
     function startBotGame(difficulty) {
+      const now = Date.now();
+      if (now - lastBotStartMs < 500) return;
+      lastBotStartMs = now;
       startingGame = false;
       busy = false;
       botDifficulty = difficulty || "medium";
@@ -4133,25 +4225,33 @@
       } catch (err) {
         console.warn("leave online", err);
       }
-      resetGameScreen();
+      clearCountdown();
+      if (sessionKickoffGuard) {
+        clearTimeout(sessionKickoffGuard);
+        sessionKickoffGuard = null;
+      }
+      if (window.WieIsHetPlay && WieIsHetPlay.hideEndOverlay) {
+        WieIsHetPlay.hideEndOverlay();
+      }
+      try {
+        if (window.WieIsHetPlay) WieIsHetPlay.reset();
+      } catch (err) {
+        console.warn("play reset", err);
+      }
       showGameScreen();
       document.documentElement.classList.remove("app-booting");
-      function kickoff() {
+      try {
+        launchBotGameNow(isDaily);
+      } catch (err) {
+        console.error("startBotGame", err);
         try {
-          launchBotGameNow(isDaily);
-        } catch (err) {
-          console.error("startBotGame", err);
-          try {
-            ensureBoardBuilt();
-            finishCountdownStartPlay();
-          } catch (err2) {
-            console.error("startBotGame fallback", err2);
-          }
+          ensureBoardBuilt();
+          forceShowGameBoard();
+          beginSoloPickPhase();
+        } catch (err2) {
+          console.error("startBotGame fallback", err2);
         }
       }
-      requestAnimationFrame(function () {
-        requestAnimationFrame(kickoff);
-      });
     }
 
     function startSoloGame(difficulty) {
@@ -5150,9 +5250,6 @@
     });
 
     onClick("btn-play-bot", goToBotDiffScreen);
-    onClick("btn-bot-easy", () => startBotGame("easy"));
-    onClick("btn-bot-medium", () => startBotGame("medium"));
-    onClick("btn-bot-hard", () => startBotGame("hard"));
 
     onClick("btn-play-ranked", goToRankedScreen);
 
@@ -5528,6 +5625,12 @@
       window.addEventListener("load", function () {
         navigator.serviceWorker
           .register("./service-worker.js", { scope: "./" })
+          .then(function () {
+            return navigator.serviceWorker.ready;
+          })
+          .then(function (reg) {
+            if (reg && reg.update) reg.update();
+          })
           .catch(function (err) {
             console.warn("Service worker registration failed:", err);
           });

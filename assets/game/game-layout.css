@@ -104,7 +104,8 @@
   transform-origin: center center;
 }
 
-#game-table .board-stand--front {
+#game-table .board-stand--front,
+#game-table .board-stand--player {
   position: relative;
   z-index: 4;
   width: var(--game-board-width);

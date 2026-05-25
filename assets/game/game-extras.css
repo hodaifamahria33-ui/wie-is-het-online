@@ -46,8 +46,8 @@
   flex: 0 0 auto !important;
   flex-shrink: 0 !important;
   width: var(--game-board-width) !important;
-  max-width: var(--game-board-width) !important;
-  min-width: var(--game-board-width) !important;
+  max-width: min(99vw, var(--game-board-width)) !important;
+  min-width: 0 !important;
 }
 
 /* Geheime kaart: mobiel rechtsonder, desktop rechts midden */
@@ -94,9 +94,9 @@
 
 #game-table .board-stack {
   flex: 0 0 auto;
-  width: var(--game-strip-width, var(--game-board-width)) !important;
-  max-width: 99vw !important;
-  min-width: var(--game-board-width) !important;
+  width: 100% !important;
+  max-width: min(99vw, var(--game-board-width)) !important;
+  min-width: 0 !important;
   transform: none !important;
 }
 
